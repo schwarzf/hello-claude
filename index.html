@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taskverwaltung</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Taskverwaltung</h1>
+    <p class="subtitle">Tasks werden lokal im Browser gespeichert (localStorage). · <a href="test.html">Tests ausführen</a></p>
+
+    <section class="card">
+      <form class="new-task" id="new-task-form">
+        <input name="title" type="text" placeholder="Neuer Task …" aria-label="Titel" autocomplete="off">
+        <select name="priority" aria-label="Priorität">
+          <option value="niedrig">Niedrig</option>
+          <option value="mittel" selected>Mittel</option>
+          <option value="hoch">Hoch</option>
+        </select>
+        <input name="dueDate" type="date" aria-label="Fällig am">
+        <button type="submit" class="primary">Hinzufügen</button>
+      </form>
+      <p class="error" id="form-error" role="alert"></p>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filter">
+          <button type="button" data-filter="alle" aria-pressed="true">Alle</button>
+          <button type="button" data-filter="offen" aria-pressed="false">Offen</button>
+          <button type="button" data-filter="erledigt" aria-pressed="false">Erledigt</button>
+        </div>
+        <input id="search" type="search" placeholder="Suchen …" aria-label="Suchen">
+      </div>
+    </section>
+
+    <section class="card">
+      <ul class="tasks" id="task-list"></ul>
+      <div class="toolbar" style="margin-top: 12px;">
+        <span class="stats" id="stats"></span>
+        <button type="button" id="clear-completed">Erledigte löschen</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/taskstore.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
