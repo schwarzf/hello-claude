@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" role="img" aria-label="Comic T-Rex">
+  <g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- hinteres Bein -->
+    <path d="M92 140 L88 182 L70 182 Q68 174 76 172 L74 140 Z" fill="#3fa34d"/>
+    <!-- Körper mit Schwanz und Kopf -->
+    <path d="M10 128 Q40 132 70 112 Q86 84 112 78 Q118 74 118 60 Q116 30 146 24 L190 26 Q206 28 206 44 L206 58 Q204 66 196 66 L176 66 Q190 70 190 78 Q188 86 176 86 L150 86 Q140 90 142 104 Q150 128 134 146 L136 182 L116 182 Q114 174 122 172 L118 150 Q100 160 76 150 Q46 144 10 128 Z" fill="#5cc46a"/>
+    <!-- Bauch -->
+    <path d="M118 100 Q132 120 120 146 Q104 154 86 148 Q108 132 118 100 Z" fill="#f6e27a" stroke-width="4"/>
+    <!-- Ärmchen -->
+    <path d="M142 108 Q156 110 160 118 L154 122 Q150 116 142 118" fill="#5cc46a" stroke-width="4"/>
+    <!-- Maul -->
+    <path d="M150 66 L196 66" fill="none" stroke-width="4"/>
+  </g>
+  <!-- Zähne -->
+  <g fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M158 66 L162 73 L166 66 Z"/>
+    <path d="M172 66 L176 73 L180 66 Z"/>
+    <path d="M186 66 L190 73 L194 66 Z"/>
+  </g>
+  <!-- Flecken -->
+  <g fill="#3fa34d">
+    <circle cx="60" cy="124" r="6"/>
+    <circle cx="80" cy="112" r="4.5"/>
+    <circle cx="98" cy="100" r="5"/>
+    <circle cx="130" cy="36" r="4"/>
+  </g>
+  <!-- Auge -->
+  <circle cx="168" cy="42" r="10" fill="#fff" stroke="#111" stroke-width="4"/>
+  <circle cx="171" cy="43" r="5" fill="#111"/>
+  <circle cx="173" cy="40" r="1.8" fill="#fff"/>
+  <!-- Nasenloch & Wange -->
+  <circle cx="198" cy="36" r="2.2" fill="#111"/>
+  <ellipse cx="184" cy="56" rx="6" ry="3.5" fill="#ff8fa3" opacity="0.8"/>
+</svg>

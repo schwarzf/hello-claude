@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Taskverwaltung</title>
+  <title>Dino-Taskverwaltung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <main>
-    <h1>Taskverwaltung</h1>
-    <p class="subtitle">Tasks werden lokal im Browser gespeichert (localStorage). · <a href="test.html">Tests ausführen</a></p>
+    <header class="hero">
+      <img src="img/trex.svg" alt="Comic T-Rex">
+      <div class="text">
+        <p class="bubble">RAWR! Was steht heute an?</p>
+        <h1>Dino-Tasks</h1>
+        <p class="subtitle">Tasks werden lokal im Browser gespeichert. · <a href="test.html">Tests ausführen</a></p>
+      </div>
+    </header>
 
     <section class="card">
       <form class="new-task" id="new-task-form">
-        <input name="title" type="text" placeholder="Neuer Task …" aria-label="Titel" autocomplete="off">
+        <input name="title" type="text" placeholder="Neuer Task für die Herde …" aria-label="Titel" autocomplete="off">
         <select name="priority" aria-label="Priorität">
           <option value="niedrig">Niedrig</option>
           <option value="mittel" selected>Mittel</option>

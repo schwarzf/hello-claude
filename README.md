@@ -1,8 +1,11 @@
-# hello-claude – Taskverwaltung
+# hello-claude – Dino-Taskverwaltung 🦖
 
 Eine einfache Taskverwaltung im Browser, nur mit HTML, CSS und JavaScript –
 ohne Datenbank, ohne Build-Schritt. Die Tasks werden im `localStorage` des
 Browsers gespeichert und bleiben so auch nach einem Neuladen erhalten.
+
+Das Design ist im Comic-Stil mit Dinosauriern gehalten (selbst gezeichnete
+SVG-Grafiken, Schriften „Bangers“ und „Comic Neue“ von Google Fonts).
 
 ## Funktionen
 
@@ -45,4 +48,5 @@ Unit-Tests und die UI-Tests werden mit einem Hinweis übersprungen.
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
 | `js/tests.js` | Testframework und Testfälle |
-| `css/style.css` | Styles |
+| `css/style.css` | Comic-Dino-Styles |
+| `img/` | Dino-Grafiken (T-Rex, Dino-Ei, Fußspuren) als SVG |

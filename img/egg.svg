@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Dino-Ei">
+  <!-- Babydino schaut aus dem Ei -->
+  <g stroke="#111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M38 52 Q36 22 60 18 Q84 22 82 52 Z" fill="#5cc46a"/>
+    <path d="M24 70 Q24 112 60 112 Q96 112 96 70 Q96 56 92 48 L82 56 L72 46 L60 58 L48 46 L38 56 L28 48 Q24 56 24 70 Z" fill="#fff6dc"/>
+  </g>
+  <circle cx="52" cy="34" r="6" fill="#fff" stroke="#111" stroke-width="3"/>
+  <circle cx="68" cy="34" r="6" fill="#fff" stroke="#111" stroke-width="3"/>
+  <circle cx="53" cy="35" r="2.8" fill="#111"/>
+  <circle cx="69" cy="35" r="2.8" fill="#111"/>
+  <g fill="#f5b942" stroke="#111" stroke-width="2.5">
+    <circle cx="44" cy="84" r="6"/>
+    <circle cx="72" cy="94" r="5"/>
+    <circle cx="80" cy="74" r="4"/>
+  </g>
+</svg>
