@@ -211,6 +211,9 @@ a.promo img { width: 64px; flex-shrink: 0; }
   -webkit-text-stroke: 1px var(--ink);
 }
 .promo-arrow { font-size: 2em; }
+a.promo-gesichter { background: #c9efff; }
+a.promo-gesichter:hover, a.promo-gesichter:focus-visible { background: #aee5fb; }
+a.promo-gesichter .promo-text strong { color: #ff3b3b; }
 
 /* ---------- Taskliste ---------- */
 ul.tasks { list-style: none; margin: 0; padding: 0; }

@@ -134,13 +134,29 @@
     return { x: m[0] * p.x + m[2] * p.y + m[4], y: m[1] * p.x + m[3] * p.y + m[5] };
   }
 
-  /** Vergrößert ein Dreieck minimal, damit zwischen Dreiecken keine Haarlinien entstehen. */
+  /**
+   * Verschiebt alle Kanten eines Dreiecks um amount nach außen, damit zwischen
+   * benachbarten Dreiecken keine durchscheinenden Haarlinien entstehen.
+   * An sehr spitzen Ecken wird die Verlängerung begrenzt.
+   */
   function expandTriangle(tri, amount) {
-    var cx = (tri[0].x + tri[1].x + tri[2].x) / 3;
-    var cy = (tri[0].y + tri[1].y + tri[2].y) / 3;
-    return tri.map(function (p) {
-      var dx = p.x - cx, dy = p.y - cy, len = Math.sqrt(dx * dx + dy * dy) || 1;
-      return { x: p.x + (dx / len) * amount, y: p.y + (dy / len) * amount };
+    var area2 = (tri[1].x - tri[0].x) * (tri[2].y - tri[0].y) - (tri[2].x - tri[0].x) * (tri[1].y - tri[0].y);
+    if (Math.abs(area2) < 1e-9) return tri.slice();
+    var sign = area2 > 0 ? 1 : -1;
+    // Außennormale je Kante i (von Ecke i zu Ecke i+1)
+    var normals = [0, 1, 2].map(function (i) {
+      var a = tri[i], b = tri[(i + 1) % 3];
+      var dx = b.x - a.x, dy = b.y - a.y, len = Math.sqrt(dx * dx + dy * dy) || 1;
+      return { x: sign * dy / len, y: -sign * dx / len };
+    });
+    return tri.map(function (p, i) {
+      var n1 = normals[(i + 2) % 3], n2 = normals[i]; // die beiden Kanten an Ecke i
+      var bx = n1.x + n2.x, by = n1.y + n2.y;
+      var dot = bx * n1.x + by * n1.y; // = 1 + cos(Winkel zwischen den Normalen)
+      var scale = dot > 1e-6 ? amount / dot : 0;
+      var len = Math.sqrt(bx * bx + by * by) * scale, max = amount * 4;
+      if (len > max) scale *= max / len;
+      return { x: p.x + bx * scale, y: p.y + by * scale };
     });
   }
 
@@ -151,7 +167,7 @@
       var dst = [dstPts[t[0]], dstPts[t[1]], dstPts[t[2]]];
       var m = affineFromTriangles(src, dst);
       if (!m) return;
-      var clip = expandTriangle(dst, 0.8);
+      var clip = expandTriangle(dst, 1);
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(clip[0].x, clip[0].y);

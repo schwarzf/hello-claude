@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gesichter-Morphing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/gesichter.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <img src="img/gesicht.svg" alt="Comic-Gesicht aus zwei Hälften">
+      <div class="text">
+        <p class="bubble">Zwei Gesichter rein – eins raus! ZACK!</p>
+        <h1>Gesichter-Morphing</h1>
+        <p class="subtitle">Deine Fotos bleiben auf deinem Gerät. · <a href="index.html">Zu den Dino-Tasks</a> · <a href="katzen.html">Zu den Katzen</a></p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>1. Zwei Gesichter wählen</h2>
+      <p class="hint">Am besten eignen sich Fotos, auf denen die Person frontal in die Kamera schaut. Bitte nur Fotos von Menschen verwenden, die damit einverstanden sind.</p>
+      <div class="slots">
+        <div class="slot" data-slot="0">
+          <h3>Gesicht 1</h3>
+          <div class="editor" aria-label="Gesicht 1 mit Gesichtspunkten">
+            <canvas width="512" height="512"></canvas>
+            <div class="markers"></div>
+            <div class="placeholder">🙂<span>Noch kein Foto</span></div>
+          </div>
+          <p class="status" aria-live="polite"></p>
+          <label class="button">Foto wählen<input type="file" accept="image/*" hidden></label>
+        </div>
+        <div class="slot" data-slot="1">
+          <h3>Gesicht 2</h3>
+          <div class="editor" aria-label="Gesicht 2 mit Gesichtspunkten">
+            <canvas width="512" height="512"></canvas>
+            <div class="markers"></div>
+            <div class="placeholder">😄<span>Noch kein Foto</span></div>
+          </div>
+          <p class="status" aria-live="polite"></p>
+          <label class="button">Foto wählen<input type="file" accept="image/*" hidden></label>
+        </div>
+      </div>
+      <p class="center"><button type="button" id="load-demo">Beispielgesichter laden</button></p>
+      <p class="note">Die Gesichtspunkte findet ein KI-Modell (MediaPipe) direkt in deinem Browser. Es wird beim ersten Foto einmalig geladen (ca. 13 MB).</p>
+    </section>
+
+    <section class="card">
+      <h2>2. Punkte prüfen</h2>
+      <p class="hint">Die Punkte werden automatisch gesetzt. Sitzt einer nicht richtig, zieh ihn einfach an die passende Stelle.</p>
+      <ul class="legend" id="legend"></ul>
+      <p class="center actions">
+        <button type="button" id="reset-points">Punkte zurücksetzen</button>
+        <label class="toggle"><input type="checkbox" id="show-points" checked> Punkte zeigen</label>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>3. Mischen! <span class="pow" aria-hidden="true">POW!</span></h2>
+      <div class="result">
+        <canvas id="result" width="512" height="512"></canvas>
+        <div class="placeholder" id="result-placeholder">🤔<span>Erst zwei Fotos wählen</span></div>
+      </div>
+      <div class="mix">
+        <span>Gesicht 1</span>
+        <input type="range" id="mix" min="0" max="100" value="50" aria-label="Mischverhältnis">
+        <span>Gesicht 2</span>
+      </div>
+      <p class="center mix-value" id="mix-value">50 % Gesicht 1 · 50 % Gesicht 2</p>
+      <p class="center actions">
+        <button type="button" id="animate" class="primary">▶ Animation</button>
+        <button type="button" id="download">Bild speichern</button>
+        <label class="toggle"><input type="checkbox" id="show-mesh"> Dreiecksnetz zeigen</label>
+      </p>
+    </section>
+  </main>
+
+  <script src="js/morph.js"></script>
+  <script src="js/face.js"></script>
+  <script src="js/gesichter-demo.js"></script>
+  <script src="js/gesichter.js"></script>
+</body>
+</html>

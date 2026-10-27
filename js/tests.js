@@ -222,6 +222,48 @@
     }]
   ];
 
+  // ---------- Unit-Tests Gesichter ----------
+
+  var faceTests = [
+    ["54 Gesichtspunkte in fünf Gruppen, Vorlage passt dazu", function () {
+      assertEqual(FaceMorph.INDICES.length, 54);
+      assertEqual(FaceMorph.GROUPS.length, 5);
+      assertEqual(FaceMorph.TEMPLATE.length, FaceMorph.INDICES.length);
+      assertEqual(FaceMorph.POINT_GROUP.length, FaceMorph.INDICES.length);
+      FaceMorph.INDICES.forEach(function (i) { assert(i >= 0 && i < 478, "Index " + i); });
+      FaceMorph.TEMPLATE.forEach(function (p) { assert(p[0] > 0 && p[0] < 1 && p[1] > 0 && p[1] < 1, "Vorlage im Bild"); });
+    }],
+    ["Vorlage ist symmetrisch", function () {
+      var xs = FaceMorph.TEMPLATE.map(function (p) { return p[0]; }).sort();
+      var mirrored = FaceMorph.TEMPLATE.map(function (p) { return +(1 - p[0]).toFixed(3); }).sort();
+      xs.forEach(function (x, i) { assert(near(x, mirrored[i], 0.002), x + " vs " + mirrored[i]); });
+    }],
+    ["Punkte werden aus den 478 Landmarks ausgewählt", function () {
+      var lm = [];
+      for (var i = 0; i < 478; i++) lm.push({ x: i, y: -i });
+      var pts = FaceMorph.selectPoints(lm);
+      assertEqual(pts.length, 54);
+      assertEqual(pts[0], { x: FaceMorph.INDICES[0], y: -FaceMorph.INDICES[0] });
+    }],
+    ["Ausschnitt ist quadratisch und enthält das ganze Gesicht", function () {
+      var pts = [{ x: 100, y: 200 }, { x: 300, y: 200 }, { x: 200, y: 50 }, { x: 200, y: 400 }];
+      var crop = FaceMorph.cropAroundFace(pts);
+      assert(near(crop.size, 350 * 1.7), "Größe " + crop.size);
+      var inCrop = FaceMorph.toCrop(pts, crop, 512);
+      inCrop.forEach(function (p) { assert(p.x > 0 && p.x < 512 && p.y > 0 && p.y < 512, "im Ausschnitt"); });
+      assert(near(inCrop[0].x + inCrop[1].x, 512), "waagerecht zentriert");
+    }],
+    ["Bereiche außerhalb des Fotos werden aufgefüllt", function () {
+      var img = solidCanvas("#ff0000");
+      var out = document.createElement("canvas");
+      out.width = out.height = 100;
+      var ctx = out.getContext("2d");
+      FaceMorph.drawCrop(ctx, img, { x: -32, y: 0, size: 64 }, 100, "#00ff00");
+      assertEqual(pixel(ctx, 10, 50).slice(0, 3), [0, 255, 0], "links Füllfarbe");
+      assertEqual(pixel(ctx, 90, 50).slice(0, 3), [255, 0, 0], "rechts Foto");
+    }]
+  ];
+
   // ---------- UI-Tests ----------
 
   var frame = document.getElementById("app-frame");
@@ -328,6 +370,7 @@
       return loadApp().then(function (w) {
         assertEqual(visibleTitles(w.document), ["Bleibt erhalten"]);
         assert(w.document.querySelector('a[href="katzen.html"]'), "Link zur Katzenseite fehlt");
+        assert(w.document.querySelector('a[href="gesichter.html"]'), "Link zur Gesichterseite fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -346,6 +389,25 @@
           // Hintergrundfarbe der roten Beispielkatze (oben links) muss im Ergebnis stehen
           var p = pixel(doc.getElementById("result").getContext("2d"), 5, 5);
           assertEqual(p.slice(0, 3), [191, 230, 245], "Pixel oben links");
+        });
+      });
+    }],
+    ["Gesichterseite: Beispielgesichter laden und mischen", function () {
+      return loadApp("gesichter.html").then(function (w) {
+        var doc = w.document;
+        assert(doc.getElementById("download").disabled, "Speichern ohne Fotos deaktiviert");
+        doc.getElementById("load-demo").click();
+        return waitFor(function () { return !doc.getElementById("download").disabled; }).then(function () {
+          assertEqual(doc.querySelectorAll(".slot.has-image").length, 2);
+          assertEqual(doc.querySelectorAll(".slot .marker").length, 108, "54 Punkte je Gesicht");
+          var mix = doc.getElementById("mix");
+          mix.value = "100";
+          mix.dispatchEvent(new w.Event("input", { bubbles: true }));
+          return waitFor(function () { return doc.getElementById("mix-value").textContent.indexOf("0 % Gesicht 1") === 0; });
+        }).then(function () {
+          // Hintergrund von Beispielgesicht B (#ffb3d1) oben links im Ergebnis
+          var p = pixel(doc.getElementById("result").getContext("2d"), 3, 3);
+          assert(near(p[0], 255, 2) && near(p[1], 179, 2) && near(p[2], 209, 2), "Pixel oben links: " + p);
         });
       });
     }]
@@ -379,10 +441,12 @@
   function run() {
     var unitList = document.getElementById("unit-results");
     var morphList = document.getElementById("morph-results");
+    var faceList = document.getElementById("face-results");
     var uiList = document.getElementById("ui-results");
     var summary = document.getElementById("summary");
     unitList.innerHTML = "";
     morphList.innerHTML = "";
+    faceList.innerHTML = "";
     uiList.innerHTML = "";
     summary.className = "test-summary";
     summary.textContent = "Tests laufen …";
@@ -395,6 +459,10 @@
     morphTests.forEach(function (t) {
       try { t[1](); passed++; report(morphList, t[0]); }
       catch (e) { failed++; report(morphList, t[0], e); }
+    });
+    faceTests.forEach(function (t) {
+      try { t[1](); passed++; report(faceList, t[0]); }
+      catch (e) { failed++; report(faceList, t[0], e); }
     });
 
     // UI-Tests nutzen den echten localStorage → vorher sichern, danach wiederherstellen.
