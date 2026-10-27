@@ -71,8 +71,10 @@ mit einer roten Katze mit weißem Bauch:
 - entspannte Akustik-Pop-Hintergrundmusik (`js/musik.js`): eigene Komposition
   in G-Dur mit 92 BPM – gezupfte bzw. geschlagene Akustikgitarre (Karplus-Strong),
   Bass, weicher Beat, Flächenklang und eine Refrain-Melodie. Sie wird live per
-  Web Audio erzeugt, es gibt keine Audiodateien. Auf dem iPad/iPhone ist sie nur
-  zu hören, wenn der Stummschalter aus ist.
+  Web Audio erzeugt, es gibt keine Audiodateien. In Safari auf iPad/iPhone wird
+  die Wiedergabe als „Medienwiedergabe“ markiert (`navigator.audioSession`, bei
+  älteren Versionen über ein stilles `<audio>`), damit sie wie in Chrome auch im
+  Lautlos-Modus zu hören ist.
 
 Die Spielregeln (`js/spiel.js`) sind vom Zeichnen (`js/katzenspiel.js`)
 getrennt. Ein Test lässt einen Bot alle Level durchspielen und prüft so, dass

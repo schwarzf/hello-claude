@@ -75,6 +75,7 @@
     if (!soundOn) return;
     try {
       if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state !== "running") audio.resume();
       var o = audio.createOscillator(), g = audio.createGain(), now = audio.currentTime;
       o.type = type || "square";
       o.frequency.setValueAtTime(freq, now);
@@ -603,6 +604,7 @@
   });
 
   overlayButton.addEventListener("click", function () {
+    if (window.Musik) Musik.unlock(); // Ton auch bei lautlosem iPad
     if (overlayAction) overlayAction();
   });
   btnPause.addEventListener("click", function () {

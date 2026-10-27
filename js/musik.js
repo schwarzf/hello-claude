@@ -284,19 +284,57 @@
 
   // ---------- Wiedergabe im Browser ----------
 
-  var ctx = null, engine = null, timer = null, playing = false;
+  var ctx = null, engine = null, timer = null, playing = false, wanted = false, silentAudio = null;
+
+  /** Kurze, stille WAV-Datei (für das Freischalten des Tons auf älteren iPads). */
+  function silentWavUrl() {
+    var n = 4000, bytes = new Uint8Array(44 + n), v = new DataView(bytes.buffer);
+    function str(o, t) { for (var i = 0; i < t.length; i++) bytes[o + i] = t.charCodeAt(i); }
+    str(0, "RIFF"); v.setUint32(4, 36 + n, true); str(8, "WAVEfmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    str(36, "data"); v.setUint32(40, n, true);
+    for (var i = 0; i < n; i++) bytes[44 + i] = 128;
+    return URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
+  }
+
+  /**
+   * Safari auf iPad/iPhone spielt Web Audio standardmäßig nur, wenn das Gerät
+   * nicht lautlos ist. Als „Medienwiedergabe“ markiert klingt es wie in Chrome.
+   * Muss während einer Nutzeraktion (Tippen/Klicken) aufgerufen werden.
+   */
+  function unlock() {
+    var nav = global.navigator || {};
+    try {
+      if (nav.audioSession) {
+        nav.audioSession.type = "playback";
+      } else if (!silentAudio && global.Audio && /iP(ad|hone|od)|Macintosh/.test(nav.userAgent || "") && "ontouchend" in global.document) {
+        // ältere iPadOS-Versionen: ein still laufendes <audio> schaltet in den Wiedergabemodus
+        silentAudio = new Audio(silentWavUrl());
+        silentAudio.loop = true;
+        silentAudio.setAttribute("playsinline", "");
+        var p = silentAudio.play();
+        if (p && p.catch) p.catch(function () { silentAudio = null; });
+      }
+    } catch (e) { /* dann eben im Standardmodus */ }
+    if (ctx && wanted && ctx.state !== "running") ctx.resume();
+  }
 
   function tick() {
-    if (engine && ctx.state === "running") engine.scheduleUntil(ctx.currentTime + 0.25);
+    if (!engine) return;
+    if (ctx.state === "running") engine.scheduleUntil(ctx.currentTime + 0.25);
+    else if (wanted && ctx.state === "interrupted") ctx.resume(); // Safari nach Unterbrechung
   }
 
   function start() {
+    wanted = true;
+    unlock();
     if (playing) return resume();
     var AC = global.AudioContext || global.webkitAudioContext;
     if (!AC) return;
     try {
       if (!ctx) ctx = new AC();
-      if (ctx.state === "suspended") ctx.resume();
+      if (ctx.state !== "running") ctx.resume();
       engine = createEngine(ctx, ctx.destination, ctx.currentTime + 0.1);
       engine.master.gain.setValueAtTime(0, ctx.currentTime);
       engine.master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2);
@@ -307,14 +345,17 @@
   }
 
   function pause() {
+    wanted = false;
     if (ctx && playing) ctx.suspend();
   }
 
   function resume() {
-    if (ctx && playing) ctx.resume();
+    wanted = true;
+    if (ctx && playing && ctx.state !== "running") ctx.resume();
   }
 
   function stop() {
+    wanted = false;
     if (!playing) return;
     clearInterval(timer);
     var g = engine.master.gain, now = ctx.currentTime;
@@ -325,6 +366,15 @@
     setTimeout(function () { old.master.disconnect(); }, 600);
     engine = null;
     playing = false;
+  }
+
+  // Jede Berührung darf eine von Safari angehaltene Wiedergabe wieder starten.
+  if (global.document) {
+    ["pointerdown", "touchend", "keydown"].forEach(function (type) {
+      global.document.addEventListener(type, function () {
+        if (ctx && wanted && ctx.state !== "running") ctx.resume();
+      }, true);
+    });
   }
 
   /** Erzeugt die ersten Sekunden der Musik offline (z. B. für Tests). */
@@ -342,6 +392,7 @@
     SECTIONS: SECTIONS,
     makePluck: makePluck,
     start: start,
+    unlock: unlock,
     pause: pause,
     resume: resume,
     stop: stop,
