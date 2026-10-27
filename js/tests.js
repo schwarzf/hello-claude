@@ -264,6 +264,99 @@
     }]
   ];
 
+  // ---------- Unit-Tests Katzenspiel ----------
+
+  var KS = window.KatzenSpiel;
+
+  /** Einfacher Bot: springt kurz vor Bodenhindernissen, duckt sich vor Tunneln. */
+  function botInput(g) {
+    var box = KS.catBox(g.cat), s = g.level.speed;
+    var next = g.level.obstacles.filter(function (o) { return o.x + o.w > box.left - 2; })[0];
+    var input = { jump: false, jumpHeld: true, duck: false };
+    if (!next) return input;
+    var dist = next.x - box.right;
+    if (next.kind === "tunnel") input.duck = dist < s * 0.12;
+    else input.jump = dist > 0 && dist < s * 0.16;
+    return input;
+  }
+
+  function simulate(g, policy, maxSeconds) {
+    var events = [];
+    for (var i = 0; i < maxSeconds * 120 && g.status === "running"; i++) {
+      events = events.concat(KS.step(g, 1 / 120, policy(g)));
+    }
+    return events;
+  }
+
+  var gameTests = [
+    ["Fünf Level mit Ziel, Hindernissen und Vögeln", function () {
+      assertEqual(KS.LEVELS.length, 5);
+      KS.LEVELS.forEach(function (def, i) {
+        var l = KS.buildLevel(i);
+        assert(l.obstacles.length >= 8, "Level " + (i + 1) + " hat Hindernisse");
+        assert(l.birds.length >= 5, "Level " + (i + 1) + " hat Vögel");
+        assert(l.obstacles[l.obstacles.length - 1].x + 200 < l.goalX, "Platz vor dem Ziel");
+      });
+      assertEqual(KS.buildLevel(0).obstacles.some(function (o) { return o.kind === "tunnel"; }), false, "Level 1 ohne Tunnel");
+      assert(KS.buildLevel(1).obstacles.some(function (o) { return o.kind === "tunnel"; }), "ab Level 2 Tunnel");
+    }],
+    ["Level sind bei jedem Laden gleich", function () {
+      assertEqual(JSON.stringify(KS.buildLevel(3)), JSON.stringify(KS.buildLevel(3)));
+    }],
+    ["Sprung ist hoch genug für jedes Hindernis, aber nicht über Tunnel", function () {
+      var apex = KS.JUMP_SPEED * KS.JUMP_SPEED / (2 * KS.GRAVITY);
+      Object.keys(KS.GROUND_TYPES).forEach(function (k) {
+        assert(apex > KS.GROUND_TYPES[k].h + 40, k + " überspringbar");
+      });
+      assert(apex + KS.CAT.h < KS.TUNNEL_TOP, "Tunnel nicht überspringbar");
+      assert(KS.CAT.duckH - KS.CAT.margin < KS.TUNNEL_GAP, "geduckt passt in den Tunnel");
+      assert(KS.CAT.h - KS.CAT.margin > KS.TUNNEL_GAP, "stehend nicht");
+    }],
+    ["Ohne Springen kostet ein Hindernis ein Leben, danach kurz unverwundbar", function () {
+      var g = KS.createGame(0);
+      var ev = simulate(g, function () { return {}; }, 4);
+      assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 1);
+      assertEqual(g.lives, 8);
+    }],
+    ["Im Tunnel: stehend Treffer, geduckt frei", function () {
+      var g = KS.createGame(1), t = g.level.obstacles.filter(function (o) { return o.kind === "tunnel"; })[0];
+      g.cat.x = t.x + 40;
+      assertEqual(KS.step(g, 1 / 120, {}), ["hit"]);
+      var g2 = KS.createGame(1);
+      g2.cat.x = t.x + 40;
+      assertEqual(KS.step(g2, 1 / 120, { duck: true }), []);
+    }],
+    ["Alle 5 Level sind ohne Treffer schaffbar", function () {
+      var score = 0, lives = 9;
+      for (var i = 0; i < 5; i++) {
+        var g = KS.createGame(i, score, lives);
+        var ev = simulate(g, botInput, 120);
+        assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 0, "Treffer in Level " + (i + 1));
+        assertEqual(g.status, i < 4 ? "level" : "won", "Level " + (i + 1));
+        score = g.score;
+        lives = g.lives;
+      }
+      assertEqual(lives, 9);
+    }],
+    ["Vogel fangen gibt Extrapunkte", function () {
+      var g = KS.createGame(0), b = g.level.birds[0];
+      g.level.obstacles.forEach(function (o) { o.done = true; }); // keine Punkte für übersprungene Hindernisse
+      b.baseY = 25;
+      g.time = 0;
+      g.cat.x = b.x - 20;
+      var ev = KS.step(g, 1 / 120, {});
+      assertEqual(ev, ["bird"]);
+      assertEqual(g.score, KS.POINTS.bird);
+      assertEqual(KS.step(g, 1 / 120, {}), [], "nur einmal fangbar");
+    }],
+    ["Nach 9 Treffern ist das Spiel vorbei", function () {
+      var g = KS.createGame(2);
+      var ev = simulate(g, function () { return {}; }, 120);
+      assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 9);
+      assertEqual(g.status, "gameover");
+    }]
+  ];
+
   // ---------- UI-Tests ----------
 
   var frame = document.getElementById("app-frame");
@@ -371,6 +464,7 @@
         assertEqual(visibleTitles(w.document), ["Bleibt erhalten"]);
         assert(w.document.querySelector('a[href="katzen.html"]'), "Link zur Katzenseite fehlt");
         assert(w.document.querySelector('a[href="gesichter.html"]'), "Link zur Gesichterseite fehlt");
+        assert(w.document.querySelector('a[href="katzenspiel.html"]'), "Link zum Katzenspiel fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -410,6 +504,29 @@
           assert(near(p[0], 255, 2) && near(p[1], 179, 2) && near(p[2], 209, 2), "Pixel oben links: " + p);
         });
       });
+    }],
+    ["Katzenspiel: starten, springen und pausieren", function () {
+      return loadApp("katzenspiel.html").then(function (w) {
+        var doc = w.document, ks = w.katzenspiel;
+        assert(!doc.getElementById("overlay").hidden, "Startbildschirm");
+        doc.getElementById("overlay-button").click();
+        assertEqual(doc.getElementById("overlay-title").textContent, "Level 1: Im Garten");
+        doc.getElementById("overlay-button").click();
+        assert(doc.getElementById("overlay").hidden, "Spiel läuft");
+        assertEqual(doc.querySelectorAll("#hud-lives .lost").length, 0, "9 volle Herzen");
+        var jump = doc.getElementById("btn-jump");
+        jump.dispatchEvent(new w.PointerEvent("pointerdown", { bubbles: true, pointerId: 1 }));
+        return waitFor(function () { return ks.game.cat.y > 20; }, 2000).then(function () {
+          jump.dispatchEvent(new w.PointerEvent("pointerup", { bubbles: true, pointerId: 1 }));
+          assert(ks.game.cat.x > 0, "Katze läuft");
+          doc.dispatchEvent(new w.KeyboardEvent("keydown", { key: "p", bubbles: true }));
+          assertEqual(doc.getElementById("overlay-title").textContent, "Pause");
+          var x = ks.game.cat.x;
+          return new Promise(function (r) { setTimeout(r, 200); }).then(function () {
+            assertEqual(ks.game.cat.x, x, "steht in der Pause");
+          });
+        });
+      });
     }]
   ];
 
@@ -442,11 +559,13 @@
     var unitList = document.getElementById("unit-results");
     var morphList = document.getElementById("morph-results");
     var faceList = document.getElementById("face-results");
+    var gameList = document.getElementById("game-results");
     var uiList = document.getElementById("ui-results");
     var summary = document.getElementById("summary");
     unitList.innerHTML = "";
     morphList.innerHTML = "";
     faceList.innerHTML = "";
+    gameList.innerHTML = "";
     uiList.innerHTML = "";
     summary.className = "test-summary";
     summary.textContent = "Tests laufen …";
@@ -463,6 +582,10 @@
     faceTests.forEach(function (t) {
       try { t[1](); passed++; report(faceList, t[0]); }
       catch (e) { failed++; report(faceList, t[0], e); }
+    });
+    gameTests.forEach(function (t) {
+      try { t[1](); passed++; report(gameList, t[0]); }
+      catch (e) { failed++; report(gameList, t[0], e); }
     });
 
     // UI-Tests nutzen den echten localStorage → vorher sichern, danach wiederherstellen.

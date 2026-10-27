@@ -211,6 +211,9 @@ a.promo img { width: 64px; flex-shrink: 0; }
   -webkit-text-stroke: 1px var(--ink);
 }
 .promo-arrow { font-size: 2em; }
+a.promo-spiel { background: #ffd9c7; }
+a.promo-spiel:hover, a.promo-spiel:focus-visible { background: #ffc8ae; }
+a.promo-spiel .promo-text strong { color: #e2552b; }
 a.promo-gesichter { background: #c9efff; }
 a.promo-gesichter:hover, a.promo-gesichter:focus-visible { background: #aee5fb; }
 a.promo-gesichter .promo-text strong { color: #ff3b3b; }

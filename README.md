@@ -53,6 +53,25 @@ werden Standardpunkte gesetzt, die man von Hand anpasst.
 Die Beispielgesichter sind gezeichnete Comic-Figuren; ihre Punkte stehen in
 `js/gesichter-demo.js`.
 
+## Katzen-Jump'n'Run 🐈
+
+`katzenspiel.html` (von der Taskliste verlinkt) ist ein kleines Jump-and-Run
+mit einer roten Katze mit weißem Bauch:
+
+- 5 Level (Garten, Hinterhof, Park, Dächer, Nacht), jedes endet am Futternapf
+- über Kisten, Blumentöpfe und Heuballen **springen**, durch Kartons **ducken**
+- Vögel kommen von oben – wer sie fängt, bekommt **+50 Punkte**
+- **9 Leben**, nach einem Treffer kurz unverwundbar; sind alle weg, startet nur
+  das aktuelle Level neu
+- Steuerung: große Knöpfe „Springen“/„Ducken“ (iPad), Tippen ins Spielfeld
+  springt ebenfalls; Tastatur: Leertaste/↑ springen (länger drücken = höher),
+  ↓ ducken, P Pause
+- Rekord wird im Browser gespeichert; Ton lässt sich abschalten
+
+Die Spielregeln (`js/spiel.js`) sind vom Zeichnen (`js/katzenspiel.js`)
+getrennt. Ein Test lässt einen Bot alle Level durchspielen und prüft so, dass
+jedes Level ohne Treffer schaffbar ist.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -71,7 +90,8 @@ python3 -m http.server 8000
 - **Unit-Tests** für die Logik in `js/taskstore.js` (mit In-Memory-Speicher)
 - **Unit-Tests** für das Morphing in `js/morph.js` (Dreiecksnetz, Verzerrung, Überblendung)
 - **Unit-Tests** für die Gesichtspunkte in `js/face.js` (Auswahl, Zuschnitt, Vorlage)
-- **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen
+- **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Physik, Treffer, Vögel, Leben, Bot spielt alle Level)
+- **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
 weil sie das Modell aus dem Netz braucht.
@@ -88,6 +108,7 @@ Unit-Tests und die UI-Tests werden mit einem Hinweis übersprungen.
 | `index.html` | Oberfläche der Taskverwaltung |
 | `katzen.html` | Katzen-Morphing |
 | `gesichter.html` | Gesichter-Morphing |
+| `katzenspiel.html` | Katzen-Jump'n'Run |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
@@ -96,8 +117,11 @@ Unit-Tests und die UI-Tests werden mit einem Hinweis übersprungen.
 | `js/face.js` | Gesichtspunkte, Zuschnitt und MediaPipe-Erkennung |
 | `js/gesichter.js` | Oberfläche des Gesichter-Morphings |
 | `js/gesichter-demo.js` | Punkte der Beispielgesichter |
+| `js/spiel.js` | Spielregeln des Jump'n'Run (Physik, Level, Treffer) |
+| `js/katzenspiel.js` | Zeichnen, Steuerung und Ablauf des Spiels |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |
 | `css/gesichter.css` | Pop-Art-Comic-Styles der Gesichterseite |
+| `css/katzenspiel.css` | Styles des Spiels |
 | `img/` | Grafiken als SVG (Dinos, Katzen, Comic-Gesichter, Pfoten) |
