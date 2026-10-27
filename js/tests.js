@@ -268,15 +268,19 @@
 
   var KS = window.KatzenSpiel;
 
-  /** Einfacher Bot: springt kurz vor Bodenhindernissen, duckt sich vor Tunneln. */
+  /** Einfacher Bot: hält rechts, springt vor Hindernissen, kriecht durch Tunnel, jagt Mäuse per Satz. */
   function botInput(g) {
-    var box = KS.catBox(g.cat), s = g.level.speed;
+    var c = g.cat, box = KS.catBox(c), v = Math.max(c.vx, 60);
     var next = g.level.obstacles.filter(function (o) { return o.x + o.w > box.left - 2; })[0];
-    var input = { jump: false, jumpHeld: true, duck: false };
-    if (!next) return input;
-    var dist = next.x - box.right;
-    if (next.kind === "tunnel") input.duck = dist < s * 0.12;
-    else input.jump = dist > 0 && dist < s * 0.16;
+    var input = { right: true, jump: false, jumpHeld: true, duck: false, pounce: false };
+    if (next) {
+      var dist = next.x - box.right;
+      if (next.kind === "tunnel") input.duck = dist < 30;
+      else input.jump = dist > 0 && dist < v * 0.16 + 4;
+    }
+    var mouse = g.level.mice.filter(function (m) { return !m.caught && m.x > c.x && m.x - c.x < 170; })[0];
+    var clear = !next || next.x - box.right > 280 || next.x + next.w < box.left;
+    if (mouse && clear && c.onGround && !input.duck) input.pounce = true;
     return input;
   }
 
@@ -287,21 +291,47 @@
     }
     return events;
   }
+  function count(events, name) { return events.filter(function (e) { return e === name; }).length; }
+  function emptyLevel(g) { g.level.obstacles = []; g.level.mice = []; g.level.birds = []; return g; }
 
   var gameTests = [
-    ["Fünf Level mit Ziel, Hindernissen und Vögeln", function () {
+    ["Fünf Level mit Ziel, Hindernissen, Vögeln und Mäusen", function () {
       assertEqual(KS.LEVELS.length, 5);
       KS.LEVELS.forEach(function (def, i) {
         var l = KS.buildLevel(i);
         assert(l.obstacles.length >= 8, "Level " + (i + 1) + " hat Hindernisse");
         assert(l.birds.length >= 5, "Level " + (i + 1) + " hat Vögel");
+        assert(l.mice.length >= 3, "Level " + (i + 1) + " hat Mäuse");
         assert(l.obstacles[l.obstacles.length - 1].x + 200 < l.goalX, "Platz vor dem Ziel");
+        l.mice.forEach(function (m) {
+          l.obstacles.forEach(function (o) { assert(m.max < o.x || m.min > o.x + o.w, "Maus läuft nicht durch Hindernisse"); });
+        });
       });
       assertEqual(KS.buildLevel(0).obstacles.some(function (o) { return o.kind === "tunnel"; }), false, "Level 1 ohne Tunnel");
       assert(KS.buildLevel(1).obstacles.some(function (o) { return o.kind === "tunnel"; }), "ab Level 2 Tunnel");
     }],
     ["Level sind bei jedem Laden gleich", function () {
       assertEqual(JSON.stringify(KS.buildLevel(3)), JSON.stringify(KS.buildLevel(3)));
+    }],
+    ["Katze bewegt sich nur, wenn man läuft", function () {
+      var g = emptyLevel(KS.createGame(0)), x = g.cat.x;
+      simulate(g, function () { return {}; }, 1);
+      assertEqual(g.cat.x, x, "steht still");
+      simulate(g, function () { return { right: true }; }, 1);
+      assert(g.cat.x > x + 150, "läuft nach rechts");
+      var right = g.cat.x;
+      simulate(g, function () { return { left: true }; }, 1);
+      assert(g.cat.x < right - 100, "läuft nach links");
+      assertEqual(g.cat.facing, -1, "schaut nach links");
+    }],
+    ["Langes Halten macht schneller, geduckt geht es langsam", function () {
+      var g = emptyLevel(KS.createGame(0));
+      simulate(g, function () { return { right: true }; }, 0.5);
+      assert(near(g.cat.vx, KS.WALK, 1), "normal " + g.cat.vx);
+      simulate(g, function () { return { right: true }; }, 3);
+      assert(near(g.cat.vx, KS.WALK * KS.SPRINT, 1), "Sprint " + g.cat.vx);
+      simulate(g, function () { return { right: true, duck: true }; }, 1);
+      assert(near(g.cat.vx, KS.CRAWL, 1), "kriechen " + g.cat.vx);
     }],
     ["Sprung ist hoch genug für jedes Hindernis, aber nicht über Tunnel", function () {
       var apex = KS.JUMP_SPEED * KS.JUMP_SPEED / (2 * KS.GRAVITY);
@@ -312,10 +342,10 @@
       assert(KS.CAT.duckH - KS.CAT.margin < KS.TUNNEL_GAP, "geduckt passt in den Tunnel");
       assert(KS.CAT.h - KS.CAT.margin > KS.TUNNEL_GAP, "stehend nicht");
     }],
-    ["Ohne Springen kostet ein Hindernis ein Leben, danach kurz unverwundbar", function () {
+    ["Gegen ein Hindernis laufen kostet ein Leben, danach kurz unverwundbar", function () {
       var g = KS.createGame(0);
-      var ev = simulate(g, function () { return {}; }, 4);
-      assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 1);
+      var ev = simulate(g, function () { return { right: true }; }, 3);
+      assertEqual(count(ev, "hit"), 1);
       assertEqual(g.lives, 8);
     }],
     ["Im Tunnel: stehend Treffer, geduckt frei", function () {
@@ -326,23 +356,46 @@
       g2.cat.x = t.x + 40;
       assertEqual(KS.step(g2, 1 / 120, { duck: true }), []);
     }],
-    ["Alle 5 Level sind ohne Treffer schaffbar", function () {
-      var score = 0, lives = 9;
+    ["Alle 5 Level sind ohne Treffer schaffbar, Mäuse sind fangbar", function () {
+      var score = 0, lives = 9, mice = 0;
       for (var i = 0; i < 5; i++) {
         var g = KS.createGame(i, score, lives);
-        var ev = simulate(g, botInput, 120);
-        assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 0, "Treffer in Level " + (i + 1));
+        var ev = simulate(g, botInput, 300);
+        assertEqual(count(ev, "hit"), 0, "Treffer in Level " + (i + 1));
         assertEqual(g.status, i < 4 ? "level" : "won", "Level " + (i + 1));
+        mice += count(ev, "mouse");
         score = g.score;
         lives = g.lives;
       }
       assertEqual(lives, 9);
+      assert(mice >= 10, "Mäuse gefangen: " + mice);
+    }],
+    ["Mäuse flüchten und lassen sich nur mit einem Satz fangen", function () {
+      var g = emptyLevel(KS.createGame(0));
+      var m = { min: 300, max: 450, x: 330, dir: 1, fleeing: false, caught: false, wander: 0 };
+      g.level.mice = [m];
+      g.cat.x = 200;
+      simulate(g, function () { return {}; }, 0.3);
+      assert(m.fleeing && m.x > 330, "Maus flüchtet");
+      // Maus in die Ecke treiben und einfach drüberlaufen: kein Fang
+      var cornered = false;
+      var ev = simulate(g, function () { cornered = cornered || m.cornered; return { right: true }; }, 2.5);
+      assert(cornered, "Maus sitzt in der Ecke");
+      assertEqual(count(ev, "mouse"), 0, "Laufen fängt keine Maus");
+      // Mit einem Satz fangen
+      m.x = m.max;
+      g.cat.x = m.max - 120;
+      g.cat.facing = 1;
+      g.cat.vx = 0;
+      ev = simulate(g, function (gg) { return { pounce: gg.cat.onGround && !gg.cat.pouncing }; }, 1);
+      assertEqual(count(ev, "mouse"), 1, "Satz fängt die Maus");
+      assert(g.score >= KS.POINTS.mouse, "Punkte für die Maus");
     }],
     ["Vogel fangen gibt Extrapunkte", function () {
       var g = KS.createGame(0), b = g.level.birds[0];
       g.level.obstacles.forEach(function (o) { o.done = true; }); // keine Punkte für übersprungene Hindernisse
+      g.level.mice = [];
       b.baseY = 25;
-      g.time = 0;
       g.cat.x = b.x - 20;
       var ev = KS.step(g, 1 / 120, {});
       assertEqual(ev, ["bird"]);
@@ -350,9 +403,10 @@
       assertEqual(KS.step(g, 1 / 120, {}), [], "nur einmal fangbar");
     }],
     ["Nach 9 Treffern ist das Spiel vorbei", function () {
-      var g = KS.createGame(2);
-      var ev = simulate(g, function () { return {}; }, 120);
-      assertEqual(ev.filter(function (e) { return e === "hit"; }).length, 9);
+      var g = KS.createGame(0), box = g.level.obstacles[0];
+      g.cat.x = box.x + box.w / 2; // mitten in der Kiste stehen bleiben
+      var ev = simulate(g, function () { return {}; }, 20);
+      assertEqual(count(ev, "hit"), 9);
       assertEqual(g.status, "gameover");
     }]
   ];
@@ -538,7 +592,7 @@
         });
       });
     }],
-    ["Katzenspiel: starten, springen und pausieren", function () {
+    ["Katzenspiel: starten, laufen, springen und pausieren", function () {
       return loadApp("katzenspiel.html").then(function (w) {
         var doc = w.document, ks = w.katzenspiel;
         assert(!doc.getElementById("overlay").hidden, "Startbildschirm");
@@ -547,11 +601,16 @@
         doc.getElementById("overlay-button").click();
         assert(doc.getElementById("overlay").hidden, "Spiel läuft");
         assertEqual(doc.querySelectorAll("#hud-lives .lost").length, 0, "9 volle Herzen");
-        var jump = doc.getElementById("btn-jump");
-        jump.dispatchEvent(new w.PointerEvent("pointerdown", { bubbles: true, pointerId: 1 }));
-        return waitFor(function () { return ks.game.cat.y > 20; }, 2000).then(function () {
+        var startX = ks.game.cat.x;
+        var right = doc.getElementById("btn-right"), jump = doc.getElementById("btn-jump");
+        return new Promise(function (r) { setTimeout(r, 300); }).then(function () {
+          assertEqual(ks.game.cat.x, startX, "läuft nicht von allein");
+          right.dispatchEvent(new w.PointerEvent("pointerdown", { bubbles: true, pointerId: 2 }));
+          jump.dispatchEvent(new w.PointerEvent("pointerdown", { bubbles: true, pointerId: 1 }));
+          return waitFor(function () { return ks.game.cat.y > 20 && ks.game.cat.x > startX + 20; }, 2000);
+        }).then(function () {
           jump.dispatchEvent(new w.PointerEvent("pointerup", { bubbles: true, pointerId: 1 }));
-          assert(ks.game.cat.x > 0, "Katze läuft");
+          right.dispatchEvent(new w.PointerEvent("pointerup", { bubbles: true, pointerId: 2 }));
           doc.dispatchEvent(new w.KeyboardEvent("keydown", { key: "p", bubbles: true }));
           assertEqual(doc.getElementById("overlay-title").textContent, "Pause");
           var x = ks.game.cat.x;

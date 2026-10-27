@@ -6,7 +6,7 @@
   "use strict";
 
   var K = KatzenSpiel;
-  var W = 960, H = 400, GROUND = 330, CAT_SCREEN_X = 190, STEP = 1 / 120;
+  var W = 960, H = 400, GROUND = 330, STEP = 1 / 120;
   var INK = "#2b1a12";
 
   var THEMES = [
@@ -29,12 +29,15 @@
   var hudProgress = document.getElementById("hud-progress");
   var btnJump = document.getElementById("btn-jump");
   var btnDuck = document.getElementById("btn-duck");
+  var btnLeft = document.getElementById("btn-left");
+  var btnRight = document.getElementById("btn-right");
+  var btnPounce = document.getElementById("btn-pounce");
   var btnPause = document.getElementById("btn-pause");
   var btnSound = document.getElementById("btn-sound");
   var btnMusic = document.getElementById("btn-music");
 
   var game = K.createGame(0);
-  var input = { jump: false, jumpHeld: false, duck: false };
+  var input = { left: false, right: false, jump: false, jumpHeld: false, duck: false, pounce: false };
   var running = false, paused = false, overlayAction = null;
   var highscore = readHighscore();
   var shake = 0, flash = 0;
@@ -93,6 +96,8 @@
     jump: function () { beep(420, 0.15, "square", 760); },
     bird: function () { beep(880, 0.08, "triangle"); setTimeout(function () { beep(1320, 0.12, "triangle"); }, 70); },
     hit: function () { beep(220, 0.3, "sawtooth", 90); },
+    pounce: function () { beep(300, 0.14, "triangle", 620); },
+    mouse: function () { beep(1600, 0.05, "square", 2300); setTimeout(function () { beep(1900, 0.06, "square", 2600); }, 60); },
     level: function () { [523, 659, 784, 1047].forEach(function (f, i) { setTimeout(function () { beep(f, 0.15, "triangle"); }, i * 110); }); },
     gameover: function () { [392, 330, 262].forEach(function (f, i) { setTimeout(function () { beep(f, 0.25, "triangle"); }, i * 180); }); }
   };
@@ -306,28 +311,46 @@
     ctx.fillText("MIAU", sx, GROUND - 6);
   }
 
-  /** Rote Katze mit weißem Bauch, Blick nach rechts. x = Mitte, y = Unterkante (Bildschirm). */
-  function drawCat(c, x, y, pose, t, scale) {
+  /**
+   * Rote Katze mit weißem Bauch. x = Mitte, y = Unterkante (Bildschirm).
+   * a: { pose, phase, t, facing, squash, blink, vy } – pose ist "idle", "walk",
+   * "sprint", "air", "pounce", "duck" oder "crawl".
+   */
+  function drawCat(c, x, y, a, scale) {
+    var pose = a.pose, t = a.t, ph = a.phase;
+    var duck = pose === "duck" || pose === "crawl";
+    var red = "#e2552b", dark = "#b23a1a";
     c.save();
     c.translate(x, y);
-    if (scale) c.scale(scale, scale);
-    var red = "#e2552b", dark = "#b23a1a";
+    c.scale((a.facing < 0 ? -1 : 1) * (scale || 1), scale || 1);
+    if (a.squash) c.scale(1 + a.squash * 0.6, 1 - a.squash);
     c.strokeStyle = INK;
     c.lineWidth = 2.5;
     c.lineJoin = "round";
     c.lineCap = "round";
 
-    var duck = pose === "duck", air = pose === "air";
-    var bodyY = duck ? -13 : -26, bodyRy = duck ? 10 : 14, headX = duck ? 26 : 22, headY = duck ? -16 : -38;
-    var run = Math.sin(t * 16);
+    // Haltung je nach Bewegung
+    var bodyY = duck ? -13 : -26, bodyRx = 28, bodyRy = duck ? 10 : 14, headX = duck ? 26 : 22, headY = duck ? -16 : -38;
+    var bob = 0, tilt = 0, earBack = duck ? 6 : 0, eyeBig = 0;
+    if (pose === "idle") bodyRy += Math.sin(t * 2.5) * 0.7;
+    if (pose === "walk") bob = Math.abs(Math.sin(ph)) * -2;
+    if (pose === "sprint") { bodyRx = 31; bob = Math.sin(ph * 2) * 2.5; tilt = Math.sin(ph) * 0.06; earBack = 5; headX = 25; headY = -35; }
+    if (pose === "air") tilt = Math.max(-0.2, Math.min(0.2, -a.vy / 4000));
+    if (pose === "pounce") { bodyRx = 33; tilt = Math.max(-0.3, Math.min(0.3, -a.vy / 2000)); earBack = -2; eyeBig = 1; headX = 27; headY = -34; }
+    c.translate(0, bob);
+    c.rotate(tilt);
 
     // Schwanz
-    c.strokeStyle = INK;
+    var tail;
+    if (pose === "sprint" || pose === "pounce") tail = [-48, bodyY - 6 + Math.sin(t * 14) * 3, -62, bodyY - 10 + Math.sin(t * 14 + 1) * 4];
+    else if (duck) tail = [-46, bodyY - 2, -56, bodyY + 3 + Math.sin(t * 6) * 2];
+    else if (pose === "air") tail = [-46, bodyY - 8, -46, bodyY - 32];
+    else if (pose === "walk") tail = [-46, bodyY - 6 + Math.sin(ph) * 2, -44, bodyY - 28 + Math.sin(ph) * 3];
+    else tail = [-46 + Math.sin(t * 2) * 3, bodyY - 6, -44 + Math.sin(t * 2.2) * 8, bodyY - 30];
     c.lineWidth = 9;
     c.beginPath();
     c.moveTo(-24, bodyY - 4);
-    if (duck) c.quadraticCurveTo(-46, bodyY - 2, -54, bodyY + 4);
-    else c.quadraticCurveTo(-46, bodyY - 4 - (air ? 4 : run * 3), -44, bodyY - 26 - (air ? 6 : run * 4));
+    c.quadraticCurveTo(tail[0], tail[1], tail[2], tail[3]);
     c.stroke();
     c.strokeStyle = red;
     c.lineWidth = 5;
@@ -335,34 +358,46 @@
     c.strokeStyle = INK;
     c.lineWidth = 2.5;
 
-    // Beine
-    var legs = duck ? [] : [[14, 1], [6, -1], [-14, -1], [-22, 1]];
+    // Beine: [Ansatz x, Phasenversatz]
+    var legs = [];
+    if (!duck) {
+      var sets = {
+        walk: [[14, 0], [6, Math.PI], [-14, Math.PI], [-22, 0]],      // Trab: diagonale Paare
+        sprint: [[15, 0], [7, 0.5], [-15, Math.PI], [-23, Math.PI + 0.5]] // Galopp: vorne/hinten
+      };
+      legs = sets[pose === "sprint" ? "sprint" : "walk"];
+    }
     legs.forEach(function (l) {
-      var swing = air ? (l[0] > 0 ? 8 : -8) : run * 7 * l[1];
-      var footY = air ? -4 : 0;
+      var swing = 0, lift = 0, footY = 0;
+      if (pose === "walk") { swing = Math.sin(ph + l[1]) * 8; lift = Math.max(0, Math.cos(ph + l[1])) * 5; }
+      if (pose === "sprint") { swing = Math.sin(ph + l[1]) * 13; lift = Math.max(0, Math.cos(ph + l[1])) * 8; }
+      if (pose === "air") { swing = l[0] > 0 ? 9 : -9; footY = a.vy > 0 ? -6 : 0; }
+      if (pose === "pounce") { swing = l[0] > 0 ? 18 : -16; footY = l[0] > 0 ? -14 : -6; }
+      var fy = footY - lift;
       c.fillStyle = red;
       c.beginPath();
       c.moveTo(l[0] - 4, bodyY + 6);
-      c.lineTo(l[0] + swing - 4, footY);
-      c.lineTo(l[0] + swing + 4, footY);
+      c.lineTo(l[0] + swing - 4, fy);
+      c.lineTo(l[0] + swing + 4, fy);
       c.lineTo(l[0] + 4, bodyY + 6);
       c.closePath();
       c.fill(); c.stroke();
       c.fillStyle = "#fff";
-      c.beginPath(); c.ellipse(l[0] + swing, footY - 2, 5, 3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(l[0] + swing, fy - 2, 5, 3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
     });
     if (duck) {
+      var shuffle = pose === "crawl" ? Math.sin(ph) * 4 : 0;
       c.fillStyle = "#fff";
-      [[16, 0], [-18, 0]].forEach(function (p) { c.beginPath(); c.ellipse(p[0], -3, 7, 3.5, 0, 0, Math.PI * 2); c.fill(); c.stroke(); });
+      [[16 + shuffle, 0], [-18 - shuffle, 0]].forEach(function (p) { c.beginPath(); c.ellipse(p[0], -3, 7, 3.5, 0, 0, Math.PI * 2); c.fill(); c.stroke(); });
     }
 
     // Körper mit weißem Bauch und Streifen
     c.fillStyle = red;
-    c.beginPath(); c.ellipse(-2, bodyY, 28, bodyRy, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.beginPath(); c.ellipse(-2, bodyY, bodyRx, bodyRy, 0, 0, Math.PI * 2); c.fill(); c.stroke();
     c.save();
-    c.beginPath(); c.ellipse(-2, bodyY, 28, bodyRy, 0, 0, Math.PI * 2); c.clip();
+    c.beginPath(); c.ellipse(-2, bodyY, bodyRx, bodyRy, 0, 0, Math.PI * 2); c.clip();
     c.fillStyle = "#fff";
-    c.beginPath(); c.ellipse(2, bodyY + bodyRy * 0.75, 20, bodyRy * 0.6, 0, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(2, bodyY + bodyRy * 0.75, bodyRx - 8, bodyRy * 0.6, 0, 0, Math.PI * 2); c.fill();
     c.strokeStyle = dark;
     c.lineWidth = 3;
     [-14, -4, 6].forEach(function (sx) {
@@ -374,23 +409,27 @@
 
     // Kopf
     c.fillStyle = red;
-    var earBack = duck ? 6 : 0;
     [[-9, 1], [5, 1]].forEach(function (e) {
       c.beginPath();
       c.moveTo(headX + e[0] - 2, headY - 8);
-      c.lineTo(headX + e[0] + 2 - earBack, headY - 22 + earBack);
+      c.lineTo(headX + e[0] + 2 - earBack, headY - 22 + Math.max(0, earBack));
       c.lineTo(headX + e[0] + 9, headY - 9);
       c.closePath(); c.fill(); c.stroke();
     });
     c.beginPath(); c.arc(headX, headY, 14, 0, Math.PI * 2); c.fill(); c.stroke();
     c.fillStyle = "#ffb3c1";
-    c.beginPath(); c.moveTo(headX + 6 - earBack, headY - 18 + earBack); c.lineTo(headX + 2, headY - 11); c.lineTo(headX + 9, headY - 11); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(headX + 6 - earBack, headY - 18 + Math.max(0, earBack)); c.lineTo(headX + 2, headY - 11); c.lineTo(headX + 9, headY - 11); c.closePath(); c.fill();
     c.fillStyle = "#fff";
     c.beginPath(); c.ellipse(headX + 7, headY + 5, 9, 6.5, 0, 0, Math.PI * 2); c.fill();
-    c.fillStyle = INK;
-    c.beginPath(); c.ellipse(headX + 4, headY - 3, 2.6, 3.6, 0, 0, Math.PI * 2); c.fill();
-    c.fillStyle = "#fff";
-    c.beginPath(); c.arc(headX + 5, headY - 4.5, 1, 0, Math.PI * 2); c.fill();
+    if (a.blink) {
+      c.lineWidth = 2;
+      c.beginPath(); c.moveTo(headX + 1, headY - 3); c.quadraticCurveTo(headX + 4, headY - 1, headX + 7, headY - 3); c.stroke();
+    } else {
+      c.fillStyle = INK;
+      c.beginPath(); c.ellipse(headX + 4, headY - 3, 2.6 + eyeBig, 3.6 + eyeBig, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#fff";
+      c.beginPath(); c.arc(headX + 5, headY - 4.5, 1, 0, Math.PI * 2); c.fill();
+    }
     c.fillStyle = "#ff6f8f";
     c.beginPath(); c.arc(headX + 13, headY + 2, 2.6, 0, Math.PI * 2); c.fill();
     c.lineWidth = 1.5;
@@ -401,9 +440,123 @@
     c.restore();
   }
 
-  function render(frameTime) {
+  /** Graue Maus; dir = Blickrichtung. */
+  function drawMouse(x, y, m, t) {
+    var tremble = m.cornered ? Math.sin(t * 70) * 1.2 : 0;
+    var moving = m.fleeing && !m.cornered;
+    ctx.save();
+    ctx.translate(x + tremble, y);
+    ctx.scale(m.dir < 0 ? -1 : 1, 1);
+    outline(2);
+    ctx.strokeStyle = INK;
+    ctx.beginPath();
+    ctx.moveTo(-11, -5);
+    ctx.quadraticCurveTo(-24, -2 + Math.sin(t * 20) * 3, -30, -10);
+    ctx.stroke();
+    if (moving) {
+      ctx.lineWidth = 2;
+      [-5, 5].forEach(function (lx, i) {
+        var sw = Math.sin(t * 30 + i * Math.PI) * 3;
+        ctx.beginPath(); ctx.moveTo(lx, -3); ctx.lineTo(lx + sw, 0); ctx.stroke();
+      });
+    }
+    ctx.fillStyle = "#9a9aa8";
+    ctx.beginPath(); ctx.ellipse(0, -7, 12, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(10, -9, 6, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffb3c1";
+    ctx.beginPath(); ctx.arc(7, -15, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath(); ctx.arc(12, -10, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ff6f8f";
+    ctx.beginPath(); ctx.arc(16, -8, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    if (m.fleeing) {
+      ctx.fillStyle = INK;
+      ctx.font = "18px Bangers, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("!", x, y - 24);
+    }
+  }
+
+  // ---------- Effekte (Staub, Sterne) ----------
+
+  var particles = [];
+  function spawn(kind, x, y, count) {
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        kind: kind, x: x + (Math.random() - 0.5) * 10, y: y + Math.random() * 6,
+        vx: (Math.random() - 0.5) * (kind === "star" ? 220 : 60), vy: Math.random() * (kind === "star" ? 220 : 50) + 20,
+        life: 0, max: kind === "star" ? 0.7 : 0.45 + Math.random() * 0.2, size: kind === "star" ? 7 : 5 + Math.random() * 5
+      });
+    }
+  }
+  function updateParticles(dt) {
+    particles.forEach(function (p) {
+      p.life += dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy -= (p.kind === "star" ? 500 : 40) * dt;
+    });
+    particles = particles.filter(function (p) { return p.life < p.max && p.y > -10; });
+  }
+  function drawStar(x, y, r) {
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r;
+      ctx.lineTo(x + Math.cos(ang) * rr, y + Math.sin(ang) * rr);
+    }
+    ctx.closePath();
+  }
+  function drawParticles(camX, night) {
+    particles.forEach(function (p) {
+      var k = 1 - p.life / p.max, sx = p.x - camX, sy = GROUND - p.y;
+      if (p.kind === "star") {
+        ctx.globalAlpha = k;
+        ctx.fillStyle = "#ffe14d";
+        outline(2);
+        drawStar(sx, sy, p.size);
+        ctx.fill(); ctx.stroke();
+      } else {
+        ctx.globalAlpha = k * 0.7;
+        ctx.fillStyle = night ? "#8a8fb0" : "#f3e6cf";
+        ctx.beginPath(); ctx.arc(sx, sy, p.size * (1.4 - k * 0.6), 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // Animationszustand der Katze (nur fürs Zeichnen)
+  var anim = { phase: 0, squash: 0, dust: 0, blinkAt: 2.5, t: 0 };
+  var camX = 0;
+
+  function catPose() {
+    var cat = game.cat, speed = Math.abs(cat.vx);
+    if (cat.pouncing) return "pounce";
+    if (!cat.onGround) return "air";
+    if (cat.ducking) return speed > 10 ? "crawl" : "duck";
+    if (speed < 15) return "idle";
+    return speed > K.WALK * 1.12 ? "sprint" : "walk";
+  }
+
+  function updateAnimation(dt) {
+    var cat = game.cat;
+    anim.t += dt;
+    anim.phase += Math.abs(cat.vx) * dt * 0.06;
+    anim.squash = Math.max(0, anim.squash - dt * 1.2);
+    var pose = catPose();
+    if (pose === "sprint") {
+      anim.dust -= dt;
+      if (anim.dust <= 0) { spawn("dust", cat.x - cat.facing * 26, 2, 1); anim.dust = 0.05; }
+    }
+    updateParticles(dt);
+    // Kamera schaut etwas in Laufrichtung voraus
+    var target = cat.x - (cat.facing > 0 ? 320 : 640);
+    camX += (target - camX) * Math.min(1, dt * 2.5);
+    camX = Math.max(0, Math.min(game.level.length + 200 - W, camX));
+  }
+
+  function render() {
     var theme = THEMES[game.level.index];
-    var camX = game.cat.x - CAT_SCREEN_X;
     ctx.save();
     if (shake > 0) ctx.translate((Math.random() - 0.5) * 10 * shake, (Math.random() - 0.5) * 6 * shake);
     drawBackground(theme, camX);
@@ -416,6 +569,20 @@
     var gx = game.level.goalX + 40 - camX;
     if (gx < W + 120) drawGoal(gx);
 
+    var firstMouse = game.level.index === 0 ? game.level.mice[0] : null;
+    game.level.mice.forEach(function (m) {
+      if (m.caught) return;
+      var sx = m.x - camX;
+      if (sx < -40 || sx > W + 40) return;
+      drawMouse(sx, GROUND, m, anim.t);
+      if (m === firstMouse) {
+        ctx.fillStyle = INK;
+        ctx.font = "20px Bangers, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🐾 SATZ!", sx, GROUND - 44);
+      }
+    });
+
     game.level.birds.forEach(function (b) {
       if (b.caught) return;
       var p = K.birdPosition(b, game);
@@ -423,10 +590,24 @@
       if (sx > -40 && sx < W + 40) drawBird(sx, GROUND - p.y, game.time + b.phase);
     });
 
-    var cat = game.cat;
-    var pose = cat.ducking ? "duck" : (cat.onGround ? "run" : "air");
-    var blink = game.invulnerable > 0 && Math.floor(game.invulnerable * 10) % 2 === 0;
-    if (!blink) drawCat(ctx, CAT_SCREEN_X, GROUND - cat.y, pose, running ? game.time : 0);
+    drawParticles(camX, Boolean(theme.moon));
+
+    var cat = game.cat, pose = catPose(), cx = cat.x - camX, cy = GROUND - cat.y;
+    // Speed-Linien beim Sprinten
+    if (pose === "sprint") {
+      var k = (K.sprintFactor(cat) - 1) / (K.SPRINT - 1);
+      ctx.strokeStyle = "rgba(255,255,255," + (0.35 + k * 0.4) + ")";
+      ctx.lineWidth = 3;
+      [-30, -18, -42].forEach(function (dy, i) {
+        var len = 30 + k * 40 + i * 8, start = cx - cat.facing * (44 + i * 6);
+        ctx.beginPath(); ctx.moveTo(start, cy + dy); ctx.lineTo(start - cat.facing * len, cy + dy); ctx.stroke();
+      });
+    }
+    var invisible = game.invulnerable > 0 && Math.floor(game.invulnerable * 10) % 2 === 0;
+    var blink = (anim.t % 3.2) > 3.05;
+    if (!invisible) {
+      drawCat(ctx, cx, cy, { pose: pose, phase: anim.phase, t: anim.t, facing: cat.facing, squash: anim.squash, blink: blink, vy: cat.vy });
+    }
 
     ctx.font = "30px Bangers, sans-serif";
     ctx.textAlign = "center";
@@ -474,6 +655,7 @@
     overlayAction = action;
     overlay.hidden = false;
     running = false;
+    releaseAll();
     overlayButton.focus({ preventScroll: true });
   }
 
@@ -488,15 +670,18 @@
 
   function levelIntro(index, score, lives) {
     game = K.createGame(index, score, lives);
+    camX = 0;
+    particles = [];
+    anim.squash = 0;
     var def = K.LEVELS[index];
     var hints = [
-      "Spring über Kisten und Blumentöpfe. Fang die Vögel für Extrapunkte!",
-      "Neu: Kartons mit Durchgang – hier musst du dich <strong>ducken</strong>!",
-      "Neu: Heuballen – die sind etwas größer.",
-      "Es wird schneller – pass gut auf!",
+      "Halte <strong>▶</strong> zum Laufen – wer lange hält, wird schneller. Spring über Kisten und Töpfe. Mäuse fängst du nur mit einem <strong>🐾 Satz</strong>!",
+      "Neu: Kartons mit Durchgang – <strong>⬇ ducken</strong> und dabei mit ▶ hindurchkriechen!",
+      "Neu: Heuballen – die sind zu hoch für einen Satz, hier musst du richtig springen.",
+      "Über den Dächern gibt es viele Mäuse und Vögel – sammle Punkte!",
       "Das letzte Level. Schaffst du es bis zum Napf?"
     ];
-    render(0);
+    render();
     updateHud();
     showOverlay("Level " + (index + 1) + ": " + def.name, "<p>" + hints[index] + "</p>", "Start!", hideOverlay);
   }
@@ -505,6 +690,9 @@
     events.forEach(function (e) {
       if (SOUNDS[e]) SOUNDS[e]();
       if (e === "hit") { shake = 1; flash = 1; }
+      if (e === "land") { anim.squash = 0.18; spawn("dust", game.cat.x, 2, 5); }
+      if (e === "mouse") spawn("star", game.cat.x + game.cat.facing * 24, 20, 8);
+      if (e === "bird") spawn("star", game.cat.x, 60, 6);
     });
     if (game.status === "level") {
       var best = saveHighscore();
@@ -533,15 +721,19 @@
       if (last === null) last = now;
       acc += Math.min(0.1, (now - last) / 1000);
       last = now;
+      var simulated = 0;
       while (acc >= STEP && running) {
         acc -= STEP;
+        simulated += STEP;
         var events = K.step(game, STEP, input);
         input.jump = false;
+        input.pounce = false;
         if (events.length) onEvents(events);
       }
+      updateAnimation(simulated);
       shake = Math.max(0, shake - 0.05);
       flash = Math.max(0, flash - 0.05);
-      render(now);
+      render();
       updateHud();
     } else {
       last = null;
@@ -560,13 +752,17 @@
 
   function pressJump() { input.jump = true; input.jumpHeld = true; }
   function releaseJump() { input.jumpHeld = false; }
+  function releaseAll() {
+    input.left = input.right = input.duck = input.jumpHeld = false;
+    Array.prototype.forEach.call(document.querySelectorAll(".control.pressed"), function (b) { b.classList.remove("pressed"); });
+  }
 
   function holdButton(btn, down, up) {
     btn.addEventListener("pointerdown", function (e) {
       e.preventDefault();
       btn.classList.add("pressed");
-      if (btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
       down();
+      try { btn.setPointerCapture(e.pointerId); } catch (err) { /* Knopf funktioniert auch ohne */ }
     });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (type) {
       btn.addEventListener(type, function () { btn.classList.remove("pressed"); up(); });
@@ -575,6 +771,9 @@
   }
   holdButton(btnJump, pressJump, releaseJump);
   holdButton(btnDuck, function () { input.duck = true; }, function () { input.duck = false; });
+  holdButton(btnLeft, function () { input.left = true; }, function () { input.left = false; });
+  holdButton(btnRight, function () { input.right = true; }, function () { input.right = false; });
+  holdButton(btnPounce, function () { input.pounce = true; }, function () {});
 
   canvas.addEventListener("pointerdown", function (e) {
     if (!running) return;
@@ -592,6 +791,14 @@
     } else if (k === "ArrowDown" || k === "s" || k === "S") {
       e.preventDefault();
       input.duck = true;
+    } else if (k === "ArrowLeft" || k === "a" || k === "A") {
+      e.preventDefault();
+      input.left = true;
+    } else if (k === "ArrowRight" || k === "d" || k === "D") {
+      e.preventDefault();
+      input.right = true;
+    } else if (k === "x" || k === "X" || k === "Shift") {
+      if (overlay.hidden && !e.repeat) input.pounce = true;
     } else if (k === "p" || k === "P" || k === "Escape") {
       if (overlay.hidden) pause();
     } else if (k === "Enter" && !overlay.hidden && overlayAction) {
@@ -603,7 +810,10 @@
     var k = e.key;
     if (k === " " || k === "ArrowUp" || k === "w" || k === "W") releaseJump();
     if (k === "ArrowDown" || k === "s" || k === "S") input.duck = false;
+    if (k === "ArrowLeft" || k === "a" || k === "A") input.left = false;
+    if (k === "ArrowRight" || k === "d" || k === "D") input.right = false;
   });
+  window.addEventListener("blur", releaseAll);
 
   // Ton schon beim Berühren freischalten (Safari verlangt eine direkte Nutzeraktion)
   ["pointerdown", "touchend"].forEach(function (type) {
@@ -641,14 +851,16 @@
   setupCanvas(canvas, W, H);
   var mascot = document.getElementById("mascot");
   setupCanvas(mascot, 180, 120);
-  drawCat(mascot.getContext("2d"), 100, 110, "run", 0.3, 1.6);
+  drawCat(mascot.getContext("2d"), 100, 110, { pose: "walk", phase: 0.8, t: 0, facing: 1 }, 1.6);
 
-  render(0);
+  render();
   updateHud();
   showOverlay("Katzen-Jump'n'Run",
     "<p>Hilf der roten Katze, in 5 Leveln zum Futternapf zu kommen!</p><ul>" +
+    "<li><strong>◀ ▶</strong> laufen – lange halten macht schneller</li>" +
     "<li><strong>Springen</strong> über Kisten, Töpfe und Heuballen</li>" +
-    "<li><strong>Ducken</strong> in Kartons mit Durchgang</li>" +
+    "<li><strong>Ducken</strong> und kriechen durch Kartons</li>" +
+    "<li><strong>🐾 Satz</strong> nach vorn: Mäuse fangen gibt +30</li>" +
     "<li><strong>Vögel fangen</strong> gibt +50 Punkte</li>" +
     "<li>Du hast <strong>9 Leben</strong> – wie eine echte Katze</li></ul>" +
     (highscore ? "<p>Rekord: " + highscore + " Punkte</p>" : ""),

@@ -59,13 +59,21 @@ Die Beispielgesichter sind gezeichnete Comic-Figuren; ihre Punkte stehen in
 mit einer roten Katze mit weißem Bauch:
 
 - 5 Level (Garten, Hinterhof, Park, Dächer, Nacht), jedes endet am Futternapf
+- die Katze läuft nur, wenn man ◀/▶ hält; wer lange in eine Richtung hält,
+  wird bis zu 1,5-mal schneller (Sprint mit Staubwolken und Speed-Linien)
 - über Kisten, Blumentöpfe und Heuballen **springen**, durch Kartons **ducken**
+  und dabei langsam weiterkriechen
+- **🐾 Satz**: flacher Sprung nach vorn – nur damit fängt man die flinken
+  Mäuse (**+30 Punkte**), die zwischen den Hindernissen herumflitzen und flüchten
 - Vögel kommen von oben – wer sie fängt, bekommt **+50 Punkte**
 - **9 Leben**, nach einem Treffer kurz unverwundbar; sind alle weg, startet nur
   das aktuelle Level neu
-- Steuerung: große Knöpfe „Springen“/„Ducken“ (iPad), Tippen ins Spielfeld
-  springt ebenfalls; Tastatur: Leertaste/↑ springen (länger drücken = höher),
-  ↓ ducken, P Pause
+- Steuerung auf dem iPad: links ◀ ▶, rechts 🐾 Satz, ⬇ Ducken, ⬆ Springen
+  (mehrere Finger gleichzeitig). Tastatur: ←/→ laufen, Leertaste/↑ springen
+  (länger drücken = höher), ↓ ducken, X Satz, P Pause
+- Animationen: Trab und Galopp passend zur Geschwindigkeit, Stehen mit
+  wedelndem Schwanz und Blinzeln, Satz-Pose, Stauchen bei der Landung, Sterne
+  beim Fangen
 - Rekord wird im Browser gespeichert; Geräusche (🔊) und Musik (🎵) lassen
   sich getrennt abschalten
 - entspannte Akustik-Pop-Hintergrundmusik (`js/musik.js`): eigene Komposition
@@ -98,7 +106,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für die Logik in `js/taskstore.js` (mit In-Memory-Speicher)
 - **Unit-Tests** für das Morphing in `js/morph.js` (Dreiecksnetz, Verzerrung, Überblendung)
 - **Unit-Tests** für die Gesichtspunkte in `js/face.js` (Auswahl, Zuschnitt, Vorlage)
-- **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Physik, Treffer, Vögel, Leben, Bot spielt alle Level)
+- **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Laufen, Sprint, Physik, Treffer, Mäuse, Vögel, Leben, Bot spielt alle Level)
 - **Unit-Tests** für die Musik in `js/musik.js` (Tonart, Songaufbau, Saitenklang, Offline-Aufnahme)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 

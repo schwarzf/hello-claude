@@ -15,7 +15,7 @@
       <canvas id="mascot" width="180" height="120" aria-hidden="true"></canvas>
       <div class="text">
         <h1>Katzen-Jump'n'Run</h1>
-        <p class="subtitle">Spring, duck dich, fang Vögel – und erreiche den Futternapf! · <a href="index.html">Zu den Dino-Tasks</a></p>
+        <p class="subtitle">Lauf, spring, duck dich, jag Mäuse – und erreiche den Futternapf! · <a href="index.html">Zu den Dino-Tasks</a></p>
       </div>
     </header>
 
@@ -42,10 +42,17 @@
       </div>
 
       <div class="controls">
-        <button type="button" class="control" id="btn-duck"><span>⬇</span> Ducken</button>
-        <button type="button" class="control jump" id="btn-jump"><span>⬆</span> Springen</button>
+        <div class="pad pad-move" role="group" aria-label="Laufen">
+          <button type="button" class="control move" id="btn-left" aria-label="Nach links laufen">◀</button>
+          <button type="button" class="control move" id="btn-right" aria-label="Nach rechts laufen">▶</button>
+        </div>
+        <div class="pad pad-action" role="group" aria-label="Aktionen">
+          <button type="button" class="control pounce" id="btn-pounce"><span>🐾</span> Satz</button>
+          <button type="button" class="control" id="btn-duck"><span>⬇</span> Ducken</button>
+          <button type="button" class="control jump" id="btn-jump"><span>⬆</span> Springen</button>
+        </div>
       </div>
-      <p class="keys">Tastatur: <kbd>Leertaste</kbd> oder <kbd>↑</kbd> springen (länger drücken = höher) · <kbd>↓</kbd> ducken · <kbd>P</kbd> Pause</p>
+      <p class="keys">Tastatur: <kbd>←</kbd> <kbd>→</kbd> laufen (lange halten = schneller) · <kbd>Leertaste</kbd>/<kbd>↑</kbd> springen · <kbd>↓</kbd> ducken · <kbd>X</kbd> Satz · <kbd>P</kbd> Pause</p>
     </section>
   </main>
 

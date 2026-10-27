@@ -131,9 +131,14 @@ button.small[aria-pressed="false"] { opacity: 0.45; text-decoration: line-throug
 button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
 
 /* ---------- Bildschirmknöpfe ---------- */
-.controls { display: flex; gap: 14px; margin-top: 12px; }
+.controls { display: flex; justify-content: space-between; gap: 14px; margin-top: 12px; }
+.pad { display: flex; gap: 10px; }
+.pad-move { flex: 0 0 auto; }
+.pad-action { flex: 1; max-width: 560px; }
+.pad-action .control { flex: 1; }
+.control.move { width: 110px; font-size: 2.2em; padding: 12px 0; background: #bfe3ff; }
+.control.pounce { background: #ffc2d6; }
 .control {
-  flex: 1;
   font-size: 1.6em;
   padding: 16px 10px;
   border-radius: 16px;
@@ -162,7 +167,10 @@ kbd {
   .hero canvas { width: 84px; height: 56px; }
   .game { padding: 8px; }
   .hud .lives { order: 5; flex-basis: 100%; font-size: 0.95em; }
-  .control { font-size: 1.3em; padding: 14px 6px; }
+  .controls { flex-wrap: wrap; gap: 10px; }
+  .pad { flex-basis: 100%; max-width: none; }
+  .pad-move .control { flex: 1; width: auto; }
+  .control { font-size: 1.15em; padding: 12px 4px; }
   .panel { padding: 10px 12px 12px; font-size: 0.9em; }
   .panel h2 { font-size: 1.5em; }
 }
