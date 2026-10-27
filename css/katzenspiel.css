@@ -84,7 +84,7 @@ h1 {
   overflow: hidden;
   background: var(--sky);
 }
-.stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 960 / 400; touch-action: manipulation; }
+.stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 960 / 480; touch-action: manipulation; }
 
 .overlay {
   position: absolute;
@@ -130,26 +130,51 @@ button.small { font-size: 1.1em; padding: 2px 10px; }
 button.small[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
 button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
 
-/* ---------- Bildschirmknöpfe ---------- */
-.controls { display: flex; justify-content: space-between; gap: 14px; margin-top: 12px; }
-.pad { display: flex; gap: 10px; }
-.pad-move { flex: 0 0 auto; }
-.pad-action { flex: 1; max-width: 560px; }
-.pad-action .control { flex: 1; }
-.control.move { width: 110px; font-size: 2.2em; padding: 12px 0; background: #bfe3ff; }
-.control.pounce { background: #ffc2d6; }
-.control {
-  font-size: 1.6em;
-  padding: 16px 10px;
-  border-radius: 16px;
-  background: #ffe08a;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
+/* ---------- Bildschirmknöpfe (halbtransparent im Spielfeld) ---------- */
+.stage { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.touch {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* nur die Knöpfe selbst nehmen Berührungen an */
 }
-.control.jump { background: #9be7a8; }
-.control span { display: inline-block; margin-right: 6px; }
+.touch-move, .touch-action {
+  position: absolute;
+  bottom: 3%;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(6px, 1.4%, 14px);
+}
+.touch-move { left: 2%; }
+.touch-action { right: 2%; }
+.tbtn {
+  pointer-events: auto;
+  width: clamp(48px, 9.5vw, 92px);
+  max-width: 92px;
+  aspect-ratio: 1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(43, 26, 18, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  box-shadow: none;
+  color: rgba(43, 26, 18, 0.85);
+  font-family: system-ui, sans-serif;
+  font-size: clamp(20px, 3.4vw, 34px);
+  line-height: 1;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tbtn small { font-family: "Bangers", cursive; font-size: clamp(10px, 1.3vw, 14px); letter-spacing: 0.5px; margin-top: 2px; }
+.tbtn.small-btn { width: clamp(44px, 8vw, 76px); font-size: clamp(18px, 2.8vw, 28px); }
+.tbtn.big-btn { width: clamp(56px, 11vw, 108px); max-width: 108px; background: rgba(155, 231, 168, 0.45); }
+#btn-pounce { background: rgba(255, 194, 214, 0.45); }
+.tbtn:active, .tbtn.pressed { transform: scale(0.92); background: rgba(255, 255, 255, 0.7); box-shadow: none; }
+.overlay { z-index: 2; }
 
 .keys { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 0.9em; }
 kbd {
@@ -167,10 +192,6 @@ kbd {
   .hero canvas { width: 84px; height: 56px; }
   .game { padding: 8px; }
   .hud .lives { order: 5; flex-basis: 100%; font-size: 0.95em; }
-  .controls { flex-wrap: wrap; gap: 10px; }
-  .pad { flex-basis: 100%; max-width: none; }
-  .pad-move .control { flex: 1; width: auto; }
-  .control { font-size: 1.15em; padding: 12px 4px; }
   .panel { padding: 10px 12px 12px; font-size: 0.9em; }
   .panel h2 { font-size: 1.5em; }
 }

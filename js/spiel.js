@@ -64,7 +64,7 @@
     var def = LEVELS[index];
     var rand = rng(1000 + index * 7919);
     var obstacles = [], birds = [], mice = [];
-    var x = 700, end = def.length - 450, prevEnd = 120;
+    var x = 1000, end = def.length - 450, prevEnd = 420;
 
     while (x < end) {
       // Maus in der Lücke vor dem Hindernis (sie bleibt zwischen den Hindernissen)
@@ -88,7 +88,7 @@
 
     // Vögel: in festen Abständen, in Lauf- oder Sprunghöhe
     var heights = [36, 95, 140];
-    for (var bx = 900; bx < def.length - 300; bx += Math.round(between(rand, [560, 900]))) {
+    for (var bx = 1200; bx < def.length - 300; bx += Math.round(between(rand, [560, 900]))) {
       birds.push({ x: bx, baseY: heights[Math.floor(rand() * heights.length)], phase: rand() * 6.28, caught: false });
     }
 
@@ -99,7 +99,7 @@
     return {
       level: buildLevel(levelIndex || 0),
       cat: {
-        x: 140, y: 0, vx: 0, vy: 0, facing: 1, ducking: false, onGround: true,
+        x: 480, y: 0, vx: 0, vy: 0, facing: 1, ducking: false, onGround: true,
         sinceGround: 0, jumpBuffer: 0, held: 0, heldDir: 0, pouncing: false, pounceCooldown: 0, distance: 0
       },
       lives: lives === undefined ? START_LIVES : lives,

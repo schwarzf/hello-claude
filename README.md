@@ -118,6 +118,13 @@ wiederhergestellt. Wird `test.html` direkt als Datei (`file://`) geöffnet,
 blockieren manche Browser den Zugriff auf das iframe – dann laufen nur die
 Unit-Tests und die UI-Tests werden mit einem Hinweis übersprungen.
 
+## Hinweis zum Zwischenspeicher
+
+GitHub Pages lässt Browser Dateien bis zu 10 Minuten zwischenspeichern. Damit
+nach einer Änderung nicht alte Skripte mit neuen Seiten gemischt werden, hängen
+alle CSS- und JS-Adressen eine Versionsnummer an (`?v=…`). Bei Änderungen an
+CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
+
 ## Dateien
 
 | Datei | Inhalt |

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
-  <link rel="stylesheet" href="css/katzenspiel.css">
+  <link rel="stylesheet" href="css/katzenspiel.css?v=202610271915">
 </head>
 <body>
   <main>
@@ -31,7 +31,18 @@
       <div class="progress" aria-hidden="true"><div id="hud-progress"></div><span>🥣</span></div>
 
       <div class="stage">
-        <canvas id="game" width="960" height="400"></canvas>
+        <canvas id="game" width="960" height="480"></canvas>
+        <div class="touch" aria-label="Steuerung">
+          <div class="touch-move" role="group" aria-label="Laufen">
+            <button type="button" class="tbtn" id="btn-left" aria-label="Nach links laufen">◀</button>
+            <button type="button" class="tbtn" id="btn-right" aria-label="Nach rechts laufen">▶</button>
+          </div>
+          <div class="touch-action" role="group" aria-label="Aktionen">
+            <button type="button" class="tbtn small-btn" id="btn-pounce" aria-label="Satz nach vorn">🐾<small>Satz</small></button>
+            <button type="button" class="tbtn small-btn" id="btn-duck" aria-label="Ducken">⬇<small>Ducken</small></button>
+            <button type="button" class="tbtn big-btn" id="btn-jump" aria-label="Springen">⬆<small>Springen</small></button>
+          </div>
+        </div>
         <div class="overlay" id="overlay">
           <div class="panel">
             <h2 id="overlay-title">Katzen-Jump'n'Run</h2>
@@ -41,23 +52,12 @@
         </div>
       </div>
 
-      <div class="controls">
-        <div class="pad pad-move" role="group" aria-label="Laufen">
-          <button type="button" class="control move" id="btn-left" aria-label="Nach links laufen">◀</button>
-          <button type="button" class="control move" id="btn-right" aria-label="Nach rechts laufen">▶</button>
-        </div>
-        <div class="pad pad-action" role="group" aria-label="Aktionen">
-          <button type="button" class="control pounce" id="btn-pounce"><span>🐾</span> Satz</button>
-          <button type="button" class="control" id="btn-duck"><span>⬇</span> Ducken</button>
-          <button type="button" class="control jump" id="btn-jump"><span>⬆</span> Springen</button>
-        </div>
-      </div>
       <p class="keys">Tastatur: <kbd>←</kbd> <kbd>→</kbd> laufen (lange halten = schneller) · <kbd>Leertaste</kbd>/<kbd>↑</kbd> springen · <kbd>↓</kbd> ducken · <kbd>X</kbd> Satz · <kbd>P</kbd> Pause</p>
     </section>
   </main>
 
-  <script src="js/spiel.js"></script>
-  <script src="js/musik.js"></script>
-  <script src="js/katzenspiel.js"></script>
+  <script src="js/spiel.js?v=202610271915"></script>
+  <script src="js/musik.js?v=202610271915"></script>
+  <script src="js/katzenspiel.js?v=202610271915"></script>
 </body>
 </html>

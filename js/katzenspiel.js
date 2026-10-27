@@ -6,7 +6,7 @@
   "use strict";
 
   var K = KatzenSpiel;
-  var W = 960, H = 400, GROUND = 330, STEP = 1 / 120;
+  var W = 960, H = 480, GROUND = 380, STEP = 1 / 120;
   var INK = "#2b1a12";
 
   var THEMES = [
@@ -549,9 +549,9 @@
       if (anim.dust <= 0) { spawn("dust", cat.x - cat.facing * 26, 2, 1); anim.dust = 0.05; }
     }
     updateParticles(dt);
-    // Kamera schaut etwas in Laufrichtung voraus
-    var target = cat.x - (cat.facing > 0 ? 320 : 640);
-    camX += (target - camX) * Math.min(1, dt * 2.5);
+    // Kamera hält die Katze in der Bildmitte
+    var target = cat.x - W / 2;
+    camX += (target - camX) * Math.min(1, dt * 10);
     camX = Math.max(0, Math.min(game.level.length + 200 - W, camX));
   }
 
@@ -670,7 +670,7 @@
 
   function levelIntro(index, score, lives) {
     game = K.createGame(index, score, lives);
-    camX = 0;
+    camX = Math.max(0, game.cat.x - W / 2);
     particles = [];
     anim.squash = 0;
     var def = K.LEVELS[index];
@@ -754,7 +754,7 @@
   function releaseJump() { input.jumpHeld = false; }
   function releaseAll() {
     input.left = input.right = input.duck = input.jumpHeld = false;
-    Array.prototype.forEach.call(document.querySelectorAll(".control.pressed"), function (b) { b.classList.remove("pressed"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".tbtn.pressed"), function (b) { b.classList.remove("pressed"); });
   }
 
   function holdButton(btn, down, up) {
@@ -775,12 +775,10 @@
   holdButton(btnRight, function () { input.right = true; }, function () { input.right = false; });
   holdButton(btnPounce, function () { input.pounce = true; }, function () {});
 
-  canvas.addEventListener("pointerdown", function (e) {
-    if (!running) return;
-    e.preventDefault();
-    pressJump();
-  });
-  canvas.addEventListener("pointerup", releaseJump);
+  // Doppeltipp-Zoom und Textauswahl auf den Knöpfen verhindern (iPad)
+  document.querySelector(".touch").addEventListener("touchstart", function (e) {
+    if (e.target.closest(".tbtn")) e.preventDefault();
+  }, { passive: false });
 
   document.addEventListener("keydown", function (e) {
     var k = e.key;
