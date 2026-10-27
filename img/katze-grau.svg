@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Beispielkatze 2: graue Katze mit spitzen Ohren und blauen Augen -->
+  <rect width="512" height="512" fill="#e3d7f7"/>
+  <g fill="#d2c3ef">
+    <circle cx="60" cy="460" r="70"/>
+    <circle cx="470" cy="60" r="50"/>
+  </g>
+  <g stroke="#2b2b3a" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M256 530 Q140 530 150 460 Q256 420 362 460 Q372 530 256 530 Z" fill="#8a8fa3"/>
+    <path d="M120 40 L210 175 Q256 165 302 175 L392 40 L390 220 Q395 280 372 332 Q340 442 256 442 Q172 442 140 332 Q117 280 122 220 Z" fill="#9aa0b5"/>
+    <path d="M140 86 L190 170 L140 196 Z" fill="#f4c2d7" stroke-width="4"/>
+    <path d="M372 86 L322 170 L372 196 Z" fill="#f4c2d7" stroke-width="4"/>
+  </g>
+  <path d="M256 180 L222 260 Q196 340 210 400 Q256 452 302 400 Q316 340 290 260 Z" fill="#ffffff"/>
+  <g stroke="#2b2b3a" stroke-width="5">
+    <path d="M168 250 Q200 222 232 250 Q200 278 168 250 Z" fill="#6cc3f0"/>
+    <path d="M280 250 Q312 222 344 250 Q312 278 280 250 Z" fill="#6cc3f0"/>
+  </g>
+  <ellipse cx="200" cy="250" rx="6" ry="15" fill="#1d1d1d"/>
+  <ellipse cx="312" cy="250" rx="6" ry="15" fill="#1d1d1d"/>
+  <circle cx="206" cy="243" r="4" fill="#fff"/>
+  <circle cx="318" cy="243" r="4" fill="#fff"/>
+  <path d="M244 312 L268 312 L256 326 Z" fill="#e88aa8" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M256 326 L256 340 M256 340 Q244 356 232 346 M256 340 Q268 356 280 346" fill="none" stroke="#2b2b3a" stroke-width="5" stroke-linecap="round"/>
+  <g stroke="#2b2b3a" stroke-width="3" stroke-linecap="round">
+    <path d="M220 334 L110 318 M220 344 L108 354 M220 354 L118 388"/>
+    <path d="M292 334 L402 318 M292 344 L404 354 M292 354 L394 388"/>
+  </g>
+</svg>

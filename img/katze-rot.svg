@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Beispielkatze 1: rote Tigerkatze mit rundem Gesicht -->
+  <rect width="512" height="512" fill="#bfe6f5"/>
+  <circle cx="420" cy="90" r="40" fill="#fff6c9"/>
+  <g stroke="#3b2a1a" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M256 520 Q120 520 110 440 Q240 400 402 440 Q392 520 256 520 Z" fill="#f08a3c"/>
+    <path d="M150 72 L205 160 Q256 145 307 160 L362 72 L398 205 Q430 262 402 322 Q372 412 256 412 Q140 412 110 322 Q82 262 114 205 Z" fill="#f59a4a"/>
+    <path d="M162 104 L192 160 L148 182 Z" fill="#ffb3c1" stroke-width="4"/>
+    <path d="M350 104 L320 160 L364 182 Z" fill="#ffb3c1" stroke-width="4"/>
+  </g>
+  <g fill="#c8612a">
+    <path d="M226 160 L236 205 L246 160 Z"/>
+    <path d="M250 154 L256 212 L262 154 Z"/>
+    <path d="M266 160 L276 205 L286 160 Z"/>
+    <path d="M115 270 L160 280 L118 290 Z"/>
+    <path d="M397 270 L352 280 L394 290 Z"/>
+  </g>
+  <ellipse cx="256" cy="345" rx="70" ry="50" fill="#fde3c8"/>
+  <g stroke="#3b2a1a" stroke-width="5">
+    <ellipse cx="195" cy="235" rx="30" ry="34" fill="#8bd16a"/>
+    <ellipse cx="317" cy="235" rx="30" ry="34" fill="#8bd16a"/>
+  </g>
+  <ellipse cx="195" cy="238" rx="11" ry="24" fill="#1d1d1d"/>
+  <ellipse cx="317" cy="238" rx="11" ry="24" fill="#1d1d1d"/>
+  <circle cx="203" cy="222" r="6" fill="#fff"/>
+  <circle cx="325" cy="222" r="6" fill="#fff"/>
+  <path d="M240 292 L272 292 L256 310 Z" fill="#ff7f9a" stroke="#3b2a1a" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M256 310 L256 326 M256 326 Q240 344 224 332 M256 326 Q272 344 288 332" fill="none" stroke="#3b2a1a" stroke-width="5" stroke-linecap="round"/>
+  <g stroke="#3b2a1a" stroke-width="3" stroke-linecap="round">
+    <path d="M200 320 L80 300 M200 332 L78 336 M200 344 L86 372"/>
+    <path d="M312 320 L432 300 M312 332 L434 336 M312 344 L426 372"/>
+  </g>
+</svg>

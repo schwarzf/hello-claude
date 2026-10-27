@@ -19,7 +19,7 @@
       <div class="text">
         <p class="bubble">Ich prüfe alles mit meinen Ärmchen!</p>
         <h1>Dino-Tests</h1>
-        <p class="subtitle">Unit-Tests für den TaskStore und UI-Tests gegen <a href="index.html">index.html</a>. Deine echten Tasks werden dabei nicht verändert.</p>
+        <p class="subtitle">Unit-Tests für den TaskStore und das Katzen-Morphing sowie UI-Tests gegen <a href="index.html">index.html</a> und <a href="katzen.html">katzen.html</a>. Deine echten Tasks werden dabei nicht verändert.</p>
       </div>
     </header>
 
@@ -34,7 +34,12 @@
     </section>
 
     <section class="card">
-      <h2>UI-Tests (index.html)</h2>
+      <h2>Unit-Tests (Katzen-Morphing)</h2>
+      <ul class="results" id="morph-results"></ul>
+    </section>
+
+    <section class="card">
+      <h2>UI-Tests (index.html &amp; katzen.html)</h2>
       <ul class="results" id="ui-results"></ul>
       <p class="stats">Testinstanz der Oberfläche:</p>
       <iframe id="app-frame" title="Taskverwaltung im Testmodus"></iframe>
@@ -42,6 +47,7 @@
   </main>
 
   <script src="js/taskstore.js"></script>
+  <script src="js/morph.js"></script>
   <script src="js/tests.js"></script>
 </body>
 </html>

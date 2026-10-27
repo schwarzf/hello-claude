@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140">
+  <!-- Hintergrundkachel mit zwei Pfotenabdrücken -->
+  <defs>
+    <g id="pfote" fill="#efd9f7">
+      <ellipse cx="20" cy="26" rx="10" ry="8.5"/>
+      <ellipse cx="8" cy="13" rx="4" ry="5"/>
+      <ellipse cx="16" cy="6" rx="4" ry="5"/>
+      <ellipse cx="25" cy="6" rx="4" ry="5"/>
+      <ellipse cx="33" cy="13" rx="4" ry="5"/>
+    </g>
+  </defs>
+  <use href="#pfote" transform="translate(16 20) rotate(-18 20 20)"/>
+  <use href="#pfote" transform="translate(84 88) rotate(20 20 20)"/>
+</svg>

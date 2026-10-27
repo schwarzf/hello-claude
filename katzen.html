@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Katzen-Morphing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/katzen.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <img src="img/katze.svg" alt="Comic-Katze">
+      <div class="text">
+        <p class="bubble">Miau! Zeig mir zwei Katzen – ich mische sie!</p>
+        <h1>Katzen-Morphing</h1>
+        <p class="subtitle">Deine Fotos bleiben auf deinem Gerät, es wird nichts hochgeladen. · <a href="index.html">Zu den Dino-Tasks</a></p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>1. Zwei Katzenfotos wählen</h2>
+      <p class="hint">Am besten funktionieren Fotos, auf denen die Katze frontal in die Kamera schaut.</p>
+      <div class="slots">
+        <div class="slot" data-slot="0">
+          <h3>Katze 1</h3>
+          <div class="editor" aria-label="Katze 1 mit Merkmalspunkten">
+            <canvas width="512" height="512"></canvas>
+            <div class="markers"></div>
+            <div class="placeholder">🐱<span>Noch kein Foto</span></div>
+          </div>
+          <label class="button">Foto wählen<input type="file" accept="image/*" hidden></label>
+        </div>
+        <div class="slot" data-slot="1">
+          <h3>Katze 2</h3>
+          <div class="editor" aria-label="Katze 2 mit Merkmalspunkten">
+            <canvas width="512" height="512"></canvas>
+            <div class="markers"></div>
+            <div class="placeholder">🐈<span>Noch kein Foto</span></div>
+          </div>
+          <label class="button">Foto wählen<input type="file" accept="image/*" hidden></label>
+        </div>
+      </div>
+      <p class="center"><button type="button" id="load-demo">Beispielkatzen laden</button></p>
+      <p class="error" id="error" role="alert"></p>
+    </section>
+
+    <section class="card">
+      <h2>2. Punkte setzen</h2>
+      <p class="hint">Ziehe die nummerierten Punkte bei <strong>beiden</strong> Katzen auf dieselben Stellen. Oder wähle einen Punkt in der Liste und tippe dann ins Foto.</p>
+      <ol class="legend" id="legend"></ol>
+      <p class="center"><button type="button" id="reset-points">Punkte zurücksetzen</button></p>
+    </section>
+
+    <section class="card">
+      <h2>3. Mischen!</h2>
+      <div class="result">
+        <canvas id="result" width="512" height="512"></canvas>
+        <div class="placeholder" id="result-placeholder">😺<span>Erst zwei Fotos wählen</span></div>
+      </div>
+      <div class="mix">
+        <span>Katze 1</span>
+        <input type="range" id="mix" min="0" max="100" value="50" aria-label="Mischverhältnis">
+        <span>Katze 2</span>
+      </div>
+      <p class="center mix-value" id="mix-value">50 % Katze 1 · 50 % Katze 2</p>
+      <p class="center actions">
+        <button type="button" id="animate" class="primary">▶ Animation</button>
+        <button type="button" id="download">Bild speichern</button>
+        <label class="toggle"><input type="checkbox" id="show-mesh"> Dreiecksnetz zeigen</label>
+      </p>
+    </section>
+  </main>
+
+  <script src="js/morph.js"></script>
+  <script src="js/katzen.js"></script>
+</body>
+</html>

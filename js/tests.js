@@ -124,16 +124,127 @@
     }]
   ];
 
+  // ---------- Unit-Tests Katzen-Morphing ----------
+
+  function area(tri) {
+    return Math.abs((tri[1].x - tri[0].x) * (tri[2].y - tri[0].y) - (tri[2].x - tri[0].x) * (tri[1].y - tri[0].y)) / 2;
+  }
+  function near(a, b, eps) { return Math.abs(a - b) < (eps || 1e-6); }
+  function solidCanvas(color) {
+    var c = document.createElement("canvas");
+    c.width = c.height = 64;
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 64, 64);
+    return c;
+  }
+  function pixel(ctx, x, y) { return Array.prototype.slice.call(ctx.getImageData(x, y, 1, 1).data); }
+
+  var morphTests = [
+    ["Quadrat wird in zwei Dreiecke zerlegt", function () {
+      var tris = CatMorph.triangulate([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }]);
+      assertEqual(tris.length, 2);
+    }],
+    ["Dreiecksnetz deckt das ganze Bild ab", function () {
+      var pts = CatMorph.defaultPoints(512, 512).concat(CatMorph.borderPoints(512, 512));
+      var tris = CatMorph.triangulate(pts);
+      var sum = tris.reduce(function (acc, t) { return acc + area([pts[t[0]], pts[t[1]], pts[t[2]]]); }, 0);
+      assert(near(sum, 512 * 512, 1e-3), "Fläche " + sum);
+      assertEqual(tris.length, 2 * pts.length - 2 - 8, "Anzahl Dreiecke");
+    }],
+    ["Delaunay: kein Punkt liegt im Umkreis eines Dreiecks", function () {
+      var pts = CatMorph.defaultPoints(512, 512).concat(CatMorph.borderPoints(512, 512));
+      CatMorph.triangulate(pts).forEach(function (t) {
+        var a = pts[t[0]], b = pts[t[1]], c = pts[t[2]];
+        var d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
+        var ux = ((a.x * a.x + a.y * a.y) * (b.y - c.y) + (b.x * b.x + b.y * b.y) * (c.y - a.y) + (c.x * c.x + c.y * c.y) * (a.y - b.y)) / d;
+        var uy = ((a.x * a.x + a.y * a.y) * (c.x - b.x) + (b.x * b.x + b.y * b.y) * (a.x - c.x) + (c.x * c.x + c.y * c.y) * (b.x - a.x)) / d;
+        var r2 = (a.x - ux) * (a.x - ux) + (a.y - uy) * (a.y - uy);
+        pts.forEach(function (p, i) {
+          if (t.indexOf(i) !== -1) return;
+          assert((p.x - ux) * (p.x - ux) + (p.y - uy) * (p.y - uy) >= r2 - 1e-6, "Punkt " + i + " im Umkreis");
+        });
+      });
+    }],
+    ["Affine Abbildung trifft alle drei Eckpunkte", function () {
+      var src = [{ x: 0, y: 0 }, { x: 100, y: 10 }, { x: 20, y: 80 }];
+      var dst = [{ x: 50, y: 40 }, { x: 160, y: 30 }, { x: 70, y: 150 }];
+      var m = CatMorph.affineFromTriangles(src, dst);
+      src.forEach(function (p, i) {
+        var q = CatMorph.applyAffine(m, p);
+        assert(near(q.x, dst[i].x) && near(q.y, dst[i].y), "Ecke " + i);
+      });
+      assertEqual(CatMorph.affineFromTriangles([{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }], dst), null, "entartetes Dreieck");
+    }],
+    ["Zwischenpunkte werden linear interpoliert", function () {
+      var a = [{ x: 0, y: 0 }], b = [{ x: 10, y: 20 }];
+      assertEqual(CatMorph.lerpPoints(a, b, 0), a);
+      assertEqual(CatMorph.lerpPoints(a, b, 1), b);
+      assertEqual(CatMorph.lerpPoints(a, b, 0.5), [{ x: 5, y: 10 }]);
+    }],
+    ["Dreiecke werden gegen Haarlinien leicht vergrößert", function () {
+      var tri = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 0, y: 10 }];
+      assert(area(CatMorph.expandTriangle(tri, 1)) > area(tri));
+    }],
+    ["Morph: 0 % = Katze 1, 100 % = Katze 2, 50 % = Mischung", function () {
+      var out = document.createElement("canvas");
+      out.width = out.height = 64;
+      var ctx = out.getContext("2d");
+      var pts = CatMorph.defaultPoints(64, 64);
+      var opts = {
+        imageA: solidCanvas("#ff0000"), imageB: solidCanvas("#0000ff"),
+        pointsA: pts, pointsB: pts,
+        bufferA: document.createElement("canvas"), bufferB: document.createElement("canvas")
+      };
+      opts.t = 0; CatMorph.morph(ctx, opts);
+      assertEqual(pixel(ctx, 32, 32), [255, 0, 0, 255]);
+      opts.t = 1; CatMorph.morph(ctx, opts);
+      assertEqual(pixel(ctx, 32, 32), [0, 0, 255, 255]);
+      opts.t = 0.5; CatMorph.morph(ctx, opts);
+      var p = pixel(ctx, 32, 32);
+      assert(near(p[0], 127, 3) && near(p[2], 127, 3) && p[3] === 255, "erhalten " + p);
+    }],
+    ["Verzerrung verschiebt Bildinhalte mit den Punkten", function () {
+      // Linke Hälfte rot: Wird der Mittelpunkt der Kante nach rechts gezogen, wandert die Kante mit.
+      var a = document.createElement("canvas");
+      a.width = a.height = 64;
+      var actx = a.getContext("2d");
+      actx.fillStyle = "#fff"; actx.fillRect(0, 0, 64, 64);
+      actx.fillStyle = "#f00"; actx.fillRect(0, 0, 32, 64);
+      var out = document.createElement("canvas");
+      out.width = out.height = 64;
+      var ctx = out.getContext("2d");
+      var border = CatMorph.borderPoints(64, 64);
+      var src = [{ x: 32, y: 32 }].concat(border), dst = [{ x: 48, y: 32 }].concat(border);
+      CatMorph.warp(ctx, a, src, dst, CatMorph.triangulate(dst));
+      assertEqual(pixel(ctx, 40, 32).slice(0, 3), [255, 0, 0], "Pixel bei x=40 jetzt rot");
+      assertEqual(pixel(ctx, 56, 32).slice(0, 3), [255, 255, 255], "Pixel bei x=56 weiß");
+    }]
+  ];
+
   // ---------- UI-Tests ----------
 
   var frame = document.getElementById("app-frame");
   var TEST_KEY = "hello-claude.tasks";
   var savedTasks = null;
 
-  function loadApp() {
+  function loadApp(page) {
     return new Promise(function (resolve) {
       frame.onload = function () { resolve(frame.contentWindow); };
-      frame.src = "index.html?t=" + Date.now();
+      frame.src = (page || "index.html") + "?t=" + Date.now();
+    });
+  }
+
+  function waitFor(cond, ms) {
+    var until = Date.now() + (ms || 3000);
+    return new Promise(function (resolve, reject) {
+      (function check() {
+        var v;
+        try { v = cond(); } catch (e) { v = false; }
+        if (v) return resolve(v);
+        if (Date.now() > until) return reject(new Error("Zeitüberschreitung"));
+        setTimeout(check, 50);
+      })();
     });
   }
 
@@ -216,6 +327,26 @@
       addViaForm(win, "Bleibt erhalten");
       return loadApp().then(function (w) {
         assertEqual(visibleTitles(w.document), ["Bleibt erhalten"]);
+        assert(w.document.querySelector('a[href="katzen.html"]'), "Link zur Katzenseite fehlt");
+      });
+    }],
+    ["Katzenseite: Beispielkatzen laden und mischen", function () {
+      return loadApp("katzen.html").then(function (w) {
+        var doc = w.document;
+        assert(doc.getElementById("download").disabled, "Speichern ohne Fotos deaktiviert");
+        doc.getElementById("load-demo").click();
+        return waitFor(function () { return !doc.getElementById("download").disabled; }).then(function () {
+          assertEqual(doc.querySelectorAll(".slot.has-image").length, 2);
+          assertEqual(doc.querySelectorAll(".slot .marker").length, 20, "10 Punkte je Katze");
+          var mix = doc.getElementById("mix");
+          mix.value = "0";
+          mix.dispatchEvent(new w.Event("input", { bubbles: true }));
+          return waitFor(function () { return doc.getElementById("mix-value").textContent.indexOf("100 % Katze 1") === 0; });
+        }).then(function () {
+          // Hintergrundfarbe der roten Beispielkatze (oben links) muss im Ergebnis stehen
+          var p = pixel(doc.getElementById("result").getContext("2d"), 5, 5);
+          assertEqual(p.slice(0, 3), [191, 230, 245], "Pixel oben links");
+        });
       });
     }]
   ];
@@ -247,9 +378,11 @@
 
   function run() {
     var unitList = document.getElementById("unit-results");
+    var morphList = document.getElementById("morph-results");
     var uiList = document.getElementById("ui-results");
     var summary = document.getElementById("summary");
     unitList.innerHTML = "";
+    morphList.innerHTML = "";
     uiList.innerHTML = "";
     summary.className = "test-summary";
     summary.textContent = "Tests laufen …";
@@ -258,6 +391,10 @@
     unitTests.forEach(function (t) {
       try { t[1](); passed++; report(unitList, t[0]); }
       catch (e) { failed++; report(unitList, t[0], e); }
+    });
+    morphTests.forEach(function (t) {
+      try { t[1](); passed++; report(morphList, t[0]); }
+      catch (e) { failed++; report(morphList, t[0], e); }
     });
 
     // UI-Tests nutzen den echten localStorage → vorher sichern, danach wiederherstellen.

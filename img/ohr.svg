@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 36">
+  <!-- Katzenohr als Deko oben auf den Karten; unten offen, damit es am Kartenrand ansetzt -->
+  <path d="M2 36 L22 3 Q26 -1 30 3 L58 36 Z" fill="#c9a7f0"/>
+  <path d="M2 36 L22 3 Q26 -1 30 3 L58 36" fill="none" stroke="#3a2e4a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M16 36 L26 14 L42 36 Z" fill="#ffb3c8"/>
+</svg>

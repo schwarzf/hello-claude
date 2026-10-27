@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" role="img" aria-label="Comic-Katze">
+  <!-- Maskottchen der Katzen-Seite -->
+  <g stroke="#3a2e4a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M150 150 Q196 140 186 96 Q182 80 170 84" fill="none" stroke-width="12"/>
+    <path d="M150 150 Q196 140 186 96 Q182 80 170 84" fill="none" stroke="#c9a7f0" stroke-width="5"/>
+    <path d="M44 14 L72 52 Q100 44 128 52 L156 14 L162 76 Q170 128 100 134 Q30 128 38 76 Z" fill="#c9a7f0"/>
+    <path d="M52 34 L66 54 L48 62 Z" fill="#ffb3c8" stroke-width="3"/>
+    <path d="M148 34 L134 54 L152 62 Z" fill="#ffb3c8" stroke-width="3"/>
+    <path d="M60 128 Q60 172 100 172 Q140 172 140 128" fill="#c9a7f0"/>
+  </g>
+  <g fill="#3a2e4a">
+    <ellipse cx="76" cy="84" rx="9" ry="12"/>
+    <ellipse cx="124" cy="84" rx="9" ry="12"/>
+  </g>
+  <circle cx="79" cy="79" r="3.5" fill="#fff"/>
+  <circle cx="127" cy="79" r="3.5" fill="#fff"/>
+  <ellipse cx="62" cy="104" rx="8" ry="5" fill="#ff8fb1" opacity="0.8"/>
+  <ellipse cx="138" cy="104" rx="8" ry="5" fill="#ff8fb1" opacity="0.8"/>
+  <path d="M94 98 L106 98 L100 105 Z" fill="#ff6f9c" stroke="#3a2e4a" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M100 105 Q93 115 86 109 M100 105 Q107 115 114 109" fill="none" stroke="#3a2e4a" stroke-width="3" stroke-linecap="round"/>
+  <g stroke="#3a2e4a" stroke-width="2.5" stroke-linecap="round">
+    <path d="M58 96 L24 90 M58 104 L22 108"/>
+    <path d="M142 96 L176 90 M142 104 L178 108"/>
+  </g>
+</svg>
