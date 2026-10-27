@@ -655,20 +655,6 @@
     "Los geht's!", function () { musicPlay(); levelIntro(0, 0); });
   updateMusicButton();
 
-  // Audio-Test: katzenspiel.html#audiotest zeigt den Zustand und spielt Testtöne
-  if (location.hash === "#audiotest") {
-    var box = document.createElement("div");
-    box.className = "audiotest";
-    box.innerHTML = '<button type="button" id="at-beep">Testton</button> <button type="button" id="at-music">Musik starten</button> <span id="at-info"></span>';
-    document.querySelector(".game").appendChild(box);
-    document.getElementById("at-beep").addEventListener("click", function () { beep(660, 0.4, "sine"); });
-    document.getElementById("at-music").addEventListener("click", function () { musicOn = true; updateMusicButton(); Musik.start(); });
-    setInterval(function () {
-      var d = Musik.diagnose();
-      document.getElementById("at-info").textContent = Object.keys(d).map(function (k) { return k + ": " + d[k]; }).join(" · ");
-    }, 300);
-  }
-
   // für Tests
   window.katzenspiel = { get game() { return game; }, input: input };
   requestAnimationFrame(frame);

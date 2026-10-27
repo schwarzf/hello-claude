@@ -422,15 +422,6 @@
     start: start,
     unlock: unlock,
     getContext: getContext,
-    diagnose: function () {
-      return {
-        kontext: ctx ? ctx.state : "keiner",
-        abtastrate: ctx ? ctx.sampleRate : 0,
-        zeit: ctx ? Math.round(ctx.currentTime * 10) / 10 : 0,
-        sitzung: global.navigator && global.navigator.audioSession ? global.navigator.audioSession.type : "–",
-        musik: playing ? (wanted ? "läuft" : "pausiert") : "aus"
-      };
-    },
     pause: pause,
     resume: resume,
     stop: stop,
