@@ -31,6 +31,7 @@
   var btnDuck = document.getElementById("btn-duck");
   var btnPause = document.getElementById("btn-pause");
   var btnSound = document.getElementById("btn-sound");
+  var btnMusic = document.getElementById("btn-music");
 
   var game = K.createGame(0);
   var input = { jump: false, jumpHeld: false, duck: false };
@@ -60,6 +61,16 @@
   // ---------- Ton (kleine Pieptöne per Web Audio) ----------
 
   var audio = null, soundOn = true;
+
+  // Hintergrundmusik (js/musik.js); die Einstellung bleibt im Browser gespeichert
+  var musicOn = true;
+  try { musicOn = localStorage.getItem("katzenspiel.musik") !== "aus"; } catch (e) { /* Standard: an */ }
+  function updateMusicButton() {
+    btnMusic.setAttribute("aria-pressed", String(musicOn));
+    btnMusic.title = musicOn ? "Musik ausschalten" : "Musik einschalten";
+  }
+  function musicPlay() { if (musicOn && window.Musik) Musik.start(); }
+  function musicPause() { if (window.Musik) Musik.pause(); }
   function beep(freq, duration, type, slide) {
     if (!soundOn) return;
     try {
@@ -464,6 +475,7 @@
   }
 
   function hideOverlay() {
+    musicPlay();
     overlay.hidden = true;
     running = true;
     paused = false;
@@ -537,6 +549,7 @@
     if (!running) return;
     showOverlay("Pause", "<p>Kurz durchatmen …</p>", "Weiterspielen", hideOverlay);
     paused = true;
+    musicPause();
     btnPause.textContent = "▶";
   }
 
@@ -596,12 +609,23 @@
     if (paused) hideOverlay();
     else pause();
   });
+  btnMusic.addEventListener("click", function () {
+    musicOn = !musicOn;
+    try { localStorage.setItem("katzenspiel.musik", musicOn ? "an" : "aus"); } catch (e) { /* egal */ }
+    updateMusicButton();
+    if (!window.Musik) return;
+    if (!musicOn) Musik.stop();
+    else if (!paused) Musik.start();
+  });
   btnSound.addEventListener("click", function () {
     soundOn = !soundOn;
     btnSound.textContent = soundOn ? "🔊" : "🔇";
   });
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden) pause();
+    if (document.hidden) {
+      pause();
+      musicPause();
+    }
   });
 
   // ---------- Start ----------
@@ -620,7 +644,8 @@
     "<li><strong>Vögel fangen</strong> gibt +50 Punkte</li>" +
     "<li>Du hast <strong>9 Leben</strong> – wie eine echte Katze</li></ul>" +
     (highscore ? "<p>Rekord: " + highscore + " Punkte</p>" : ""),
-    "Los geht's!", function () { levelIntro(0, 0); });
+    "Los geht's!", function () { musicPlay(); levelIntro(0, 0); });
+  updateMusicButton();
 
   // für Tests
   window.katzenspiel = { get game() { return game; }, input: input };

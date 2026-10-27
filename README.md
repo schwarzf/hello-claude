@@ -66,7 +66,13 @@ mit einer roten Katze mit weißem Bauch:
 - Steuerung: große Knöpfe „Springen“/„Ducken“ (iPad), Tippen ins Spielfeld
   springt ebenfalls; Tastatur: Leertaste/↑ springen (länger drücken = höher),
   ↓ ducken, P Pause
-- Rekord wird im Browser gespeichert; Ton lässt sich abschalten
+- Rekord wird im Browser gespeichert; Geräusche (🔊) und Musik (🎵) lassen
+  sich getrennt abschalten
+- entspannte Akustik-Pop-Hintergrundmusik (`js/musik.js`): eigene Komposition
+  in G-Dur mit 92 BPM – gezupfte bzw. geschlagene Akustikgitarre (Karplus-Strong),
+  Bass, weicher Beat, Flächenklang und eine Refrain-Melodie. Sie wird live per
+  Web Audio erzeugt, es gibt keine Audiodateien. Auf dem iPad/iPhone ist sie nur
+  zu hören, wenn der Stummschalter aus ist.
 
 Die Spielregeln (`js/spiel.js`) sind vom Zeichnen (`js/katzenspiel.js`)
 getrennt. Ein Test lässt einen Bot alle Level durchspielen und prüft so, dass
@@ -91,6 +97,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für das Morphing in `js/morph.js` (Dreiecksnetz, Verzerrung, Überblendung)
 - **Unit-Tests** für die Gesichtspunkte in `js/face.js` (Auswahl, Zuschnitt, Vorlage)
 - **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Physik, Treffer, Vögel, Leben, Bot spielt alle Level)
+- **Unit-Tests** für die Musik in `js/musik.js` (Tonart, Songaufbau, Saitenklang, Offline-Aufnahme)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
@@ -119,6 +126,7 @@ Unit-Tests und die UI-Tests werden mit einem Hinweis übersprungen.
 | `js/gesichter-demo.js` | Punkte der Beispielgesichter |
 | `js/spiel.js` | Spielregeln des Jump'n'Run (Physik, Level, Treffer) |
 | `js/katzenspiel.js` | Zeichnen, Steuerung und Ablauf des Spiels |
+| `js/musik.js` | Hintergrundmusik des Spiels (Web Audio) |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |

@@ -357,6 +357,39 @@
     }]
   ];
 
+  // ---------- Unit-Tests Musik ----------
+
+  var musicTests = [
+    ["Melodie bleibt in G-Dur", function () {
+      var scale = [7, 9, 11, 0, 2, 4, 6]; // G A H C D E Fis
+      Musik.MELODY.forEach(function (m) { assert(scale.indexOf(m[1] % 12) !== -1, "Ton " + m[1]); });
+      Musik.MELODY.forEach(function (m) { assert(m[0] >= 0 && m[0] + m[2] <= 8 * 16, "innerhalb von 8 Takten"); });
+    }],
+    ["Songteile nutzen nur bekannte Akkorde", function () {
+      Musik.SECTIONS.forEach(function (sec) {
+        sec.chords.forEach(function (c) { assert(Musik.CHORDS[c], sec.name + ": " + c); });
+        if (sec.melody) assertEqual(sec.chords.length, 8, sec.name + " passt zur Melodie");
+      });
+    }],
+    ["Gezupfte Saite klingt ab und bleibt im Wertebereich", function () {
+      var d = Musik.makePluck(44100, 196, 1.5, 1);
+      var early = 0, late = 0;
+      for (var i = 0; i < 4410; i++) early += Math.abs(d[i]);
+      for (var j = d.length - 4410; j < d.length; j++) late += Math.abs(d[j]);
+      assert(late < early * 0.5, "klingt ab");
+      for (var k = 0; k < d.length; k++) assert(isFinite(d[k]) && Math.abs(d[k]) <= 1, "Wertebereich");
+    }],
+    ["Musik ist hörbar, aber nicht übersteuert", function () {
+      return Musik.render(6, 22050).then(function (buf) {
+        var d = buf.getChannelData(0), peak = 0, sum = 0;
+        for (var i = 0; i < d.length; i++) { peak = Math.max(peak, Math.abs(d[i])); sum += d[i] * d[i]; }
+        var rms = Math.sqrt(sum / d.length);
+        assert(rms > 0.01, "hörbar (RMS " + rms.toFixed(3) + ")");
+        assert(peak < 0.95, "nicht übersteuert (Spitze " + peak.toFixed(2) + ")");
+      });
+    }]
+  ];
+
   // ---------- UI-Tests ----------
 
   var frame = document.getElementById("app-frame");
@@ -524,6 +557,11 @@
           var x = ks.game.cat.x;
           return new Promise(function (r) { setTimeout(r, 200); }).then(function () {
             assertEqual(ks.game.cat.x, x, "steht in der Pause");
+            assert(w.Musik.playing, "Musik läuft");
+            doc.getElementById("btn-music").click();
+            assert(!w.Musik.playing, "Musik aus");
+            assertEqual(doc.getElementById("btn-music").getAttribute("aria-pressed"), "false");
+            doc.getElementById("btn-music").click(); // Einstellung wieder zurücksetzen
           });
         });
       });
@@ -560,12 +598,14 @@
     var morphList = document.getElementById("morph-results");
     var faceList = document.getElementById("face-results");
     var gameList = document.getElementById("game-results");
+    var musicList = document.getElementById("music-results");
     var uiList = document.getElementById("ui-results");
     var summary = document.getElementById("summary");
     unitList.innerHTML = "";
     morphList.innerHTML = "";
     faceList.innerHTML = "";
     gameList.innerHTML = "";
+    musicList.innerHTML = "";
     uiList.innerHTML = "";
     summary.className = "test-summary";
     summary.textContent = "Tests laufen …";
@@ -590,7 +630,13 @@
 
     // UI-Tests nutzen den echten localStorage → vorher sichern, danach wiederherstellen.
     backupStorage();
-    return loadApp().then(function (win) {
+    return musicTests.reduce(function (p, t) {
+      return p.then(function () { return t[1](); })
+        .then(function () { passed++; report(musicList, t[0]); },
+              function (e) { failed++; report(musicList, t[0], e); });
+    }, Promise.resolve()).then(function () {
+      return loadApp();
+    }).then(function (win) {
       try {
         win.document.getElementById("task-list");
       } catch (e) {
