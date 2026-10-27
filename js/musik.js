@@ -104,9 +104,8 @@
   /** Baut das Klangnetz auf und liefert eine Funktion, die bis zu einer Zeit vorausplant. */
   function createEngine(ctx, destination, startTime) {
     var master = ctx.createGain();
-    master.gain.value = 0.55;
-    var comp = ctx.createDynamicsCompressor();
-    master.connect(comp).connect(destination);
+    master.gain.value = 0.75;
+    master.connect(destination);
 
     var reverb = ctx.createConvolver();
     reverb.buffer = makeImpulse(ctx, 1.5);
@@ -129,7 +128,7 @@
 
     // ein gemeinsamer Filter für alle Gitarrentöne spart Rechenleistung
     guitarIn.type = "lowpass";
-    guitarIn.frequency.value = 3200;
+    guitarIn.frequency.value = 4500;
     guitarIn.connect(guitarBus);
 
     var plucks = {}, noise = makeNoise(ctx);
@@ -284,7 +283,7 @@
 
   // ---------- Wiedergabe im Browser ----------
 
-  var ctx = null, engine = null, timer = null, playing = false, wanted = false, silentAudio = null;
+  var ctx = null, engine = null, timer = null, playing = false, wanted = false, silentAudio = null, sessionSet = false;
 
   /** Kurze, stille WAV-Datei (für das Freischalten des Tons auf älteren iPads). */
   function silentWavUrl() {
@@ -301,14 +300,17 @@
   /**
    * Safari auf iPad/iPhone spielt Web Audio standardmäßig nur, wenn das Gerät
    * nicht lautlos ist. Als „Medienwiedergabe“ markiert klingt es wie in Chrome.
-   * Muss während einer Nutzeraktion (Tippen/Klicken) aufgerufen werden.
+   * Wird nur einmal und vor dem Anlegen des Audio-Kontexts umgestellt, weil ein
+   * späteres Umstellen einen laufenden Kontext stören kann.
    */
-  function unlock() {
+  function setupSession() {
+    if (sessionSet) return;
+    sessionSet = true;
     var nav = global.navigator || {};
     try {
       if (nav.audioSession) {
         nav.audioSession.type = "playback";
-      } else if (!silentAudio && global.Audio && /iP(ad|hone|od)|Macintosh/.test(nav.userAgent || "") && "ontouchend" in global.document) {
+      } else if (global.Audio && /iP(ad|hone|od)|Macintosh/.test(nav.userAgent || "") && "ontouchend" in global.document) {
         // ältere iPadOS-Versionen: ein still laufendes <audio> schaltet in den Wiedergabemodus
         silentAudio = new Audio(silentWavUrl());
         silentAudio.loop = true;
@@ -317,7 +319,37 @@
         if (p && p.catch) p.catch(function () { silentAudio = null; });
       }
     } catch (e) { /* dann eben im Standardmodus */ }
-    if (ctx && wanted && ctx.state !== "running") ctx.resume();
+  }
+
+  /**
+   * Gemeinsamer Audio-Kontext für Musik und Spielgeräusche. Beim ersten Aufruf
+   * (während einer Berührung) wird sofort ein stiller Ton gespielt – so gibt
+   * Safari die Wiedergabe frei.
+   */
+  function getContext() {
+    if (ctx) {
+      if (ctx.state !== "running" && ctx.state !== "closed") ctx.resume();
+      return ctx;
+    }
+    var AC = global.AudioContext || global.webkitAudioContext;
+    if (!AC) return null;
+    setupSession();
+    try {
+      ctx = new AC();
+      var b = ctx.createBuffer(1, 1, ctx.sampleRate), src = ctx.createBufferSource();
+      src.buffer = b;
+      src.connect(ctx.destination);
+      src.start(0);
+      if (ctx.state !== "running") ctx.resume();
+    } catch (e) {
+      ctx = null;
+    }
+    return ctx;
+  }
+
+  /** Während einer Nutzeraktion aufrufen, damit der Ton freigeschaltet wird. */
+  function unlock() {
+    getContext();
   }
 
   function tick() {
@@ -328,16 +360,12 @@
 
   function start() {
     wanted = true;
-    unlock();
+    if (!getContext()) return;
     if (playing) return resume();
-    var AC = global.AudioContext || global.webkitAudioContext;
-    if (!AC) return;
     try {
-      if (!ctx) ctx = new AC();
-      if (ctx.state !== "running") ctx.resume();
       engine = createEngine(ctx, ctx.destination, ctx.currentTime + 0.1);
       engine.master.gain.setValueAtTime(0, ctx.currentTime);
-      engine.master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2);
+      engine.master.gain.linearRampToValueAtTime(0.75, ctx.currentTime + 2);
       timer = setInterval(tick, 50);
       tick();
       playing = true;
@@ -393,6 +421,16 @@
     makePluck: makePluck,
     start: start,
     unlock: unlock,
+    getContext: getContext,
+    diagnose: function () {
+      return {
+        kontext: ctx ? ctx.state : "keiner",
+        abtastrate: ctx ? ctx.sampleRate : 0,
+        zeit: ctx ? Math.round(ctx.currentTime * 10) / 10 : 0,
+        sitzung: global.navigator && global.navigator.audioSession ? global.navigator.audioSession.type : "–",
+        musik: playing ? (wanted ? "läuft" : "pausiert") : "aus"
+      };
+    },
     pause: pause,
     resume: resume,
     stop: stop,

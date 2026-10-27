@@ -74,7 +74,9 @@
   function beep(freq, duration, type, slide) {
     if (!soundOn) return;
     try {
-      if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      // derselbe Audio-Kontext wie die Musik (Safari mag keine zwei)
+      if (!audio) audio = window.Musik ? Musik.getContext() : new (window.AudioContext || window.webkitAudioContext)();
+      if (!audio) return;
       if (audio.state !== "running") audio.resume();
       var o = audio.createOscillator(), g = audio.createGain(), now = audio.currentTime;
       o.type = type || "square";
@@ -603,8 +605,12 @@
     if (k === "ArrowDown" || k === "s" || k === "S") input.duck = false;
   });
 
+  // Ton schon beim Berühren freischalten (Safari verlangt eine direkte Nutzeraktion)
+  ["pointerdown", "touchend"].forEach(function (type) {
+    overlayButton.addEventListener(type, function () { if (window.Musik) Musik.unlock(); });
+  });
   overlayButton.addEventListener("click", function () {
-    if (window.Musik) Musik.unlock(); // Ton auch bei lautlosem iPad
+    if (window.Musik) Musik.unlock();
     if (overlayAction) overlayAction();
   });
   btnPause.addEventListener("click", function () {
@@ -648,6 +654,20 @@
     (highscore ? "<p>Rekord: " + highscore + " Punkte</p>" : ""),
     "Los geht's!", function () { musicPlay(); levelIntro(0, 0); });
   updateMusicButton();
+
+  // Audio-Test: katzenspiel.html#audiotest zeigt den Zustand und spielt Testtöne
+  if (location.hash === "#audiotest") {
+    var box = document.createElement("div");
+    box.className = "audiotest";
+    box.innerHTML = '<button type="button" id="at-beep">Testton</button> <button type="button" id="at-music">Musik starten</button> <span id="at-info"></span>';
+    document.querySelector(".game").appendChild(box);
+    document.getElementById("at-beep").addEventListener("click", function () { beep(660, 0.4, "sine"); });
+    document.getElementById("at-music").addEventListener("click", function () { musicOn = true; updateMusicButton(); Musik.start(); });
+    setInterval(function () {
+      var d = Musik.diagnose();
+      document.getElementById("at-info").textContent = Object.keys(d).map(function (k) { return k + ": " + d[k]; }).join(" · ");
+    }, 300);
+  }
 
   // für Tests
   window.katzenspiel = { get game() { return game; }, input: input };

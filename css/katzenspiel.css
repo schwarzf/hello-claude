@@ -146,6 +146,7 @@ button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
 .control.jump { background: #9be7a8; }
 .control span { display: inline-block; margin-right: 6px; }
 
+.audiotest { margin-top: 10px; padding: 8px; border: 2px dashed var(--ink); border-radius: 8px; font-size: 0.9em; }
 .keys { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 0.9em; }
 kbd {
   display: inline-block;
