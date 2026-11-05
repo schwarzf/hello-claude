@@ -489,6 +489,38 @@
         assert(low / all > 0.25, "Bassanteil " + Math.round(low / all * 100) + " %");
       });
     }],
+    ["Katzenfrieden: Songablauf, Tempo-Steigerung und Zeittabelle", function () {
+      var F = FriedenMusik;
+      assertEqual(F.SECTIONS.map(function (s) { return s.name; }), ["streit", "minze", "waelzen", "frieden", "tanz", "ende"]);
+      var hidschas = [2, 3, 6, 7, 9, 10, 0]; // D Es Fis G A B C
+      F.TANZ.forEach(function (m) { assert(hidschas.indexOf(m[1] % 12) !== -1, "Tanzton " + m[1]); });
+      var tanz = 0;
+      for (var i = 0; i < 4; i++) tanz += F.SECTIONS[i].bars * 16;
+      var first = 60 / (F.stepLength(tanz) * 4), lastBpm = 60 / (F.stepLength(tanz + 16 * 16 - 1) * 4);
+      assert(near(first, 100, 1), "Tanz beginnt mit 100 BPM: " + first);
+      assert(lastBpm > 175, "Tanz endet schnell: " + lastBpm);
+      for (var st = 0; st < F.STEPS; st += 37) {
+        var p = F.stepAt(F.stepTime(st) + F.stepLength(st) / 2);
+        assertEqual(p.step, st, "stepAt passt zu stepTime");
+      }
+      var counts = {};
+      for (var k = 0; k < F.STEPS; k++) Object.keys(F.at(k).events).forEach(function (e) { counts[e] = (counts[e] || 0) + 1; });
+      ["hiss", "fight", "drop", "burst", "pad", "lead", "clap", "opa", "kick", "bass", "purr"].forEach(function (e) { assert(counts[e] > 0, e + " kommt vor"); });
+    }],
+    ["Katzenfrieden-Sound hat viel Bass und übersteuert nicht", function () {
+      var F = FriedenMusik, from = 28.8; // Wälzen und Frieden
+      return F.render(from + 6, 22050, true).then(function (buf) {
+        var d = buf.getChannelData(0), i0 = Math.floor(from * 22050), peak = 0, low = 0, all = 0, lp = 0;
+        for (var i = i0; i < d.length; i++) {
+          peak = Math.max(peak, Math.abs(d[i]));
+          lp += (d[i] - lp) * 0.04;
+          low += lp * lp;
+          all += d[i] * d[i];
+        }
+        assert(peak < 0.95, "Spitze " + peak.toFixed(2));
+        assert(low / all > 0.25, "Bassanteil " + Math.round(low / all * 100) + " %");
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -610,6 +642,7 @@
         assert(w.document.querySelector('a[href="katzenspiel.html"]'), "Link zum Katzenspiel fehlt");
         assert(w.document.querySelector('a[href="demo.html"]'), "Link zur Amiga-Demo fehlt");
         assert(w.document.querySelector('a[href="katzendemo.html"]'), "Link zur Katzen-Demo fehlt");
+        assert(w.document.querySelector('a[href="katzenfrieden.html"]'), "Link zu Katzenfrieden fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -682,6 +715,21 @@
           });
           kd.setTime(18 * bar);
           return waitFor(function () { return kd.scene === "band"; }, 1000);
+        });
+      });
+    }],
+    ["Katzenfrieden: startet und zeigt alle Szenen", function () {
+      return loadApp("katzenfrieden.html").then(function (w) {
+        var doc = w.document, fr = w.frieden;
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        return waitFor(function () { return fr.frames > 5; }, 3000).then(function () {
+          assertEqual(fr.scene, "streit");
+          [["streit", 5], ["minze", 22], ["waelzen", 35], ["frieden", 50], ["tanz", 70], ["ende", 87]].forEach(function (s) {
+            assertEqual(fr.renderAt(s[1], true), s[0], "Szene bei " + s[1] + " s");
+          });
+          fr.setTime(70);
+          return waitFor(function () { return fr.scene === "tanz"; }, 1000);
         });
       });
     }],

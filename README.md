@@ -127,6 +127,31 @@ Grafik lesen daraus, deshalb passen Bild und Ton auch im Video exakt. Das Video
 entsteht, indem `katzendemo.renderAt(t, true)` Bild für Bild gerendert und mit
 dem offline erzeugten Ton per ffmpeg zusammengesetzt wird.
 
+## Katzenfrieden 🌿💃
+
+`katzenfrieden.html` (von der Taskliste verlinkt) ist die dritte Demo –
+live oder als Video (`video/katzenfrieden.mp4`, 88 Sekunden, 1280×800, mit Ton):
+
+1. **Streit:** fünf verfeindete Katzen im nächtlichen Hinterhof machen einen
+   Buckel, sträuben das Fell und fauchen sich an („FAUCH!“, „GRRR!“ …); zwei
+   raufen sich in einer Comic-Staubwolke
+2. **Katzenminze:** ein Beutel fällt vom Himmel und platzt, die Blätter regnen
+   herab, die Katzen werden neugierig
+3. **Wälzen:** alle rollen sich auf dem Rücken in der Minze – mit Herzchen
+   und psychedelischem Himmel
+4. **Frieden:** die Katzen stehen auf und werden Freunde
+5. **Griechischer Tanz:** vor weißen Häusern mit blauen Kuppeln tanzen sie in
+   der Seitenansicht in einer Reihe, Pfote auf dem Rücken des Vordermanns, und
+   werfen die Beine hoch – mit zwei Longcats, „OPA!“ und zerbrechenden Tellern.
+   Wie beim echten Volkstanz wird die Musik immer schneller (100 → 180 BPM).
+
+Sound (`js/frieden-musik.js`): eigene Komposition im Stil der anderen Demos –
+angespannter d-Moll-Teil mit tiefem Bass und Fauchen, magischer Übergang,
+träumerischer Wälz-Teil mit Schnurr-Bass, dann ein Tanz in d-Hidschas mit
+Bouzouki-artigem Tremolo, Oom-pah-Bass und Klatschen. Wegen des
+Tempowechsels hat jeder Schritt eine feste Startzeit (`stepTime`/`stepAt`),
+die Musik und Grafik gemeinsam nutzen.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -149,6 +174,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für die Musik in `js/musik.js` (Tonart, Songaufbau, Saitenklang, Offline-Aufnahme)
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
+- **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
@@ -177,6 +203,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
 | `video/katzendemo.mp4` | Katzen-Demo als Video |
+| `katzenfrieden.html` | Demo „Katzenfrieden“ |
+| `video/katzenfrieden.mp4` | Katzenfrieden als Video |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
@@ -192,6 +220,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `js/demo.js` | Effekte und Ablauf der Amiga-Demo |
 | `js/katzendemo-musik.js` | Song der Katzen-Demo (Miau-Synth, Schnurr-Bass) |
 | `js/katzendemo.js` | Szenen der Katzen-Demo (Pixel-Art-Katzen, Band, Longcats) |
+| `js/frieden-musik.js` | Song von Katzenfrieden (mit Tempo-Steigerung) |
+| `js/frieden.js` | Szenen von Katzenfrieden (Streit, Minze, Tanz) |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |
