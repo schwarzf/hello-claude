@@ -462,6 +462,33 @@
         assert(low / all > 0.3, "Bassanteil " + Math.round(low / all * 100) + " %");
       });
     }],
+    ["Katzen-Demo: Song in F-Dur mit Miau-Melodie, Band-Ereignisse vorhanden", function () {
+      var K = KatzenDemoMusik, fDur = [5, 7, 9, 10, 0, 2, 4]; // F G A B C D E
+      K.LEAD.forEach(function (m) { assert(fDur.indexOf(m[1] % 12) !== -1, "Miau-Ton " + m[1] + " in F-Dur"); });
+      assertEqual(K.SECTIONS.map(function (s) { return s.name; }), ["flug", "wolle", "band", "longcat", "finale"]);
+      var counts = {};
+      for (var st = 0; st < K.SONG_BARS * 16; st++) {
+        var e = K.at(st, true).events;
+        Object.keys(e).forEach(function (k) { counts[k] = (counts[k] || 0) + 1; });
+      }
+      ["kick", "snare", "hat", "bass", "purr", "arp", "lead", "crash"].forEach(function (k) { assert(counts[k] > 0, k + " kommt vor"); });
+      assertEqual(K.at(K.SONG_BARS * 16, true).section, "ende", "Video endet");
+      assertEqual(K.at(K.SONG_BARS * 16).section, "band", "live geht es mit der Band weiter");
+    }],
+    ["Katzen-Demo-Sound hat viel Bass und übersteuert nicht", function () {
+      var K = KatzenDemoMusik, from = 16 * 16 * K.STEP; // Band-Teil
+      return K.render(from + 4, 22050, true).then(function (buf) {
+        var d = buf.getChannelData(0), i0 = Math.floor(from * 22050), peak = 0, low = 0, all = 0, lp = 0;
+        for (var i = i0; i < d.length; i++) {
+          peak = Math.max(peak, Math.abs(d[i]));
+          lp += (d[i] - lp) * 0.04;
+          low += lp * lp;
+          all += d[i] * d[i];
+        }
+        assert(peak < 0.95, "Spitze " + peak.toFixed(2));
+        assert(low / all > 0.25, "Bassanteil " + Math.round(low / all * 100) + " %");
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -582,6 +609,7 @@
         assert(w.document.querySelector('a[href="gesichter.html"]'), "Link zur Gesichterseite fehlt");
         assert(w.document.querySelector('a[href="katzenspiel.html"]'), "Link zum Katzenspiel fehlt");
         assert(w.document.querySelector('a[href="demo.html"]'), "Link zur Amiga-Demo fehlt");
+        assert(w.document.querySelector('a[href="katzendemo.html"]'), "Link zur Katzen-Demo fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -638,6 +666,22 @@
           // Boing-Szene: grauer Hintergrund mit lila Gitter
           var p = pixel(doc.getElementById("demo").getContext("2d"), 5, 100);
           assert(p[0] > 120 && p[1] > 120 && p[2] > 120 || (p[2] > p[1]), "Boing-Hintergrund: " + p);
+        });
+      });
+    }],
+    ["Katzen-Demo: startet und zeigt alle Szenen", function () {
+      return loadApp("katzendemo.html").then(function (w) {
+        var doc = w.document, kd = w.katzendemo, bar = 60 / 130 * 4;
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        return waitFor(function () { return kd.frames > 5; }, 3000).then(function () {
+          assertEqual(kd.scene, "flug");
+          // jede Szene lässt sich zeichnen, das Video endet mit „ende“
+          [["flug", 1], ["wolle", 10], ["band", 18], ["longcat", 27], ["finale", 33], ["ende", 36.5]].forEach(function (s) {
+            assertEqual(kd.renderAt(s[1] * bar, true), s[0], "Szene bei Takt " + s[1]);
+          });
+          kd.setTime(18 * bar);
+          return waitFor(function () { return kd.scene === "band"; }, 1000);
         });
       });
     }],

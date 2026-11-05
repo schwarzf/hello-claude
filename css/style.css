@@ -218,6 +218,8 @@ a.promo-demo { background: #1b1f45; color: #e6ebff; }
 a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
 a.promo-demo .promo-text strong { color: #ff9b3a; }
 a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
+a.promo-katzendemo { background: #0b0630; }
+a.promo-katzendemo .promo-text strong { color: #ff6fae; }
 a.promo-gesichter { background: #c9efff; }
 a.promo-gesichter:hover, a.promo-gesichter:focus-visible { background: #aee5fb; }
 a.promo-gesichter .promo-text strong { color: #ff3b3b; }

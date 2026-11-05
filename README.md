@@ -103,6 +103,30 @@ hochskaliert, optional mit Röhren-Scanlines und im Vollbild):
   Alles live per Web Audio, keine Samples. Die Grafik folgt der Musik.
 - „Ohne Ton“ startet die Demo mit eigener Uhr
 
+## Katzen-Demo 🌈🐈
+
+`katzendemo.html` (von der Taskliste verlinkt) ist eine zweite Demo im
+Amiga-Stil, diesmal mit Katzen – live im Browser oder als fertiges Video
+(`video/katzendemo.mp4`, 70 Sekunden, 1280×800, mit Ton):
+
+1. **Regenbogen-Flug:** die rote Katze fliegt mit großem Regenbogen-Schweif
+   durchs Sternenfeld, begleitet von kleinen Regenbogen-Katzen
+2. **Wollknäuel-Jagd:** ein Regenbogen-Wollknäuel hüpft im Takt über das
+   Gitter, die Katzen jagen hinterher und springen auf der Snare
+3. **Katzenband „The Miaus“:** Schlagzeug, Bass, Gesang („MIAU“), Gitarre und
+   Keyboard spielen synchron zu ihrer Spur; davor tanzen Regenbogen-Katzen auf
+   den Hinterbeinen
+4. **Longcats:** zwei sehr lange Katzen wachsen über den Bildschirm hinaus
+5. **Finale** mit Konfetti und Greetings, im Video danach „THE END“
+
+Sound (`js/katzendemo-musik.js`): eigener Synth-Song in F-Dur, 130 BPM, im
+Stil der Amiga-Demo – Sägezahn-Bass, „Schnurr“-Bass (Sub-Bass mit Flattern),
+der beim Kick pumpt, Drums, Chip-Arpeggios und ein „Miau“-Synth als Lead.
+Der Song ist als Daten beschrieben (`KatzenDemoMusik.at(schritt)`); Musik und
+Grafik lesen daraus, deshalb passen Bild und Ton auch im Video exakt. Das Video
+entsteht, indem `katzendemo.renderAt(t, true)` Bild für Bild gerendert und mit
+dem offline erzeugten Ton per ffmpeg zusammengesetzt wird.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -124,6 +148,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Laufen, Sprint, Physik, Treffer, Mäuse, Vögel, Leben, Bot spielt alle Level)
 - **Unit-Tests** für die Musik in `js/musik.js` (Tonart, Songaufbau, Saitenklang, Offline-Aufnahme)
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
+- **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
@@ -150,6 +175,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `gesichter.html` | Gesichter-Morphing |
 | `katzenspiel.html` | Katzen-Jump'n'Run |
 | `demo.html` | Amiga-Demo |
+| `katzendemo.html` | Katzen-Demo |
+| `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
@@ -163,6 +190,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `js/musik.js` | Hintergrundmusik des Spiels (Web Audio) |
 | `js/demo-musik.js` | Synthetischer Demo-Sound |
 | `js/demo.js` | Effekte und Ablauf der Amiga-Demo |
+| `js/katzendemo-musik.js` | Song der Katzen-Demo (Miau-Synth, Schnurr-Bass) |
+| `js/katzendemo.js` | Szenen der Katzen-Demo (Pixel-Art-Katzen, Band, Longcats) |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |
