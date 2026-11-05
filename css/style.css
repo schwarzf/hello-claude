@@ -214,6 +214,10 @@ a.promo img { width: 64px; flex-shrink: 0; }
 a.promo-spiel { background: #ffd9c7; }
 a.promo-spiel:hover, a.promo-spiel:focus-visible { background: #ffc8ae; }
 a.promo-spiel .promo-text strong { color: #e2552b; }
+a.promo-demo { background: #1b1f45; color: #e6ebff; }
+a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
+a.promo-demo .promo-text strong { color: #ff9b3a; }
+a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
 a.promo-gesichter { background: #c9efff; }
 a.promo-gesichter:hover, a.promo-gesichter:focus-visible { background: #aee5fb; }
 a.promo-gesichter .promo-text strong { color: #ff3b3b; }

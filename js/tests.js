@@ -433,6 +433,35 @@
       assert(late < early * 0.5, "klingt ab");
       for (var k = 0; k < d.length; k++) assert(isFinite(d[k]) && Math.abs(d[k]) <= 1, "Wertebereich");
     }],
+    ["Demo-Sound: Basslinie, Lead und Songteile sind stimmig", function () {
+      assertEqual(DemoMusik.BASSLINE.length, 16, "16 Schritte pro Takt");
+      var aMoll = [9, 11, 0, 2, 4, 5, 7]; // A H C D E F G
+      DemoMusik.LEAD.forEach(function (m) {
+        assert(aMoll.indexOf(m[1] % 12) !== -1, "Lead-Ton " + m[1] + " in a-Moll");
+        assert(m[0] + m[2] <= 128, "Lead innerhalb von 8 Takten");
+      });
+      DemoMusik.SECTIONS.forEach(function (sec) {
+        assert(sec.bars > 0 && sec.bars % 4 === 0, sec.name + ": ganze Akkordfolgen");
+        if (sec.lead) assertEqual(sec.bars, 8, sec.name + " passt zur Lead-Melodie");
+      });
+      Object.keys(DemoMusik.ARPS).forEach(function (c) { assertEqual(DemoMusik.ARPS[c].length, 3, c); });
+    }],
+    ["Demo-Sound hat viel Bass und übersteuert nicht", function () {
+      // Hauptteil (ab Takt 8) mit Kick, Bass und Arpeggio
+      return DemoMusik.render(8 * DemoMusik.STEP * 16 + 4, 22050).then(function (buf) {
+        var d = buf.getChannelData(0), from = Math.floor(8 * DemoMusik.STEP * 16 * 22050), peak = 0;
+        var low = 0, all = 0, lp = 0;
+        for (var i = from; i < d.length; i++) {
+          peak = Math.max(peak, Math.abs(d[i]));
+          lp += (d[i] - lp) * 0.04; // einfacher Tiefpass (~150 Hz)
+          low += lp * lp;
+          all += d[i] * d[i];
+        }
+        assert(peak < 0.95, "Spitze " + peak.toFixed(2));
+        assert(Math.sqrt(all / (d.length - from)) > 0.05, "hörbar");
+        assert(low / all > 0.3, "Bassanteil " + Math.round(low / all * 100) + " %");
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -552,6 +581,7 @@
         assert(w.document.querySelector('a[href="katzen.html"]'), "Link zur Katzenseite fehlt");
         assert(w.document.querySelector('a[href="gesichter.html"]'), "Link zur Gesichterseite fehlt");
         assert(w.document.querySelector('a[href="katzenspiel.html"]'), "Link zum Katzenspiel fehlt");
+        assert(w.document.querySelector('a[href="demo.html"]'), "Link zur Amiga-Demo fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -589,6 +619,25 @@
           // Hintergrund von Beispielgesicht B (#ffb3d1) oben links im Ergebnis
           var p = pixel(doc.getElementById("result").getContext("2d"), 3, 3);
           assert(near(p[0], 255, 2) && near(p[1], 179, 2) && near(p[2], 209, 2), "Pixel oben links: " + p);
+        });
+      });
+    }],
+    ["Amiga-Demo: startet, zeichnet und wechselt die Szenen", function () {
+      return loadApp("demo.html").then(function (w) {
+        var doc = w.document;
+        assert(!doc.getElementById("start").hidden, "Startbildschirm");
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        return waitFor(function () { return w.demo.frames > 5; }, 3000).then(function () {
+          assertEqual(w.demo.scene, "intro");
+          w.demo.setScene("melodie");
+          return waitFor(function () { return w.demo.scene === "melodie"; }, 1000);
+        }).then(function () {
+          return new Promise(function (r) { setTimeout(r, 150); });
+        }).then(function () {
+          // Boing-Szene: grauer Hintergrund mit lila Gitter
+          var p = pixel(doc.getElementById("demo").getContext("2d"), 5, 100);
+          assert(p[0] > 120 && p[1] > 120 && p[2] > 120 || (p[2] > p[1]), "Boing-Hintergrund: " + p);
         });
       });
     }],

@@ -88,6 +88,21 @@ Die Spielregeln (`js/spiel.js`) sind vom Zeichnen (`js/katzenspiel.js`)
 getrennt. Ein Test lässt einen Bot alle Level durchspielen und prüft so, dass
 jedes Level ohne Treffer schaffbar ist.
 
+## Amiga-Demo 🕹️
+
+`demo.html` (von der Taskliste verlinkt) ist eine kleine Demo im Stil der
+Amiga-Demoszene, gerechnet in echter Low-Res-Auflösung (320×200, pixelig
+hochskaliert, optional mit Röhren-Scanlines und im Vollbild):
+
+- Szenen: Intro mit Sternenfeld und Copper-Bars, wellendes Chrom-Logo,
+  Sinus-Scroller, Glenz-Vektor-Würfel, Boing-Ball auf lila Gitter, Plasma mit
+  Greetings und ein Finale mit allem zusammen; Blitz und Wackeln im Takt
+- synthetischer Sound (`js/demo-musik.js`): eigener Tracker-Song in a-Moll mit
+  125 BPM – Sägezahn-Bass mit Filter-Sweeps und Sub-Bass, der beim Kick
+  „pumpt“, Kick, Snare, Hi-Hats, Chip-Arpeggios und eine Lead-Stimme mit Echo.
+  Alles live per Web Audio, keine Samples. Die Grafik folgt der Musik.
+- „Ohne Ton“ startet die Demo mit eigener Uhr
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -108,6 +123,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für die Gesichtspunkte in `js/face.js` (Auswahl, Zuschnitt, Vorlage)
 - **Unit-Tests** für das Katzenspiel in `js/spiel.js` (Laufen, Sprint, Physik, Treffer, Mäuse, Vögel, Leben, Bot spielt alle Level)
 - **Unit-Tests** für die Musik in `js/musik.js` (Tonart, Songaufbau, Saitenklang, Offline-Aufnahme)
+- **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
@@ -133,6 +149,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `katzen.html` | Katzen-Morphing |
 | `gesichter.html` | Gesichter-Morphing |
 | `katzenspiel.html` | Katzen-Jump'n'Run |
+| `demo.html` | Amiga-Demo |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
@@ -144,9 +161,12 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `js/spiel.js` | Spielregeln des Jump'n'Run (Physik, Level, Treffer) |
 | `js/katzenspiel.js` | Zeichnen, Steuerung und Ablauf des Spiels |
 | `js/musik.js` | Hintergrundmusik des Spiels (Web Audio) |
+| `js/demo-musik.js` | Synthetischer Demo-Sound |
+| `js/demo.js` | Effekte und Ablauf der Amiga-Demo |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |
 | `css/gesichter.css` | Pop-Art-Comic-Styles der Gesichterseite |
 | `css/katzenspiel.css` | Styles des Spiels |
+| `css/demo.css` | Styles der Amiga-Demo |
 | `img/` | Grafiken als SVG (Dinos, Katzen, Comic-Gesichter, Pfoten) |
