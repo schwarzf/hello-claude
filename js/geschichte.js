@@ -84,7 +84,15 @@
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    text(str, x, y + 1, 8, spiky ? "#d81b60" : "#333");
+    if (spiky) text(str, x, y + 1, 8, "#d81b60");
+    else {
+      // ohne Schatten, damit kurze Zeichen wie „?“ klar lesbar bleiben
+      ctx.font = "8px " + FONT;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#333";
+      ctx.fillText(str, Math.round(x), Math.round(y + 1));
+    }
   }
   function heart(x, y, s, color) {
     var rows = [".kk.kk.", "kppkppk", "kpppppk", ".kpppk.", "..kpk..", "...k..."];
