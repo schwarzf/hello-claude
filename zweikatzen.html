@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zwei Katzen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="css/demo.css?v=202611061815">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Zwei Katzen</h1>
+      <p>Eine Glückskatze und eine Regenbogenkatze können sich nicht leiden – bis eines Tages die Tür offen steht. Eine Geschichte in vier Szenen. · <a href="video/zweikatzen.mp4">🎬 Als Video ansehen</a> · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="demo" width="320" height="200"></canvas>
+      <div class="crt" aria-hidden="true"></div>
+      <div class="start" id="start">
+        <p class="blink">HELLO-CLAUDE PRESENTS: ZWEI KATZEN</p>
+        <button type="button" id="play">▶ DEMO STARTEN</button>
+        <button type="button" id="play-silent" class="secondary">OHNE TON</button>
+        <p class="hint">Mit Kopfhörern oder guten Lautsprechern – es gibt viel Bass!</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">🔊 TON</button>
+      <button type="button" id="btn-crt" aria-pressed="true">📺 RÖHRE</button>
+      <button type="button" id="btn-full">⛶ VOLLBILD</button>
+      <span id="part" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <script src="js/musik.js?v=202611061815"></script>
+  <script src="js/geschichte-musik.js?v=202611061815"></script>
+  <script src="js/geschichte.js?v=202611061815"></script>
+</body>
+</html>

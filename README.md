@@ -152,6 +152,27 @@ Bouzouki-artigem Tremolo, Oom-pah-Bass und Klatschen. Wegen des
 Tempowechsels hat jeder Schritt eine feste Startzeit (`stepTime`/`stepAt`),
 die Musik und Grafik gemeinsam nutzen.
 
+## Zwei Katzen 🍀🌈
+
+`zweikatzen.html` (von der Taskliste verlinkt) erzählt eine Geschichte in
+vier Szenen, gesehen aus dem Zimmer heraus (Fenster mit Fensterbank, daneben
+die Tür) – live oder als Video (`video/zweikatzen.mp4`, 105 Sekunden, mit Ton):
+
+1. Die **Glückskatze** (dreifarbig, mit Halsband und Glöckchen, winkt wie eine
+   Winkekatze) sitzt drinnen am Fenster; die **Regenbogenkatze** spaziert
+   draußen vorbei. Sie starren sich an und knurren („GRRR!“ – auch hörbar).
+2. Umgekehrt: die Regenbogenkatze sitzt drinnen, die Glückskatze läuft vorbei.
+   Spannende Musik, dunkler Himmel und ein Duell im Splitscreen.
+3. Niemand sitzt drinnen. Draußen kommen beide von zwei Seiten und schauen
+   sich an – diesmal ohne Knurren.
+4. Die Tür geht auf. Beide zögern, dann Nasenstupser und Herz. Sie gehen
+   gemeinsam hinein, springen auf die Fensterbank und sitzen zusammen am
+   Fenster; ihre Schwänze formen ein Herz. Romantische Musik zum Sonnenuntergang.
+
+Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
+eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
+Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -175,6 +196,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für die Zwei-Katzen-Musik in `js/geschichte-musik.js` (Szenen, Tempi, wer wann knurrt, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
 Die automatische Gesichtserkennung selbst wird auf der Testseite nicht geprüft,
@@ -205,6 +227,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
+| `zweikatzen.html` | Demo „Zwei Katzen“ |
+| `video/zweikatzen.mp4` | Zwei Katzen als Video |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
@@ -222,6 +246,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `js/katzendemo.js` | Szenen der Katzen-Demo (Pixel-Art-Katzen, Band, Longcats) |
 | `js/frieden-musik.js` | Song von Katzenfrieden (mit Tempo-Steigerung) |
 | `js/frieden.js` | Szenen von Katzenfrieden (Streit, Minze, Tanz) |
+| `js/geschichte-musik.js` | Musik zu „Zwei Katzen“ |
+| `js/geschichte.js` | Szenen von „Zwei Katzen“ (Zimmer, Glücks- und Regenbogenkatze) |
 | `js/tests.js` | Testframework und Testfälle |
 | `css/style.css` | Comic-Dino-Styles |
 | `css/katzen.css` | Katzen-Styles |
