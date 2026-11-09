@@ -706,6 +706,7 @@
         assert(w.document.querySelector('a[href="katzenfrieden.html"]'), "Link zu Katzenfrieden fehlt");
         assert(w.document.querySelector('a[href="zweikatzen.html"]'), "Link zu Zwei Katzen fehlt");
         assert(w.document.querySelector('a[href="neon.html"]'), "Link zu HYPERFLUX fehlt");
+        assert(w.document.querySelector('a[href="gluehwuermchen.html"]'), "Link zu den Glühwürmchen fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -827,6 +828,21 @@
         });
         assertEqual(ne.renderAt(49.5 * bar, true, 0.25), "ende");
         return waitFor(function () { return ne.frames > 1; }, 8000);
+      });
+    }],
+    ["Glühwürmchen: schweben und sammeln sich am Finger", function () {
+      return loadApp("gluehwuermchen.html").then(function (w) {
+        var g = w.gluehwuermchen, size = g.size(), tx = size.w / 2, ty = size.h / 2;
+        assert(g.flies.length >= 60, "genug Glühwürmchen");
+        function avgDist() {
+          return g.flies.reduce(function (sum, f) { return sum + Math.sqrt((f.x - tx) * (f.x - tx) + (f.y - ty) * (f.y - ty)); }, 0) / g.flies.length;
+        }
+        var before = avgDist();
+        g.setTarget(tx, ty);
+        for (var i = 0; i < 240; i++) g.update(1 / 60);
+        g.draw();
+        assert(avgDist() < before * 0.6, "sammeln sich: " + Math.round(before) + " → " + Math.round(avgDist()));
+        g.flies.forEach(function (f) { assert(isFinite(f.x) && isFinite(f.y), "Positionen gültig"); });
       });
     }],
     ["Katzenspiel: starten, laufen, springen und pausieren", function () {

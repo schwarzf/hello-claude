@@ -219,6 +219,9 @@ a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
 a.promo-demo .promo-text strong { color: #ff9b3a; }
 a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
 a.promo-katzendemo { background: #0b0630; }
+a.promo-glueh { background: #0d1f3a; }
+a.promo-glueh .promo-text strong { color: #f6f1a8; }
+.promo-emoji { font-size: 40px; width: 64px; text-align: center; flex-shrink: 0; }
 a.promo-neon { background: linear-gradient(100deg, #06243a, #3a0a4a); }
 a.promo-neon .promo-text strong { color: #22e6ff; }
 a.promo-zwei { background: #7a3f8f; }

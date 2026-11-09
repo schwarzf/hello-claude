@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glühwürmchen</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #050a1e; color: #e8ecff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 0 0 4px; font-weight: 600; font-size: clamp(22px, 5vw, 34px); color: #f6f1a8; text-shadow: 0 0 18px rgba(246, 241, 120, 0.6); }
+    p { margin: 0 0 12px; color: #97a3c7; }
+    a { color: #f6f1a8; }
+    .feld { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); }
+    canvas { display: block; width: 100%; height: min(70vh, 620px); touch-action: none; cursor: pointer; }
+    #tipp { position: absolute; left: 0; right: 0; top: 42%; text-align: center; font-size: 18px; color: #f6f1a8; pointer-events: none; transition: opacity 1s; text-shadow: 0 0 12px #000; }
+    #tipp.weg { opacity: 0; }
+    button { margin-top: 12px; font: inherit; padding: 9px 18px; color: #e8ecff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; cursor: pointer; }
+    button:focus-visible { outline: 2px solid #f6f1a8; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Glühwürmchen</h1>
+    <p>Tippe oder ziehe über die Wiese – die Glühwürmchen kommen zu dir und es klingt leise. · <a href="index.html">Zu den Dino-Tasks</a></p>
+    <div class="feld">
+      <canvas id="wiese" aria-label="Nächtliche Wiese mit Glühwürmchen"></canvas>
+      <div id="tipp">✨ Tippe auf die Wiese ✨</div>
+    </div>
+    <button type="button" id="btn-sound" aria-pressed="true">🔔 Ton an</button>
+  </main>
+  <script src="js/musik.js?v=202611092118"></script>
+  <script src="js/gluehwuermchen.js?v=202611092118"></script>
+</body>
+</html>

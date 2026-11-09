@@ -173,6 +173,13 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Glühwürmchen ✨
+
+`gluehwuermchen.html` (von der Taskliste verlinkt) ist eine kleine, ruhige
+Mini-Demo: Glühwürmchen schweben über einer nächtlichen Wiese. Wo man tippt
+oder zieht, sammeln sie sich und kreisen um den Finger; dazu erklingen leise
+Glockentöne in einer pentatonischen Tonleiter (oben hoch, unten tief).
+
 ## HYPERFLUX ⚡
 
 `neon.html` (von der Taskliste verlinkt) ist eine moderne Echtzeit-Demo mit
@@ -251,6 +258,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
 | `neon.html` | Shader-Demo HYPERFLUX |
+| `gluehwuermchen.html` | Mini-Demo Glühwürmchen (`js/gluehwuermchen.js`) |
 | `zweikatzen.html` | Demo „Zwei Katzen“ |
 | `video/zweikatzen.mp4` | Zwei Katzen als Video |
 | `test.html` | Testseite |
