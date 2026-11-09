@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HYPERFLUX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Unbounded:wght@600;900&display=swap">
+  <link rel="stylesheet" href="css/neon.css?v=202611092109">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>HYPER<span>FLUX</span></h1>
+      <p>Echtzeit-Shader-Demo: Daten-Tunnel, 3D-Landschaft, Ozean, Acid und Morphing – mit hartem Synth-Sound. · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="gl"></canvas>
+      <div class="title" id="title" data-text="" aria-live="polite"></div>
+      <div class="fail" id="fail" hidden><strong>Keine Grafik möglich</strong><span></span></div>
+      <div class="start" id="start">
+        <p class="kicker">hello-claude presents</p>
+        <p class="logo">HYPER<span>FLUX</span></p>
+        <button type="button" id="play" class="primary">▶ Start</button>
+        <button type="button" id="play-silent">Ohne Ton</button>
+        <p class="hint">Am besten mit Kopfhörern. Achtung: schnelle Lichtwechsel und flackernde Effekte – mit „Weniger Blitze“ lassen sie sich abschwächen.</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">Ton</button>
+      <button type="button" id="btn-calm" aria-pressed="false">Weniger Blitze</button>
+      <button type="button" id="btn-full">Vollbild</button>
+      <span id="part"></span>
+    </div>
+  </main>
+
+  <script src="js/musik.js?v=202611092109"></script>
+  <script src="js/neon-musik.js?v=202611092109"></script>
+  <script src="js/neon.js?v=202611092109"></script>
+</body>
+</html>

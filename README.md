@@ -173,6 +173,28 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## HYPERFLUX ⚡
+
+`neon.html` (von der Taskliste verlinkt) ist eine moderne Echtzeit-Demo mit
+GPU-Shadern (WebGL2) statt Pixel-Art. Sechs Szenen folgen der Musik:
+
+1. **System Boot** – Flug durch einen Daten-Tunnel aus Leiterbahnen
+2. **Terraform** – 3D-Landschaft mit Neon-Gitter, Polarlicht und Sonne
+3. **Deep Blue** – Ozean mit Spiegelungen, Sonnenglitzern und leuchtenden Kämmen
+4. **Acid** – Kaleidoskop aus Ringen und verzerrtem Farbrauschen
+5. **Morph** – flüssiges, schillerndes Objekt: Kugel → Torus → Würfel → Oktaeder
+6. **Overdrive** – Ozean, Morph-Objekt und Acid-Himmel zusammen
+
+Technik (`js/neon.js`): Raymarching in eine kleinere Textur, deren Auflösung
+sich an die Geschwindigkeit des Geräts anpasst; ein zweiter Durchgang legt
+Bloom, Farbsäume, Glitch beim Szenenwechsel, Vignette und Körnung darüber.
+Ohne WebGL2 erscheint ein Hinweis. „Weniger Blitze“ schwächt die schnellen
+Lichtwechsel ab (bei „reduzierte Bewegung“ im System automatisch aktiv).
+
+Sound (`js/neon-musik.js`): eigener Track in e-Moll, 145 BPM – harter Kick,
+rollender Bass, verzerrte Acid-Linie, Supersaw-Lead und -Stabs, Riser und
+Einschläge; ein weicher Begrenzer am Ausgang hält die Spitzen unter 0,9.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -196,6 +218,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für den HYPERFLUX-Sound in `js/neon-musik.js` (Aufbau, Tonart, Begrenzer, Bassanteil); der UI-Test prüft, dass die Shader kompilieren und jede Szene ein Bild zeichnet
 - **Unit-Tests** für die Zwei-Katzen-Musik in `js/geschichte-musik.js` (Szenen, Tempi, wer wann knurrt, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
 
@@ -227,6 +250,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
+| `neon.html` | Shader-Demo HYPERFLUX |
 | `zweikatzen.html` | Demo „Zwei Katzen“ |
 | `video/zweikatzen.mp4` | Zwei Katzen als Video |
 | `test.html` | Testseite |
@@ -246,6 +270,8 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `js/katzendemo.js` | Szenen der Katzen-Demo (Pixel-Art-Katzen, Band, Longcats) |
 | `js/frieden-musik.js` | Song von Katzenfrieden (mit Tempo-Steigerung) |
 | `js/frieden.js` | Szenen von Katzenfrieden (Streit, Minze, Tanz) |
+| `js/neon-musik.js` | Soundtrack von HYPERFLUX |
+| `js/neon.js` | Shader und Ablauf von HYPERFLUX (WebGL2) |
 | `js/geschichte-musik.js` | Musik zu „Zwei Katzen“ |
 | `js/geschichte.js` | Szenen von „Zwei Katzen“ (Zimmer, Glücks- und Regenbogenkatze) |
 | `js/tests.js` | Testframework und Testfälle |
@@ -254,4 +280,5 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `css/gesichter.css` | Pop-Art-Comic-Styles der Gesichterseite |
 | `css/katzenspiel.css` | Styles des Spiels |
 | `css/demo.css` | Styles der Amiga-Demo |
+| `css/neon.css` | Styles von HYPERFLUX |
 | `img/` | Grafiken als SVG (Dinos, Katzen, Comic-Gesichter, Pfoten) |

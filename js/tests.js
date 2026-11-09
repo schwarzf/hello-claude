@@ -550,6 +550,38 @@
         assert(Math.sqrt(sum / (d.length - i0)) > 0.05, "hörbar");
       });
     }],
+    ["HYPERFLUX: Songaufbau, Tonart und Ereignisse", function () {
+      var N = NeonMusik, eMoll = [4, 6, 7, 9, 11, 0, 2];
+      assertEqual(N.SECTIONS.map(function (s) { return s.name; }), ["boot", "terrain", "ocean", "acid", "morph", "final"]);
+      N.LEAD.forEach(function (m) { assert(eMoll.indexOf(m[1] % 12) !== -1, "Lead-Ton " + m[1] + " in e-Moll"); });
+      var per = {};
+      for (var st = 0; st < N.SONG_STEPS; st++) {
+        var a = N.at(st, true);
+        per[a.section] = per[a.section] || {};
+        Object.keys(a.events).forEach(function (k) { per[a.section][k] = true; });
+        assert(a.acidCut >= 0 && a.acidCut <= 1, "Acid-Filter im Bereich");
+      }
+      assert(per.acid.acid && per.final.acid && !per.terrain.acid, "Acid-Linie nur in Acid und Finale");
+      assert(per.ocean.wash && per.ocean.pad && !per.ocean.bass, "Ozean ist der ruhige Teil");
+      assert(per.boot.riser && per.ocean.riser, "Riser vor den Drops");
+      assertEqual(N.at(N.SONG_STEPS, true).section, "ende");
+      assertEqual(N.at(N.SONG_STEPS).section, "terrain", "live geht es mit der Landschaft weiter");
+    }],
+    ["HYPERFLUX-Sound ist laut, basslastig und wird weich begrenzt", function () {
+      var N = NeonMusik, from = 24 * 16 * N.STEP; // Acid-Teil
+      return N.render(from + 4, 22050, true).then(function (buf) {
+        var d = buf.getChannelData(0), i0 = Math.floor(from * 22050), peak = 0, low = 0, all = 0, lp = 0;
+        for (var i = i0; i < d.length; i++) {
+          peak = Math.max(peak, Math.abs(d[i]));
+          lp += (d[i] - lp) * 0.04;
+          low += lp * lp;
+          all += d[i] * d[i];
+        }
+        assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        assert(Math.sqrt(all / (d.length - i0)) > 0.15, "laut");
+        assert(low / all > 0.3, "Bassanteil " + Math.round(low / all * 100) + " %");
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -673,6 +705,7 @@
         assert(w.document.querySelector('a[href="katzendemo.html"]'), "Link zur Katzen-Demo fehlt");
         assert(w.document.querySelector('a[href="katzenfrieden.html"]'), "Link zu Katzenfrieden fehlt");
         assert(w.document.querySelector('a[href="zweikatzen.html"]'), "Link zu Zwei Katzen fehlt");
+        assert(w.document.querySelector('a[href="neon.html"]'), "Link zu HYPERFLUX fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -776,6 +809,24 @@
           ge.setTime(45);
           return waitFor(function () { return ge.scene === "szene3"; }, 1000);
         });
+      });
+    }],
+    ["HYPERFLUX: Shader laufen und alle Szenen zeichnen ein Bild", function () {
+      return loadApp("neon.html").then(function (w) {
+        var doc = w.document, ne = w.neon, bar = 60 / 145 * 4;
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        if (!ne.ok) {
+          // ohne WebGL2 muss ein Hinweis erscheinen
+          assert(!doc.getElementById("fail").hidden, "Hinweis ohne WebGL2");
+          return;
+        }
+        [["boot", 5], ["terrain", 11], ["ocean", 19], ["acid", 27], ["morph", 35], ["final", 43]].forEach(function (s) {
+          assertEqual(ne.renderAt(s[1] * bar, true, 0.25), s[0], "Szene bei Takt " + s[1]);
+          assert(ne.brightness() > 8, s[0] + " zeichnet ein Bild");
+        });
+        assertEqual(ne.renderAt(49.5 * bar, true, 0.25), "ende");
+        return waitFor(function () { return ne.frames > 1; }, 8000);
       });
     }],
     ["Katzenspiel: starten, laufen, springen und pausieren", function () {
