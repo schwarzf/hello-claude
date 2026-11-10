@@ -1,13 +1,14 @@
 /**
  * SingularityMusik – Soundtrack der Demo „SINGULARITY“ (eigene Komposition).
  * Eine einzige Eskalation: Herzschlag und Glocke → präzise Arpeggios →
- * Drum-and-Bass mit Reese-Bass → Halftime am Ereignishorizont → Tunnel mit
- * Shepard-Ton (scheint endlos zu steigen) → Stille → Lichtwelle in D-Dur.
+ * Drum-and-Bass mit Reese-Bass → Halftime am Ereignishorizont → heller,
+ * treibender Morph-Teil in Dur → Tunnel mit Acid-Linie und Shepard-Ton
+ * (scheint endlos zu steigen) → Stille, ein Herzschlag → Explosion.
  * Das Tempo steigt von 80 auf über 200 BPM; jeder Schritt hat deshalb eine
  * feste Startzeit (stepTime), die Musik und Grafik gemeinsam nutzen.
  *
- * Ein Motiv aus vier Tönen (A–D–F–E) zieht sich durch alles; im Finale wird
- * aus dem F ein Fis – aus Moll wird Dur.
+ * Ein Motiv aus vier Tönen (A–D–F–E) zieht sich durch alles; ab dem
+ * Morph-Teil wird aus dem F ein Fis – aus Moll wird Dur.
  */
 (function (global) {
   "use strict";
@@ -20,14 +21,17 @@
     { name: "bruch", bars: 8, bpm: [140, 140], chaos: [0.35, 0.5] },
     { name: "fraktal", bars: 8, bpm: [150, 166], chaos: [0.5, 0.7] },
     { name: "pause", bars: 2, bpm: [80, 80], chaos: [0.2, 0.3] },
-    { name: "horizont", bars: 8, bpm: [170, 170], chaos: [0.7, 0.85] },
-    { name: "tunnel", bars: 16, bpm: [176, 212], chaos: [0.85, 1] },
-    { name: "stille", bars: 1, bpm: [160, 160], chaos: [0, 0] },
-    { name: "licht", bars: 4, bpm: [96, 96], chaos: [0, 0] },
-    { name: "weiss", bars: 3, bpm: [96, 96], chaos: [0, 0] }
+    { name: "horizont", bars: 3, bpm: [170, 170], chaos: [0.7, 0.75] },
+    { name: "morph", bars: 8, bpm: [172, 172], chaos: [0.45, 0.65] },
+    { name: "tunnel", bars: 16, bpm: [176, 212], chaos: [0.8, 1] },
+    { name: "stille", bars: 2, bpm: [150, 150], chaos: [0, 0] },
+    { name: "licht", bars: 4, bpm: [174, 174], chaos: [0.6, 0.6] },
+    { name: "weiss", bars: 2, bpm: [96, 96], chaos: [0, 0] }
   ];
   var CH_MIN = [[62, 65, 69], [62, 65, 69], [58, 62, 65], [57, 61, 64]], RT_MIN = [38, 38, 34, 33], MO_MIN = [69, 74, 77, 76];
-  var CH_MAJ = [[62, 66, 69], [62, 66, 69], [59, 62, 67], [57, 61, 64]], RT_MAJ = [38, 38, 31, 33], MO_MAJ = [69, 74, 78, 76];
+  // Dur ab dem Morph-Teil: D – G – h – A
+  var CH_MAJ = [[62, 66, 69], [62, 67, 71], [62, 66, 71], [61, 64, 69]], RT_MAJ = [38, 31, 35, 33], MO_MAJ = [69, 74, 78, 76];
+  var ACID = [0, 0, 12, 0, 4, 0, 9, 12, 0, 7, 0, 12, 16, 12, 9, 7], ACID_ACCENT = [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0];
 
   // ---------- Zeittabelle ----------
 
@@ -114,35 +118,57 @@
       if (k % 8 === 0) e.bell = { midi: MO_MIN[k / 8], len: 8 };
       if (bar === 1) e.riser = (k - 16) / 16 * 0.7;
     } else if (n === "horizont") {
-      cut = Math.floor(k / 32);
-      if (inBar === 0 || (inBar === 6 && bar % 2 === 1)) e.kick = 1.2;
+      if (inBar === 0) e.kick = 1.2;
       if (inBar === 8) e.snare = 1.4;
       if (inBar === 4 || inBar === 12) e.hat = 2;
       if (four) e.reese = { midi: RT_MIN[b4], len: 4, wob: 3 };
       if (inBar === 0) { e.pad = [CH_MIN[b4][0], CH_MIN[b4][0] + 1, CH_MIN[b4][2]]; e.lead = { midi: MO_MIN[b4] - 12, len: 16 }; e.choir = MO_MIN[b4]; }
-      if (inBar === 12 && bar % 2 === 1) e.fall = 1;
       if (k === 0) e.impact = 1.3;
+      if (bar === 2) { e.riser = inBar / 16; if (inBar >= 8) e.snare = 0.4 + (inBar - 8) / 10; }
+    } else if (n === "morph") {
+      cut = Math.floor(k / 32);
+      if (four) e.kick = 1;
+      if (inBar === 4 || inBar === 12) e.snare = 0.8;
+      e.hat = inBar % 4 === 2 ? 2 : 1;
+      if (inBar % 4 === 2 || (inBar % 4 === 3 && h < 0.4)) e.bass = RT_MAJ[b4];
+      e.arp = { midi: CH_MAJ[b4][[0, 1, 2, 1][inBar % 4]] + 12 + (inBar >= 8 ? 12 : 0), cut: 0.75 };
+      if (inBar === 0) { e.sub = RT_MAJ[b4]; e.lead = { midi: MO_MAJ[b4] + 12, len: 6 }; }
+      if (inBar === 6) e.lead = { midi: CH_MAJ[b4][1] + 12, len: 2 };
+      if (inBar === 8) e.lead = { midi: CH_MAJ[b4][2] + 12, len: 4 };
+      if (inBar === 12) e.lead = { midi: MO_MAJ[b4] + 12, len: 4 };
+      if (inBar === 0 || inBar === 6 || inBar === 12) e.stab = CH_MAJ[b4];
+      if (k === 0) e.impact = 1;
+      if (inBar === 0 && bar % 4 === 0) e.crash = 1;
+      if (bar >= 6) e.riser = (k - 96) / 32;
+      if (bar === 7 && inBar >= 8) e.snare = 0.4 + (inBar - 8) / 12;
     } else if (n === "tunnel") {
       cut = bar < 8 ? Math.floor(k / 16) : bar < 12 ? 8 + Math.floor((k - 128) / 8) : 16 + Math.floor((k - 192) / 4);
       if (bar < 12 ? (inBar === 0 || inBar === 10) : four) e.kick = 1;
       if (bar < 12 ? (inBar === 4 || inBar === 12) : bar === 12 ? four : bar < 15 ? inBar % 2 === 0 : true) e.snare = bar < 12 ? 1 : 0.5 + (k - 192) / 64 * 0.7;
       e.hat = 1;
-      if (inBar % 2 === 0) e.reese = { midi: RT_MIN[b4], len: 2, wob: 1 };
-      e.arp = { midi: CH_MIN[b4][(inBar * 2 + bar) % 3] + 24, cut: 0.6 + pr * 0.4 };
-      if (inBar === 0) e.lead = { midi: MO_MIN[b4] + 12, len: 14 };
-      if (inBar === 0 || inBar === 6 || inBar === 12) e.stab = CH_MIN[b4];
+      if (inBar % 2 === 0) e.reese = { midi: RT_MAJ[b4], len: 2, wob: 1 };
+      e.acid = { midi: 50 + ACID[inBar] + (RT_MAJ[b4] - 38), accent: ACID_ACCENT[inBar], cut: 0.25 + 0.75 * pr };
+      if (inBar === 0) e.lead = { midi: MO_MAJ[b4] + 12, len: 14 };
+      if (inBar === 0 || inBar === 6 || inBar === 12) e.stab = CH_MAJ[b4];
       e.riser = pr;
       if (k === 0) { e.shepard = 1; e.impact = 1; }
       if (inBar === 0 && bar % 2 === 0) e.crash = 1;
     } else if (n === "stille") {
+      // Stille – dann ein einzelner Herzschlag, bevor es knallt
       if (k === 0) e.mute = 1;
+      if (k === 16) { e.unmute = 1; e.heart = 1; }
+      if (k === 19) e.heart = 0.6;
     } else if (n === "licht") {
-      if (k === 0) { e.unmute = 1; e.impact = 1.1; e.crash = 1; }
-      if (inBar === 0) { e.wall = CH_MAJ[b4]; e.sub = RT_MAJ[b4]; e.lead = { midi: MO_MAJ[b4] + 12, len: 16 }; e.choir = MO_MAJ[b4]; }
-      if (inBar === 0 || inBar === 8) e.timp = RT_MAJ[b4];
-      if (inBar % 2 === 0) e.sparkle = CH_MAJ[b4][(inBar / 2) % 3] + 24 + (inBar >= 8 ? 12 : 0);
+      if (k === 0) { e.impact = 1.3; e.crash = 1; }
+      if (four) { e.kick = 1; e.stab = CH_MAJ[b4]; }
+      if (bar < 2 ? (inBar === 4 || inBar === 12) : bar === 2 ? inBar % 2 === 0 : true) e.snare = bar < 2 ? 1 : 0.5 + (k - 32) / 32 * 0.8;
+      e.hat = 1;
+      if (inBar % 2 === 0) { e.reese = { midi: RT_MAJ[b4], len: 2, wob: 1 }; e.sparkle = CH_MAJ[b4][(inBar / 2) % 3] + 24 + (inBar >= 8 ? 12 : 0); }
+      if (inBar === 0) { e.wall = CH_MAJ[b4]; e.lead = { midi: MO_MAJ[b4] + 12, len: 14 }; e.choir = MO_MAJ[b4]; e.timp = RT_MAJ[b4]; }
+      if (bar >= 2) e.riser = (k - 32) / 32;
+      if (inBar === 0 && bar % 2 === 0) e.crash = 1;
     } else if (n === "weiss") {
-      if (k === 0) { e.final = len; e.bell = { midi: 86, len: 32 }; e.timp = 38; }
+      if (k === 0) e.hit = 1;
     }
     return { section: n, index: si, step: k, bar: bar, inBar: inBar, events: e, chaos: chaos, progress: pr, cut: cut };
   }
@@ -173,6 +199,9 @@
     var duck = ctx.createGain();
     duck.connect(bassBus);
     reeseDrive.connect(bus(0.55, duck));
+    var acidDrive = ctx.createWaveShaper();
+    acidDrive.curve = tanhCurve(5, 1);
+    acidDrive.connect(bus(0.2));
     var delay = ctx.createDelay(1.5), feedback = ctx.createGain();
     delay.delayTime.value = 0.33;
     feedback.gain.value = 0.45;
@@ -397,15 +426,21 @@
         o.start(t); o.stop(t + dur + 0.05);
       }
     }
-    function finalChord(t, len) {
-      pad(t, [50, 57, 62, 66, 69, 74], len, 2200, 0.7);
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.linearRampToValueAtTime(0.35, t + 1.5);
-      g.gain.setTargetAtTime(0.0001, t + len * 0.75, 0.5);
-      osc("sine", midiToFreq(74), t, len + 3, g);
-      osc("sine", midiToFreq(38), t, len + 3, g);
-      g.connect(bellBus);
+    function acid(t, a, sl) {
+      var f = ctx.createBiquadFilter(), g = ctx.createGain(), len = sl * (a.accent ? 1.1 : 0.8), base = 250 + a.cut * a.cut * 2800;
+      f.type = "lowpass"; f.Q.value = 15;
+      f.frequency.setValueAtTime(base * (a.accent ? 4 : 2), t);
+      f.frequency.exponentialRampToValueAtTime(base, t + len * 0.8);
+      env(g, t, a.accent ? 1 : 0.6, 0.003, len * 0.6, 0.02);
+      osc("sawtooth", midiToFreq(a.midi), t, len + 0.1, f);
+      f.connect(g).connect(acidDrive);
+    }
+    /** Schlussschlag: ein einziger harter Akkord, kein Ausklingen. */
+    function finalHit(t) {
+      impact(t, 1.4);
+      kick(t, 1.2);
+      noiseHit(t, 0.4, "highpass", 4000, 1.6, fxBus);
+      [38, 50, 62, 66, 69, 74, 78, 81].forEach(function (m) { supersaw(t, m, 0.7, stabBus, null, 5200, [-12, 12]); });
     }
 
     var step = fromStep || 0;
@@ -443,7 +478,8 @@
           if (e.timp) { heart(t, 1.0); noiseHit(t, 0.2, "lowpass", 300, 0.5, fxBus); }
           if (e.sparkle) bell(t, e.sparkle, 3 * sl);
           if (e.shepard) shepard(t, stepTime(sectionStartStep.stille) - stepTime(step));
-          if (e.final) finalChord(t, stepTime(step + e.final) - stepTime(step));
+          if (e.acid) acid(t, e.acid, sl);
+          if (e.hit) finalHit(t);
           step++;
         }
       }

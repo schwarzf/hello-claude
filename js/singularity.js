@@ -1,11 +1,16 @@
 /**
- * SINGULARITY – Shader-Demo (WebGL2) als eine einzige Eskalation: Lichtpunkt →
- * Würfelgitter → Lorenz-Attraktor → Bruch → Fraktal-Kathedrale →
- * Ereignishorizont → Tunnel → Stille → eine Lichtwelle erfasst das Universum.
- * Fast monochrom mit einer wechselnden Akzentfarbe.
+ * SINGULARITY – Shader-Demo (WebGL2) als eine einzige Eskalation:
+ * Lichtpunkt → Stabgitter → Gitterstäbe biegen sich zum Lorenz-Attraktor,
+ * der ins Chaos auffächert → Zerfall und Bruch → Würfel-Fraktal mit
+ * Endlos-Zoom und Flug durch seine Schächte → schwarzes Loch, dessen Scheibe
+ * zu einem flüssigen Acid-Objekt wird → runder Acid-Tunnel → Stille, ein
+ * Herzschlag → eine Lichtwelle erfasst das Universum.
+ * Erst fast monochrom mit einer wechselnden Akzentfarbe, ab dem Morph-Objekt
+ * in vollen Farben. Der Lichtpunkt vom Anfang bleibt in jeder Szene sichtbar.
  *
  * Ein „Chaos-Regler“ (0…1) aus der Musik (SingularityMusik) steuert Tempo,
- * Kamerawackeln, Farbsäume, Bildstörungen und Schlieren. Aufbau pro Bild:
+ * Kamerawackeln, Farbsäume, Bildstörungen und Schlieren; der Bass verformt
+ * die Geometrie. Aufbau pro Bild:
  *   1. Szene per Raymarching in eine Textur (Auflösung passt sich an),
  *      Partikel (Attraktor, Galaxien) additiv darüber
  *   2. Feedback: das vorige Bild wird gezoomt und gedreht untergemischt
@@ -30,17 +35,18 @@
 
   var SCENE = COMMON + "\n" + [
     "uniform vec2 uRes;",
-    "uniform float uTime,uKick,uSnare,uChaos,uProg,uCut,uTravel,uRad,uDist;",
+    "uniform float uTime,uKick,uSnare,uChaos,uProg,uSub,uCut,uTravel,uRad,uDist,uBass,uDecay,uJit;",
     "uniform vec3 uAccent;",
     "uniform int uScene;",
     "out vec4 outCol;",
-    "float gT,gH,gTrap;",
+    "float gT,gH,gTrap,gS;vec3 gC;",
     "float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);",
     "  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}",
     "float fbm(vec2 p){float a=.5,v=0.;for(int i=0;i<4;i++){v+=a*noise(p);p=rot(.5)*p*2.03;a*=.5;}return v;}",
     "float sdBox(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}",
+    "vec3 pal(float t){return .5+.5*cos(6.28318*(t+vec3(0.,.33,.67)));}",
 
-    // ---- Lichtpunkt (Anfang und Atempause) ----
+    // ---- Lichtpunkt (Anfang, Atempause, Herzschlag vor dem Finale) ----
     "vec3 punkt(vec2 uv,float pull){",
     "  float r=length(uv);",
     "  float s=.00035*(1.+uKick*2.5)*(1.+2.*uProg*(1.-pull));",
@@ -53,14 +59,16 @@
     "  return c;",
     "}",
 
-    // ---- Ordnung: Würfelgitter, das mit dem Chaos-Regler zu zittern beginnt ----
+    // ---- Stabgitter: Ordnung, die erst zittert (uJit) und dann zerfällt (uDecay) ----
     "float mapGrid(vec3 p){",
     "  vec3 id=floor((p+1.5)/3.),q=mod(p+1.5,3.)-1.5;",
-    "  float h=hash(id.xy+id.z*17.3),j=max(uChaos-.07,0.)*7.;",
-    "  q.xy*=rot(j*sin(gT*2.*(.5+h)+h*6.)*.5);q.yz*=rot(j*cos(gT*1.7*(.5+h))*.5);",
+    "  float h=hash(id.xy+id.z*17.3),j=uJit*(.5+h);",
+    "  q-=(vec3(h,fract(h*7.13),fract(h*13.7))-.5)*1.5*uDecay;",
+    "  q.xy*=rot(j*sin(gT*2.*(.5+h)+h*6.)*.5+uDecay*h*4.);q.yz*=rot(j*cos(gT*1.7*(.5+h))*.5+uDecay*(1.-h)*3.);",
     "  gH=h;",
-    "  float rods=min(length(q.xy),min(length(q.yz),length(q.xz)))-.035;",
-    "  return min(sdBox(q,vec3(.34+.05*uKick))-.02,rods)*.8;",
+    "  float d=sdBox(q,vec3(.34+.05*uKick+.05*uBass))-.02,rr=.035*(1.-uDecay);",
+    "  if(rr>.003)d=min(d,min(length(q.xy),min(length(q.yz),length(q.xz)))-rr);",
+    "  return d*.75;",
     "}",
     "vec3 gridScene(vec2 uv,float t,float dim){",
     "  vec3 ro=vec3(1.5,1.5,t*1.5),rd=normalize(vec3(uv,1.2));",
@@ -72,7 +80,7 @@
     "  vec3 n=normalize(vec3(mapGrid(p+e.xyy)-mapGrid(p-e.xyy),mapGrid(p+e.yxy)-mapGrid(p-e.yxy),mapGrid(p+e.yyx)-mapGrid(p-e.yyx)));",
     "  float ndl=max(dot(n,-rd),0.);",
     "  vec3 col=vec3(.03+.4*ndl*ndl)+vec3(.5)*pow(1.-ndl,3.);",
-    "  col+=uAccent*step(.9,hh)*(.4+uKick*1.6);",
+    "  col+=uAccent*step(.9-.55*uDecay,hh)*(.4+uKick*1.6);",
     "  return col*exp(-d*.05)*dim;",
     "}",
 
@@ -81,7 +89,7 @@
     "  vec3 id=floor(p/2.4),q=mod(p,2.4)-1.2;",
     "  float h=hash(id.xy+id.z*9.1),h2=hash(id.yz+id.x*3.7);",
     "  q.xy*=rot(gT*(h-.5)*2.5+h*6.3);q.xz*=rot(gT*(h2-.5)*2.+h2*6.3);",
-    "  gH=h2;return sdBox(q,vec3(.25+.5*h,.025,.12+.3*h2))*.6;",
+    "  gH=h2;return sdBox(q,vec3(.25+.5*h,.025+.03*uBass,.12+.3*h2))*.6;",
     "}",
     "vec3 shardScene(vec2 uv,float t){",
     "  vec3 ro=vec3(1.2+sin(uCut*1.7),1.2+cos(uCut*2.3),t*5.),rd=normalize(vec3(uv,.9));",
@@ -100,33 +108,61 @@
     "  return col+uAccent*uSnare*.05;",
     "}",
 
-    // ---- Fraktal-Kathedrale (Kugelinversionen), baut sich bei jedem Schnitt um ----
-    "float mapFr(vec3 p){",
-    "  float sc=1.,s=1.22+.12*sin(uCut*2.4)+.02*uKick;gTrap=1e9;",
-    "  for(int i=0;i<7;i++){p=-1.+2.*fract(.5*p+.5);float r2=dot(p,p);gTrap=min(gTrap,r2);float k=s/r2;p*=k;sc*=k;}",
-    "  return .25*abs(p.y)/sc;",
+    // ---- Würfel-Fraktal (Menger-Schwamm) ----
+    "float menger(vec3 p){",
+    "  float d=sdBox(p,vec3(1.)),s=1.;",
+    "  for(int i=0;i<3;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
+    "    d=max(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s);}",
+    "  return d;",
     "}",
-    "vec3 fractalScene(vec2 uv,float t){",
-    "  float tt=t*.22+uCut*1.7;",
-    "  vec3 ro=vec3(2.8*cos(.1+.33*tt),.4+.3*cos(.37*tt),2.8*cos(.5+.35*tt));",
-    "  vec3 ta=vec3(1.9*cos(1.2+.41*tt),.4+.1*cos(.27*tt),1.9*cos(2.+.38*tt));",
-    "  vec3 ww=normalize(ta-ro),uu=normalize(cross(ww,vec3(sin(.3*tt)*.4,1.,0.))),vv=cross(uu,ww);",
-    "  vec3 rd=normalize(uv.x*uu+uv.y*vv+(1.1-.3*uChaos)*ww);",
-    "  float d=.01,steps=0.;vec3 p=ro;bool hit=false;",
-    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapFr(p);steps+=1.;if(h<.0012*d){hit=true;break;}d+=h;if(d>12.)break;}",
+    // Selbstähnlich: in der Mitte jedes Würfels schwebt derselbe Würfel, fünfmal kleiner und etwas gedreht
+    "float mapZoom(vec3 p){",
+    "  float d=1e9,sc=5.;",
+    "  for(int k=0;k<5;k++){vec3 q=p/sc;q.xy*=rot(float(k)*.5236);float m=menger(q)*sc;if(m<d){d=m;gH=float(k);}sc/=5.;}",
+    "  return d;",
+    "}",
+    "vec3 zoomScene(vec2 uv){",
+    "  float U=uSub*3.+uSub*uSub*1.5,fr=fract(U),s=pow(5.,-fr);",
+    "  vec3 ro=vec3(.04*s*sin(gT),.04*s*cos(gT*.8),-1.6*s),rd=normalize(vec3(uv,1.));",
+    "  mat2 roll=rot(-fr*.5236+.3*sin(gT*.3));ro.xy*=roll;rd.xy*=roll;",
+    "  float d=0.,steps=0.;vec3 p=ro;bool hit=false;",
+    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapZoom(p);steps+=1.;if(h<.0015*s){hit=true;break;}d+=h;if(d>40.*s)break;}",
     "  vec3 col=vec3(0.);",
     "  if(hit){",
-    "    float tr=gTrap;vec2 e=vec2(.0015*d+.0005,0.);",
-    "    vec3 n=normalize(vec3(mapFr(p+e.xyy)-mapFr(p-e.xyy),mapFr(p+e.yxy)-mapFr(p-e.yxy),mapFr(p+e.yyx)-mapFr(p-e.yyx)));",
-    "    float ao=1.-steps/90.,ndl=max(dot(n,normalize(vec3(.4,.8,-.3))),0.);",
-    "    col=vec3(ao*ao)*(.12+.7*ndl)+vec3(.4)*pow(1.-abs(dot(n,rd)),3.)*ao;",
-    "    col+=uAccent*pow(clamp(1.-tr*1.6,0.,1.),2.)*(1.2+uKick*2.);",
+    "    float lv=gH;vec2 e=vec2(.002*s,0.);",
+    "    vec3 n=normalize(vec3(mapZoom(p+e.xyy)-mapZoom(p-e.xyy),mapZoom(p+e.yxy)-mapZoom(p-e.yxy),mapZoom(p+e.yyx)-mapZoom(p-e.yyx)));",
+    "    float ao=1.-steps/90.,ndl=max(dot(n,-rd),0.);",
+    "    col=vec3(.34,.38,.45)*ao*(.08+.8*ndl*ndl)+uAccent*pow(1.-ndl,3.)*.6*ao;",
+    "    col+=uAccent*.25*mod(lv,2.)*ao*(1.+uKick);",
+    "    col*=exp(-d/s*.22);",
     "  }",
-    "  col=mix(col,uAccent*.12,1.-exp(-d*.45));",
-    "  return col+vec3(1.)*uSnare*.04;",
+    "  return col+uAccent*.005/(dot(uv,uv)+.02)+vec3(.0008/(dot(uv,uv)+.0001));",
+    "}",
+    // Unendlich: Flug durch die Schächte eines Schwamms ohne Rand
+    "float mapInf(vec3 p){",
+    "  float d=-1e9,s=1.;",
+    "  for(int i=0;i<4;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
+    "    d=max(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s);}",
+    "  return d;",
+    "}",
+    "vec3 infScene(vec2 uv,float t){",
+    "  vec3 ro=vec3(.12*sin(t*.9),.12*cos(t*.7),t*1.6),rd=normalize(vec3(uv,.8-.2*uSub));",
+    "  rd.xy*=rot(uCut*1.5708+t*.15);rd.xz*=rot(sin(t*.4+uCut)*.1);rd.yz*=rot(cos(t*.33)*.07);",
+    "  float c=mod(uCut,3.);if(c>1.5){ro=ro.zxy;rd=rd.zxy;}else if(c>.5){ro=ro.yzx;rd=rd.yzx;}",
+    "  float d=.02,steps=0.;vec3 p=ro;bool hit=false;",
+    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapInf(p);steps+=1.;if(h<.001*(1.+d)){hit=true;break;}d+=h;if(d>24.)break;}",
+    "  vec3 col=vec3(0.);",
+    "  if(hit){",
+    "    vec2 e=vec2(.002,0.);",
+    "    vec3 n=normalize(vec3(mapInf(p+e.xyy)-mapInf(p-e.xyy),mapInf(p+e.yxy)-mapInf(p-e.yxy),mapInf(p+e.yyx)-mapInf(p-e.yyx)));",
+    "    float ao=1.-steps/90.,ndl=max(dot(n,-rd),0.);",
+    "    col=vec3(.34,.38,.45)*ao*(.08+.7*ndl)+uAccent*pow(1.-ndl,3.)*.5*ao;",
+    "    col+=uAccent*step(.5,fract(p.z*.25+p.x*.25+p.y*.25-t*.3))*.12*ao*(1.+uKick*2.);",
+    "  }",
+    "  return mix(col,uAccent*.25,1.-exp(-d*.16))+vec3(uSnare*.04);",
     "}",
 
-    // ---- Ereignishorizont: gebogene Lichtstrahlen, Akkretionsscheibe ----
+    // ---- Ereignishorizont: gebogene Lichtstrahlen; die Scheibe zieht sich am Ende zusammen ----
     "vec3 bgSky(vec3 d){",
     "  float lon=atan(d.z,d.x),lat=asin(clamp(d.y,-1.,1.));",
     "  vec2 g=vec2(lon,lat)*12./PI,f=abs(fract(g)-.5);",
@@ -137,12 +173,13 @@
     "  return c+uAccent*.07*fbm(vec2(lon*2.,lat*4.)+3.);",
     "}",
     "vec3 hole(vec2 uv,float t){",
-    "  float D=mix(15.,4.2,pow(uProg,1.4)),an=t*.1+uCut*1.9;",
-    "  vec3 ro=vec3(cos(an)*D,D*(.14+.1*sin(uCut*2.3)),sin(an)*D);",
+    "  float con=smoothstep(.55,1.,uProg),D=mix(13.,6.,uProg),an=t*.1+1.;",
+    "  vec3 ro=vec3(cos(an)*D,D*.16,sin(an)*D);",
     "  vec3 ww=normalize(-ro),uu=normalize(cross(ww,vec3(0.,1.,0.))),vv=cross(uu,ww);",
-    "  uv*=rot(.25*sin(t*.2)+uCut*.4+uProg*uProg*1.5);",
-    "  vec3 rd=normalize(uv.x*uu+uv.y*vv+(1.1-.4*uProg)*ww);",
+    "  uv*=rot(.25*sin(t*.2)+uProg*.6);",
+    "  vec3 rd=normalize(uv.x*uu+uv.y*vv+1.1*ww);",
     "  vec3 p=ro,v=rd,hc=cross(p,v);float h2=dot(hc,hc),tr=1.,minr=1e9;bool dead=false;",
+    "  float rout=mix(9.,2.9,con);",
     "  vec3 col=vec3(0.);",
     "  for(int i=0;i<72;i++){",
     "    float r2=dot(p,p);minr=min(minr,r2);",
@@ -151,77 +188,139 @@
     "    vec3 pn=p+v*dt;",
     "    if(p.y*pn.y<0.){",
     "      float f=p.y/(p.y-pn.y);vec3 c=mix(p,pn,f);float r=length(c.xz);",
-    "      if(r>2.4&&r<9.){",
+    "      if(r>2.4&&r<rout){",
     "        vec2 q=rot(t*5./pow(r,1.5))*c.xz;",
     "        float n=fbm(q*1.2)*.6+.4*fbm(vec2(r*5.,atan(q.y,q.x)*2.));",
-    "        float rad=smoothstep(2.4,3.,r)*smoothstep(9.,5.,r);",
+    "        float rad=smoothstep(2.4,3.,r)*smoothstep(rout,rout*.55,r);",
     "        float dop=1.+.7*dot(normalize(vec2(-c.z,c.x)),normalize(ro.xz));",
     "        vec3 dc=mix(vec3(1.,.95,.85),vec3(1.,.42,.08),smoothstep(2.4,5.,r));",
     "        dc=mix(dc,vec3(.5,.05,.02),smoothstep(5.,9.,r));",
+    "        dc=mix(dc,pal(r*.4+t*.5)*1.3,con);",
     "        float a=rad*(.35+.9*n*n);",
-    "        col+=tr*dc*a*max(dop,.2)*1.6*(1.+uKick*.6);tr*=1.-clamp(a*.7,0.,1.);",
+    "        col+=tr*dc*a*max(dop,.2)*(1.6+3.*con)*(1.+uKick*.6);tr*=1.-clamp(a*.7,0.,1.);",
     "      }",
     "    }",
     "    v+=-1.5*h2*p/(r2*r2*sqrt(r2))*dt;",
     "    p=pn;",
     "    if(r2>400.&&dot(p,v)>0.)break;",
     "  }",
-    "  if(!dead)col+=tr*bgSky(normalize(v));",
-    "  col+=vec3(1.,.8,.6)*.012/(abs(minr-2.25)+.05);",
+    "  if(!dead)col+=tr*bgSky(normalize(v))*(1.-con);",
+    "  col+=mix(vec3(1.,.8,.6),pal(t),con)*(.012+.05*con)/(abs(minr-2.25)+.05);",
     "  return col;",
     "}",
 
-    // ---- Tunnel: immer schneller, Querschnitt morpht, am Ende weißes Licht ----
+    // ---- Acid: Kaleidoskop-Muster, als Spiegelung und Tunnelwand ----
+    "vec3 acid(vec2 uv,float t){",
+    "  uv*=rot(t*.15);",
+    "  float r=length(uv),a=atan(uv.y,uv.x),n=PI/4.;",
+    "  a=abs(mod(a,2.*n)-n);",
+    "  vec2 p=vec2(cos(a),sin(a))*r,q=p;vec3 col=vec3(0.);",
+    "  for(int i=0;i<3;i++){",
+    "    q=fract(q*1.6+vec2(.1*sin(t*.4),.1*cos(t*.3)))-.5;",
+    "    float d=length(q)*exp(-r*.8);",
+    "    d=abs(sin(d*9.+t*1.6)/9.);",
+    "    col+=pal(r*.8+float(i)*.35+t*.35)*pow(.011/max(d,1e-4),1.25);",
+    "  }",
+    "  vec2 w=p*2.5+vec2(t*.2,0.);",
+    "  w+=2.*vec2(fbm(w+t*.4),fbm(w.yx-t*.3));",
+    "  return mix(col,pal(fbm(w)*1.8+t*.25+r)*1.1,.4);",
+    "}",
+
+    // ---- Morph-Objekt: Kugel → Torus → Würfel → Oktaeder, flüssig und schillernd ----
+    "float sdTorus(vec3 p,vec2 t){vec2 q=vec2(length(p.xz)-t.x,p.y);return length(q)-t.y;}",
+    "float sdOcta(vec3 p,float s){p=abs(p);return (p.x+p.y+p.z-s)*.57735;}",
+    "float shapeN(vec3 p,float i){",
+    "  if(i<.5)return length(p)-1.;",
+    "  if(i<1.5)return sdTorus(p,vec2(.9,.36));",
+    "  if(i<2.5)return sdBox(p,vec3(.7))-.07;",
+    "  return sdOcta(p,1.3);",
+    "}",
+    "float mapM(vec3 p){",
+    "  p/=gS;",
+    "  p.xz*=rot(gT*.5);p.xy*=rot(gT*.31);",
+    "  float k=mod(gT*.4,4.),i=floor(k),f=smoothstep(.15,.85,fract(k));",
+    "  float d=mix(shapeN(p,i),shapeN(p,mod(i+1.,4.)),f);",
+    "  d+=sin(p.x*5.+gT*2.)*sin(p.y*5.+gT*1.7)*sin(p.z*5.+gT*2.3)*.07*(1.+uKick*1.5+uBass);",
+    "  return d*.65*gS;",
+    "}",
+    "float marchObj(vec3 ro,vec3 rd){",
+    "  float b=dot(ro,rd),c=dot(ro,ro)-3.6*gS*gS,disc=b*b-c;",
+    "  if(disc<0.)return -1.;",
+    "  float s=sqrt(disc),d=max(-b-s,0.),dmax=-b+s;",
+    "  for(int i=0;i<60;i++){float h=mapM(ro+rd*d);if(h<.002)return d;d+=h;if(d>dmax)return -1.;}",
+    "  return -1.;",
+    "}",
+    "vec3 morphScene(vec2 uv,float t){",
+    "  float grow=smoothstep(0.,.1,uProg),dive=smoothstep(.78,1.,uProg);",
+    "  gS=(.05+.95*grow)*(1.+.3*uKick*(1.-grow))*(1.+.6*dive);",
+    "  vec3 ro=vec3(0.,0.,-4.2+2.6*dive),rd=normalize(vec3(uv,1.5-.8*dive));",
+    "  float ca=sin(t*.3)*.5+uCut*.9;ro.xz*=rot(ca);rd.xz*=rot(ca);",
+    "  vec3 col=pal(t*.2)*.05/(dot(uv,uv)+.05)*grow+vec3(.0012/(dot(uv,uv)+.0001))*(1.-grow);",
+    "  float d=marchObj(ro,rd);",
+    "  if(d>0.){",
+    "    vec3 pl=ro+rd*d;vec2 e=vec2(.004,-.004);",
+    "    vec3 n=normalize(e.xyy*mapM(pl+e.xyy)+e.yyx*mapM(pl+e.yyx)+e.yxy*mapM(pl+e.yxy)+e.xxx*mapM(pl+e.xxx));",
+    "    vec3 rf=reflect(rd,n),l=normalize(vec3(.5,.8,-.4));",
+    "    float fr=pow(1.-max(dot(n,-rd),0.),3.);",
+    "    vec3 irid=pal(dot(n,rd)*1.5+length(pl)*.8+t*.3);",
+    "    col=irid*(.2+.5*max(dot(n,l),0.))+acid(rf.xy/(abs(rf.z)+.7),t*.7)*.8*(.3+.7*fr)+vec3(pow(max(dot(rf,l),0.),40.))+irid*fr*.6;",
+    "  }",
+    "  return col;",
+    "}",
+
+    // ---- Tunnel: immer rund, Acid-Farben, immer schneller, am Ende weißes Licht ----
     "vec3 tunnel(vec2 uv,float t){",
     "  float pr=uProg;",
-    "  uv*=rot(uTravel*.02+sin(t*.7)*pr*1.5);",
-    "  uv+=vec2(sin(t*3.1),cos(t*2.3))*.06*pr;",
-    "  float a=atan(uv.y,uv.x);",
-    "  float sh=1.+.2*pr*cos(a*(3.+mod(uCut,4.))+t*2.);",
-    "  float r=length(uv)*sh+1e-3;",
+    "  uv*=rot(uTravel*.02+sin(t*.7)*pr*1.2);",
+    "  uv+=vec2(sin(t*3.1),cos(t*2.3))*.05*pr;",
+    "  float a=atan(uv.y,uv.x),r=length(uv)*(1.+.07*uBass)+1e-3;",
     "  float z=.5/pow(r,1.+pr*.5)+uTravel;",
     "  float tw=a/PI*8.+z*.15*(1.+pr*3.)*sin(t*.2+1.);",
     "  vec2 g=vec2(tw,z*.8),id=floor(g),f=fract(g)-.5;",
     "  float h=hash(id),h2=hash(id+7.3);",
-    "  float panel=step(.62-.2*pr,h)*smoothstep(.5,.42,max(abs(f.x),abs(f.y)));",
-    "  float edge=smoothstep(.43,.5,max(abs(f.x),abs(f.y)));",
-    "  vec2 g2=g*vec2(2.,4.),f2=fract(g2)-.5;float hh=hash(floor(g2)+3.1);",
-    "  float small=step(.8,hh)*smoothstep(.5,.3,max(abs(f2.x),abs(f2.y)));",
-    "  float st=smoothstep(.75,1.,hash(vec2(floor(tw*3.),3.)))*(.3+pr);",
-    "  float rings=smoothstep(.9,1.,sin(z*2.));",
-    "  vec3 col=vec3(.22)*panel*(.3+.7*h2)+uAccent*panel*step(.8,h2)*1.8+vec3(.18)*edge+uAccent*small*.8+vec3(st*.3)+uAccent*rings*.5;",
-    "  col*=min(1.,r*2.2)*(1.+uKick*.8);",
-    "  col+=mix(uAccent,vec3(1.),.5+.5*pr)*.006/(r*r+.004)*(.4+pr*pr*3.);",
-    "  float rw=pow(max(pr-.8,0.)/.2,2.)*1.6;",
+    "  float m=max(abs(f.x),abs(f.y)),panel=smoothstep(.5,.42,m),edge=smoothstep(.43,.5,m);",
+    "  vec2 w=vec2(cos(a),sin(a))*2.+vec2(z*.35,0.);",
+    "  w+=1.5*vec2(fbm(w+t*.4),fbm(w.yx-t*.3));",
+    "  vec3 wall=pal(fbm(w)*1.6+z*.06+t*.2);",
+    "  vec3 col=wall*(.3+.7*panel*h2)+pal(h+z*.1+t*.5)*panel*step(.7,h2)*1.5+vec3(edge*.2);",
+    "  col+=pal(z*.15-t)*smoothstep(.85,1.,sin(z*2.))*.8;",
+    "  col*=min(1.,r*2.4)*(1.+uKick*.7);",
+    "  col+=vec3(.004/(r*r+.003)*(.5+pr*pr*3.));",
+    "  float rw=pow(max(pr-.82,0.)/.18,2.)*1.6;",
     "  if(rw>0.)col=mix(col,vec3(6.),smoothstep(rw,rw*.55,r));",
     "  return col;",
     "}",
 
     // ---- Lichtwelle: eine Kugel aus Licht wächst schneller, als die Kamera zurückweicht ----
     "vec3 licht(vec2 uv){",
-    "  vec3 rd=normalize(vec3(uv*2./1.6,1.)),gold=vec3(1.,.78,.3);",
+    "  vec3 rd=normalize(vec3(uv*2./1.6,1.)),warm=vec3(1.,.94,.84);",
     "  float D=uDist,R=uRad;",
     "  if(D<R)return vec3(6.);",
     "  float b=D*rd.z,imp2=max(D*D-b*b,1e-9),disc=R*R-imp2;",
-    "  vec3 col=gold*pow(min(R*R/imp2,1.),.8)*.5*(1.+uKick);",
-    "  if(disc>0.){float k=sqrt(disc)/R;col=mix(gold,vec3(1.),k*k)*(.6+2.4*k)+gold*smoothstep(.35,0.,k)*1.5;}",
-    "  return col+vec3(1.,.95,.85)*pow(R/D,3.)*2.;",
+    "  vec3 col=warm*pow(min(R*R/imp2,1.),.8)*.6*(1.+uKick);",
+    "  if(disc>0.){float k=sqrt(disc)/R;col=mix(warm,vec3(1.),k)*(.8+2.6*k)+vec3(.7,.85,1.)*smoothstep(.3,0.,k)*1.5;}",
+    "  return col+vec3(pow(R/D,3.)*2.5);",
     "}",
 
     "void main(){",
-    "  gT=uTime;",
+    "  gT=uTime;gS=1.;",
     "  vec2 uv=(gl_FragCoord.xy-.5*uRes)/uRes.y;",
     "  vec3 col=vec3(0.);",
+    "  vec3 dot0=vec3(.0006/(dot(uv,uv)+.00012));",   // der Lichtpunkt vom Anfang bleibt in jeder Szene
     "  if(uScene==0)col=punkt(uv,0.);",
-    "  else if(uScene==1)col=gridScene(uv,gT,1.);",
-    "  else if(uScene==2)col=gridScene(uv,gT*.6,.3);",
-    "  else if(uScene==3)col=shardScene(uv,gT);",
-    "  else if(uScene==4)col=fractalScene(uv,gT);",
+    "  else if(uScene==1)col=gridScene(uv,gT,1.)+dot0;",
+    "  else if(uScene==2)col=gridScene(uv,gT*.6,.3)+dot0;",
+    "  else if(uScene==3)col=shardScene(uv,gT)+dot0;",
+    "  else if(uScene==4)col=zoomScene(uv);",
     "  else if(uScene==5)col=punkt(uv,1.);",
     "  else if(uScene==6)col=hole(uv,gT);",
     "  else if(uScene==7)col=tunnel(uv,gT);",
     "  else if(uScene==9)col=licht(uv);",
     "  else if(uScene==10)col=vec3(6.);",
+    "  else if(uScene==11)col=gridScene(uv,gT,1.)+dot0;",
+    "  else if(uScene==12)col=infScene(uv,gT)+dot0;",
+    "  else if(uScene==13)col=morphScene(uv,gT);",
+    "  else if(uScene==14)col=punkt(uv,0.)*(.25+uKick*1.5);",
     "  outCol=vec4(1.-exp(-col*1.2),1.);",
     "}"
   ].join("\n");
@@ -263,17 +362,22 @@
   var PVERT = [
     "#version 300 es",
     "layout(location=0) in vec4 aPos;",
+    "layout(location=1) in vec3 aBase;",
+    "layout(location=2) in vec3 aGrid;",
     "uniform mat3 uRot;",
-    "uniform float uDist,uAspect,uSize,uTime,uRad;",
+    "uniform float uDist,uAspect,uSize,uTime,uRad,uSpread,uMorph,uJit;",
     "uniform int uMode;",
     "out float vB;out float vW;",
     "void main(){",
-    "  vec3 p=uRot*aPos.xyz;p.z+=uDist;",
+    "  vec3 w=aPos.xyz;",
+    // Attraktor: Punkte liegen erst auf Gitterstäben, biegen sich zur Bahn, dann fächern die Bahnen auf
+    "  if(uMode==0)w=mix(aGrid,mix(aBase,aPos.xyz,uSpread),uMorph)+sin(vec3(aPos.w*911.,aPos.w*577.,aPos.w*331.)+uTime*7.)*uJit;",
+    "  vec3 p=uRot*w;p.z+=uDist;",
     "  gl_Position=vec4(p.x*1.6/uAspect,p.y*1.6,0.,p.z);",
     "  vW=0.;",
-    "  if(uMode==0){",                     // Attraktor: Lichtköpfe laufen die Bahn entlang
-    "    float hd=pow(fract(aPos.w*3.-uTime*.22),10.);",
-    "    vB=.06+hd*1.6;gl_PointSize=clamp(uSize*(1.+hd*2.)/max(p.z,.1),1.,40.);",
+    "  if(uMode==0){",
+    "    float hd=pow(fract(aPos.w*3.-uTime*.22),10.)*uMorph;",
+    "    vB=.06+.1*(1.-uMorph)+hd*1.6;gl_PointSize=clamp(uSize*(1.+hd*2.)/max(p.z,.1),1.,40.);",
     "  }else{",                            // Universum: was die Lichtwelle erreicht, leuchtet auf
     "    float r=length(aPos.xyz);",
     "    vW=step(r,uRad)*(.6+2.*smoothstep(uRad*.75,uRad,r));",
@@ -287,14 +391,14 @@
     "in float vB;in float vW;",
     "uniform vec3 uColor;",
     "out vec4 outCol;",
-    "void main(){float a=smoothstep(.5,.05,length(gl_PointCoord-.5));outCol=vec4((uColor*vB+vec3(1.,.9,.7)*vW)*a,1.);}"
+    "void main(){float a=smoothstep(.5,.05,length(gl_PointCoord-.5));outCol=vec4((uColor*vB+vec3(1.,.96,.9)*vW)*a,1.);}"
   ].join("\n");
 
   // ---------- WebGL-Aufbau ----------
 
   var ok = false, error = "", progScene, progFb, progPost, progPts, vaoTri, vaoLorenz, vaoUni;
   var fboS, texS, fboA, texA, fboB, texB, fbW = 0, fbH = 0;
-  var N_LORENZ = 6000, N_UNI = 0;
+  var N_LORENZ = 2600, K_LORENZ = 8, N_UNI = 0;
 
   function compile(type, src) {
     var s = gl.createShader(type);
@@ -313,13 +417,19 @@
     names.forEach(function (n) { u[n] = gl.getUniformLocation(p, n); });
     return { p: p, u: u };
   }
-  function pointBuffer(data) {
+  function pointBuffer(data, stride) {
     var vao = gl.createVertexArray(), buf = gl.createBuffer();
     gl.bindVertexArray(vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(0, 4, gl.FLOAT, false, stride * 4, 0);
+    if (stride > 4) {
+      gl.enableVertexAttribArray(1);
+      gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride * 4, 16);
+      gl.enableVertexAttribArray(2);
+      gl.vertexAttribPointer(2, 3, gl.FLOAT, false, stride * 4, 28);
+    }
     return vao;
   }
   function rng(seed) {
@@ -331,20 +441,31 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  /** Zwei Lorenz-Bahnen mit fast gleichem Start – sie laufen auseinander (Schmetterlingseffekt). */
+  /**
+   * Acht Lorenz-Bahnen mit verschiedenen Startwerten. Pro Punkt: eigene
+   * Position, die Position der ersten Bahn (solange alles „deterministisch“
+   * übereinander liegt) und ein Platz auf den Stäben eines Würfelgitters.
+   */
   function lorenzData() {
-    var d = new Float32Array(N_LORENZ * 2 * 4);
-    [0, 1].forEach(function (k) {
-      var x = 0.1 + k * 0.001, y = 0, z = 20, dt = 0.006;
-      for (var i = 0; i < N_LORENZ; i++) {
-        for (var s = 0; s < 2; s++) {
+    var d = new Float32Array(N_LORENZ * K_LORENZ * 10), base = [];
+    for (var k = 0; k < K_LORENZ; k++) {
+      var x = 0.1 + k * 0.37, y = k * 0.2, z = 20, dt = 0.006;
+      for (var i = -500; i < N_LORENZ; i++) {
+        for (var st = 0; st < 2; st++) {
           var dx = 10 * (y - x), dy = x * (28 - z) - y, dz = x * y - 8 / 3 * z;
           x += dx * dt; y += dy * dt; z += dz * dt;
         }
-        var o = (k * N_LORENZ + i) * 4;
-        d[o] = x / 25; d[o + 1] = (z - 25) / 25; d[o + 2] = y / 25; d[o + 3] = i / N_LORENZ;
+        if (i < 0) continue;
+        var o = (k * N_LORENZ + i) * 10, px = x / 25, py = (z - 25) / 25, pz = y / 25;
+        if (k === 0) base.push(px, py, pz);
+        d[o] = px; d[o + 1] = py; d[o + 2] = pz; d[o + 3] = i / N_LORENZ;
+        d[o + 4] = base[i * 3]; d[o + 5] = base[i * 3 + 1]; d[o + 6] = base[i * 3 + 2];
+        // Gitterstab: 27 Linien eines 3×3×3-Gitters
+        var u = i / N_LORENZ * 27, line = Math.floor(u), along = (u - line) * 2 - 1, a = (line % 3) - 1, b2 = (Math.floor(line / 3) % 3) - 1, axis = Math.floor(line / 9);
+        var g = axis === 0 ? [along, a, b2] : axis === 1 ? [a, along, b2] : [a, b2, along];
+        d[o + 7] = g[0] * 0.9; d[o + 8] = g[1] * 0.9; d[o + 9] = g[2] * 0.9;
       }
-    });
+    }
     return d;
   }
   /** Heimatgalaxie (Spirale) im Ursprung und ein Netz ferner Galaxien. */
@@ -372,13 +493,13 @@
     return { tex: tex, fbo: fbo };
   }
   function setup() {
-    progScene = program(VERT, SCENE, ["uRes", "uTime", "uKick", "uSnare", "uChaos", "uProg", "uCut", "uTravel", "uRad", "uDist", "uAccent", "uScene"]);
+    progScene = program(VERT, SCENE, ["uRes", "uTime", "uKick", "uSnare", "uChaos", "uProg", "uSub", "uCut", "uTravel", "uRad", "uDist", "uBass", "uDecay", "uJit", "uAccent", "uScene"]);
     progFb = program(VERT, FEEDBACK, ["uCur", "uPrev", "uRes", "uFb", "uZoom", "uRotF"]);
     progPost = program(VERT, POST, ["uTex", "uRes", "uShake", "uTime", "uKick", "uGlitch", "uFade", "uWhite", "uCA", "uStrobe", "uBars"]);
-    progPts = program(PVERT, PFRAG, ["uRot", "uDist", "uAspect", "uSize", "uTime", "uRad", "uMode", "uColor"]);
+    progPts = program(PVERT, PFRAG, ["uRot", "uDist", "uAspect", "uSize", "uTime", "uRad", "uMode", "uColor", "uSpread", "uMorph", "uJit"]);
     vaoTri = gl.createVertexArray();
-    vaoLorenz = pointBuffer(lorenzData());
-    vaoUni = pointBuffer(universeData());
+    vaoLorenz = pointBuffer(lorenzData(), 10);
+    vaoUni = pointBuffer(universeData(), 4);
     var s = target(), a = target(), b = target();
     texS = s.tex; fboS = s.fbo; texA = a.tex; fboA = a.fbo; texB = b.tex; fboB = b.fbo;
     fbW = fbH = 0;
@@ -416,24 +537,42 @@
 
   // ---------- Ablaufdaten ----------
 
-  var SCENES = { punkt: 0, gitter: 1, lorenz: 2, bruch: 3, fraktal: 4, pause: 5, horizont: 6, tunnel: 7, stille: 8, licht: 9, weiss: 10, ende: 10 };
+  var SCENES = { punkt: 0, gitter: 1, lorenz: 2, bruch: 3, fraktal: 4, pause: 5, horizont: 6, morph: 13, tunnel: 7, stille: 8, licht: 9, weiss: 10, ende: 10 };
   var ACCENT = {
-    punkt: [0.85, 0.85, 0.9], gitter: [0.9, 0.9, 0.95], lorenz: [0.1, 0.85, 1], bruch: [1, 0.45, 0.05], fraktal: [1, 0.08, 0.05],
-    pause: [0.8, 0.8, 0.9], horizont: [0.6, 0.2, 1], stille: [0, 0, 0], licht: [1, 0.78, 0.3], weiss: [1, 1, 1], ende: [1, 1, 1]
+    punkt: [0.85, 0.85, 0.9], gitter: [0.9, 0.9, 0.95], lorenz: [0.1, 0.85, 1], bruch: [1, 0.45, 0.05], fraktal: [0.15, 0.5, 1],
+    pause: [0.8, 0.8, 0.9], horizont: [0.6, 0.2, 1], morph: [1, 1, 1], tunnel: [1, 1, 1], stille: [1, 1, 1], licht: [1, 0.94, 0.84], weiss: [1, 1, 1], ende: [1, 1, 1]
   };
-  var TUNNEL_COLORS = [[0.1, 0.85, 1], [1, 0.45, 0.05], [1, 0.08, 0.05], [0.6, 0.2, 1], [1, 0.78, 0.3], [1, 1, 1]];
-  var FEEDBACK_AMOUNT = { punkt: 0, gitter: 0, lorenz: 0.6, bruch: 0.4, fraktal: 0.5, pause: 0.8, horizont: 0.6, tunnel: 0.55, stille: 0, licht: 0.5, weiss: 0, ende: 0 };
+  var FEEDBACK_AMOUNT = { punkt: 0, gitter: 0, lorenz: 0.6, bruch: 0.4, fraktal: 0.35, pause: 0.8, horizont: 0.6, morph: 0.45, tunnel: 0.55, stille: 0, licht: 0.5, weiss: 0, ende: 0 };
   // kurze Wort-Einblendungen: [Abschnitt, von Schritt, bis Schritt, Text]
   var WORDS = [
     ["punkt", 20, 60, "SINGULARITY"],
     ["gitter", 8, 44, "ORDER"],
     ["lorenz", 8, 36, "DETERMINISTIC"], ["lorenz", 72, 100, "UNPREDICTABLE"],
-    ["bruch", 0, 14, "ENTROPY"], ["bruch", 64, 72, "BREAK"],
-    ["fraktal", 8, 24, "SELF-SIMILAR"], ["fraktal", 72, 84, "INFINITE"],
+    ["bruch", 4, 24, "ENTROPY"], ["bruch", 64, 76, "BREAK"],
+    ["fraktal", 8, 28, "SELF-SIMILAR"], ["fraktal", 68, 84, "INFINITE"],
     ["pause", 16, 32, "EVENT HORIZON"],
-    ["horizont", 64, 84, "NO RETURN"],
+    ["horizont", 8, 28, "NO RETURN"],
     ["tunnel", 32, 40, "FASTER"], ["tunnel", 96, 104, "CLOSER"], ["tunnel", 160, 166, "HOTTER"], ["tunnel", 192, 196, "BRIGHTER"], ["tunnel", 224, 228, "NOW"]
   ];
+
+  /** Szene im Shader; manche Abschnitte haben zwei Hälften mit eigenem Bild. */
+  function sceneId(n, a) {
+    if (n === "bruch") return a.step < 64 ? 11 : 3;        // ENTROPY: Zerfall – BREAK: Splitter
+    if (n === "fraktal") return a.step < 64 ? 4 : 12;      // SELF-SIMILAR: Endlos-Zoom – INFINITE: Schächte
+    if (n === "stille") return a.step < 16 ? 8 : 14;       // Schwarz – dann der Herzschlag
+    return SCENES[n];
+  }
+  /** Filterbewegung des Reese-Basses (0…1), damit man den Bass sieht. */
+  function bassEnv(step, frac) {
+    var now = M.stepTime(step) + frac * M.stepLength(step);
+    for (var k = 0; k < 8 && step - k >= 0; k++) {
+      var r = M.at(step - k).events.reese;
+      if (!r) continue;
+      var age = (now - M.stepTime(step - k)) / (M.stepTime(step - k + r.len) - M.stepTime(step - k));
+      return age < 1 ? Math.pow(Math.sin(Math.PI * age * (r.wob || 1)), 2) : 0;
+    }
+    return 0;
+  }
 
   function since(step, frac, keys) {
     var now = M.stepTime(step) + frac * M.stepLength(step);
@@ -446,7 +585,7 @@
   function frac01(x) { return x - Math.floor(x); }
   function hash1(n) { return frac01(Math.sin(n * 127.1) * 43758.5453); }
 
-  var quality = 0.5, calm = false, lastScene = "", current = { scene: "punkt", index: 0, word: "", progress: 0 };
+  var quality = 0.5, calm = false, lastScene = -1, current = { scene: "punkt", index: 0, word: "", progress: 0 };
 
   function resize() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -455,7 +594,7 @@
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
   }
 
-  function drawPoints(vao, first, count, mode, color, rot, dist, size, t, rad) {
+  function drawPoints(vao, first, count, mode, color, rot, dist, size, t, rad, spread, morph, jit) {
     gl.useProgram(progPts.p);
     gl.bindVertexArray(vao);
     gl.enable(gl.BLEND);
@@ -467,6 +606,9 @@
     gl.uniform1f(progPts.u.uTime, t);
     gl.uniform1f(progPts.u.uRad, rad);
     gl.uniform1i(progPts.u.uMode, mode);
+    gl.uniform1f(progPts.u.uSpread, spread || 0);
+    gl.uniform1f(progPts.u.uMorph, morph === undefined ? 1 : morph);
+    gl.uniform1f(progPts.u.uJit, jit || 0);
     gl.uniform3f(progPts.u.uColor, color[0], color[1], color[2]);
     gl.drawArrays(gl.POINTS, first, count);
     gl.disable(gl.BLEND);
@@ -490,11 +632,15 @@
     var secT = sec ? t - M.sectionStart(n) : 9, secLen = sec ? M.stepTime(step - a.step + len) - M.sectionStart(n) : 9;
     var kick = Math.exp(-since(step, frac, ["kick", "heart", "timp"]) * 7), snare = Math.exp(-since(step, frac, ["snare"]) * 10);
     var soft = calm ? 0.3 : 1;
-    var accent = ACCENT[n];
-    if (n === "tunnel") accent = TUNNEL_COLORS[a.cut % TUNNEL_COLORS.length];
+    var accent = ACCENT[n], scene = sceneId(n, a);
     var time = t * (0.6 + 1.8 * chaos);
     var travel = n === "tunnel" ? secLen * 3 * (Math.exp(2.6 * pr) - 1) / 2.6 : 0;
-    var rad = 0.01 * Math.exp(10.06 * pr), dist = 0.25 * Math.exp(6.4 * pr);
+    // die Lichtkugel überholt die Kamera schon nach der halben Szene
+    var rad = 0.01 * Math.exp(12.8 * pr), dist = 0.25 * Math.exp(6.4 * pr);
+    var half = len / 2, sub = a.step < half ? (a.step + frac) / half : (a.step + frac - half) / half;
+    var bassV = bassEnv(step, frac) * (calm ? 0.4 : 1), smooth = function (x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+    var decay = scene === 11 ? sub : n === "lorenz" ? smooth((pr - 0.55) / 0.45) * 0.7 : 0;
+    var jit = scene === 11 ? 0.15 + sub * sub * 5 : Math.max(chaos - 0.07, 0) * 7;
 
     var w = Math.max(2, Math.round(canvas.width * (q || quality))), h = Math.max(2, Math.round(canvas.height * (q || quality)));
     ensureTargets(w, h);
@@ -511,18 +657,26 @@
     gl.uniform1f(u.uSnare, snare * soft);
     gl.uniform1f(u.uChaos, chaos);
     gl.uniform1f(u.uProg, pr);
+    gl.uniform1f(u.uSub, sub);
+    gl.uniform1f(u.uBass, bassV);
+    gl.uniform1f(u.uDecay, decay);
+    gl.uniform1f(u.uJit, jit);
     gl.uniform1f(u.uCut, a.cut);
     gl.uniform1f(u.uTravel, travel);
     gl.uniform1f(u.uRad, rad);
     gl.uniform1f(u.uDist, dist);
     gl.uniform3f(u.uAccent, accent[0], accent[1], accent[2]);
-    gl.uniform1i(u.uScene, SCENES[n]);
+    gl.uniform1i(u.uScene, scene);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (n === "lorenz") {
+      // DETERMINISTIC: Gitterstäbe biegen sich zur gemeinsamen Bahn – UNPREDICTABLE: die Bahnen fächern auf
       var rotL = rotation(t * 0.35 + a.cut * 1.3, 0.25 + 0.2 * Math.sin(t * 0.3));
-      var grow = Math.min(1, pr * 4);
-      drawPoints(vaoLorenz, 0, Math.round(N_LORENZ * grow), 0, [0.8, 0.8, 0.85], rotL, 2.5 - pr * 0.5, 0.012 * h, t, 0);
-      drawPoints(vaoLorenz, N_LORENZ, Math.round(N_LORENZ * grow), 0, accent, rotL, 2.5 - pr * 0.5, 0.012 * h, t, 0);
+      var morph = smooth((pr - 0.04) / 0.2), spread = smooth((pr - 0.48) / 0.3);
+      for (var k = 0; k < K_LORENZ; k++) {
+        var mixW = k === 0 ? 1 : 0.15 + 0.5 * ((k * 0.37) % 1);
+        var colK = [accent[0] + (1 - accent[0]) * mixW, accent[1] + (1 - accent[1]) * mixW, accent[2] + (1 - accent[2]) * mixW];
+        drawPoints(vaoLorenz, k * N_LORENZ, N_LORENZ, 0, colK.map(function (c) { return c * 0.8; }), rotL, 2.6 - pr * 0.6, 0.011 * h, t, 0, spread, morph, 0.05 * spread * spread);
+      }
     } else if (n === "licht") {
       drawPoints(vaoUni, 0, N_UNI, 1, [1.3, 1.35, 1.6], rotation(0.4 + pr * 1.2, 0.95 - pr * 0.5), dist, 0.0022 * h, t, rad);
     }
@@ -539,8 +693,8 @@
     gl.uniform1i(progFb.u.uPrev, 1);
     gl.uniform2f(progFb.u.uRes, w, h);
     // beim Szenenwechsel keine Schlieren der alten Szene mitnehmen
-    gl.uniform1f(progFb.u.uFb, n !== lastScene ? 0 : fb * (calm ? 0.8 : 1));
-    lastScene = n;
+    gl.uniform1f(progFb.u.uFb, scene !== lastScene ? 0 : fb * (calm ? 0.8 : 1));
+    lastScene = scene;
     gl.uniform1f(progFb.u.uZoom, n === "horizont" ? 0.985 : 1.006 + chaos * 0.03);
     gl.uniform1f(progFb.u.uRotF, (0.002 + chaos * 0.012) * (a.cut % 2 ? 1 : -1));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -554,12 +708,14 @@
     u = progPost.u;
     var hard = n !== "punkt" && n !== "stille" && n !== "licht" && n !== "weiss" && n !== "ende";
     var trans = hard ? Math.max(0, 1 - secT / 0.3) : 0;
-    var burst = hash1(Math.floor(t * 10)) < chaos * 0.22 ? chaos * 0.7 : 0;
+    // auch der Wechsel zur zweiten Hälfte (BREAK, INFINITE) ist ein harter Schnitt
+    if ((n === "bruch" || n === "fraktal") && a.step >= 64) trans = Math.max(trans, 1 - (t - M.stepTime(step - a.step + 64)) / 0.3);
+    var burst = hash1(Math.floor(t * 10)) < chaos * 0.18 ? chaos * 0.45 : 0;
     var shake = (chaos * chaos * 0.012 + kick * 0.004 * chaos) * soft;
-    var strobe = calm ? 0 : snare * chaos * chaos * 0.35 + (n === "licht" ? Math.exp(-secT * 6) * 0.9 : 0);
+    var strobe = calm ? 0 : snare * chaos * chaos * 0.35 + (n === "licht" || n === "morph" ? Math.exp(-secT * 6) * 0.9 : 0);
     var fade = Math.min(1, t / 1.2);
-    if (n === "stille") fade = 0;
-    var bars = n === "weiss" || n === "ende" ? 0 : n === "licht" ? 0.11 * Math.max(0, 1 - pr * 2.2) : 0.11;
+    if (scene === 8) fade = 0;
+    var bars = n === "weiss" || n === "ende" ? 0 : n === "licht" ? 0.11 * Math.max(0, 1 - pr * 4) : 0.11;
     gl.uniform1i(u.uTex, 0);
     gl.uniform2f(u.uRes, canvas.width, canvas.height);
     gl.uniform2f(u.uShake, Math.sin(t * 91.7) * shake, Math.cos(t * 77.3) * shake);
@@ -592,7 +748,7 @@
   var running = false, withSound = true, clock = 0, last = null, frames = 0, offset = 0, slow = 0, fast = 0, shownWord = null, shownScene = "";
   var wordEl = document.getElementById("word"), partEl = document.getElementById("part"), finalEl = document.getElementById("final");
   var startEl = document.getElementById("start"), soundBtn = document.getElementById("btn-sound"), calmBtn = document.getElementById("btn-calm"), againBtn = document.getElementById("again");
-  var NAMES = { punkt: "I · POINT", gitter: "II · ORDER", lorenz: "III · ATTRACTOR", bruch: "IV · ENTROPY", fraktal: "V · FRACTAL", pause: "VI · SILENCE", horizont: "VII · EVENT HORIZON", tunnel: "VIII · TUNNEL", stille: "", licht: "IX · LIGHT", weiss: "", ende: "" };
+  var NAMES = { punkt: "I · POINT", gitter: "II · ORDER", lorenz: "III · ATTRACTOR", bruch: "IV · ENTROPY", fraktal: "V · FRACTAL", pause: "VI · SILENCE", horizont: "VII · EVENT HORIZON", morph: "VIII · MORPH", tunnel: "IX · TUNNEL", stille: "", licht: "X · LIGHT", weiss: "", ende: "" };
 
   function songTime() {
     var t = withSound ? M.time() : null;
@@ -676,7 +832,7 @@
 
   // Standbild hinter dem Startbildschirm: das schwarze Loch
   resize();
-  renderAt(M.sectionStart("horizont") + 6, 0.5);
+  renderAt(M.sectionStart("horizont") + 1.5, 0.5);
   requestAnimationFrame(frame);
 
   window.singularity = {

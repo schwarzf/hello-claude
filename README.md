@@ -175,38 +175,46 @@ Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
 ## SINGULARITY ⚫
 
-`singularity.html` (von der Taskliste verlinkt) ist eine zweiminütige
-Shader-Demo (WebGL2) als eine einzige Eskalation – fast monochrom, mit einer
-Akzentfarbe, die bei jedem harten Schnitt wechselt:
+`singularity.html` (von der Taskliste verlinkt) ist eine gut zweiminütige
+Shader-Demo (WebGL2) als eine einzige Eskalation. Die ersten 80 Sekunden sind
+fast monochrom mit einer Akzentfarbe, die bei jedem harten Schnitt wechselt;
+danach bricht die Farbe herein. Der Lichtpunkt vom Anfang bleibt in jeder Szene
+in der Bildmitte sichtbar.
 
-| Szene | Inhalt | Akzent |
+| Wort | Bild | Farbe |
 | --- | --- | --- |
-| Point | ein Lichtpunkt, Herzschlag | – |
-| Order | Flug durch ein sauberes Stabgitter | – |
-| Attractor | zwei Lorenz-Bahnen aus Partikeln laufen auseinander, das Gitter zittert | Cyan |
-| Entropy | das Gitter ist zersplittert, harte Schnitte | Orange |
-| Fractal | Flug durch eine Fraktal-Kathedrale, die sich umbaut | Rot |
-| Silence | Atempause mit dem Lichtpunkt | – |
-| Event Horizon | schwarzes Loch mit gebogenen Lichtstrahlen und Akkretionsscheibe | Violett |
-| Tunnel | immer schneller, der Querschnitt morpht, Farben wechseln im Takt | alle |
-| Light | Stille – dann erfasst eine Lichtwelle Galaxie und Universum | Gold |
+| SINGULARITY | ein Lichtpunkt, Herzschlag | – |
+| ORDER | Flug durch ein sauberes Stabgitter | – |
+| DETERMINISTIC | Gitterstäbe biegen sich zur Bahn des Lorenz-Attraktors; acht Bahnen laufen exakt übereinander | Cyan |
+| UNPREDICTABLE | die Bahnen fächern zu einem Knäuel auf, das Gitter dahinter zerfällt | Cyan |
+| ENTROPY | Würfel lösen sich aus dem Gitter, kippen und treiben auseinander | Orange |
+| BREAK | alles zerspringt in Splitter, harte Schnitte | Orange |
+| SELF-SIMILAR | Endlos-Zoom in einen Würfel-Schwamm: in jedem steckt derselbe Würfel, fünfmal kleiner | Blau |
+| INFINITE | Flug durch die Schächte eines Schwamms ohne Rand | Blau |
+| EVENT HORIZON | Atempause, dann ein schwarzes Loch mit gebogenen Lichtstrahlen; seine Scheibe zieht sich zusammen … | Violett |
+| – | … und wird zu einem flüssig morphenden, schillernden Objekt | Acid |
+| FASTER … NOW | runder Tunnel in Acid-Farben, bis zum Ende immer schneller | Acid |
+| – | Schwarz und Stille, ein Herzschlag – dann erfasst eine Lichtwelle Galaxie und Universum | Weiß |
 
 Am Ende steht Schwarz auf Weiß „SINGULARITY“ und ein „Nochmal“-Knopf.
 
 Technik (`js/singularity.js`): Ein Chaos-Regler (0…1) aus der Musik steuert
-Tempo, Kamerawackeln, Farbsäume, Bildstörungen und Schlieren. Pro Bild drei
-Durchgänge: Szene per Raymarching in eine Textur (Auflösung passt sich an,
-Partikel additiv darüber), Feedback (das vorige Bild wird gezoomt und gedreht
-untergemischt), Nachbearbeitung (Bloom, Farbsäume, Glitch, Körnung, Kinobalken).
-Die Lichtstrahlen am schwarzen Loch werden schrittweise gebogen; die Lichtwelle
-ist eine Kugel, die schneller wächst, als die Kamera zurückweicht.
+Tempo, Kamerawackeln, Farbsäume, Bildstörungen und Schlieren; die
+Filterbewegung des Basses verformt die Geometrie. Pro Bild drei Durchgänge:
+Szene per Raymarching in eine Textur (Auflösung passt sich an, Partikel additiv
+darüber), Feedback (das vorige Bild wird gezoomt und gedreht untergemischt),
+Nachbearbeitung (Bloom, Farbsäume, Glitch, Körnung, Kinobalken). Die Partikel
+des Attraktors haben drei Positionen (Gitterstab, gemeinsame Bahn, eigene
+Bahn), zwischen denen überblendet wird. Der Endlos-Zoom nutzt, dass Skalieren
+um den Faktor 5 samt 30° Drehung das Bild auf sich selbst abbildet.
 
 Sound (`js/singularity-musik.js`): eigene Komposition, Tempo 80 → 212 BPM mit
 gemeinsamer Zeittabelle für Musik und Grafik. Herzschlag und Glocke, präzise
 Arpeggios, die ihre Ordnung verlieren, Drum-and-Bass mit Reese-Bass, Halftime
-am Ereignishorizont, im Tunnel ein Shepard-Ton (scheint endlos zu steigen),
-ein Takt Stille, dann die Lichtwelle in D-Dur. Das Motiv aus vier Tönen bleibt,
-nur die Terz wechselt von Moll nach Dur.
+am Ereignishorizont, ein heller, treibender Morph-Teil in Dur, im Tunnel eine
+Acid-Linie und ein Shepard-Ton (scheint endlos zu steigen), dann Stille, ein
+Herzschlag und eine Explosion mit hartem Schlussschlag. Das Motiv aus vier
+Tönen bleibt, nur die Terz wechselt von Moll nach Dur.
 
 ## Happy Birthday Andi! 🎂🎸
 

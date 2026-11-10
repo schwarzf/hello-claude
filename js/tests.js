@@ -598,7 +598,7 @@
     }],
     ["SINGULARITY: Ablauf, Tempo-Rampe, Chaos-Regler und Motiv", function () {
       var S = SingularityMusik;
-      assertEqual(S.SECTIONS.map(function (s) { return s.name; }), ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "tunnel", "stille", "licht", "weiss"]);
+      assertEqual(S.SECTIONS.map(function (s) { return s.name; }), ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "morph", "tunnel", "stille", "licht", "weiss"]);
       assert(S.DURATION > 115 && S.DURATION < 140, "rund zwei Minuten: " + S.DURATION.toFixed(1));
       var first = {}, lastStep = {};
       for (var st = 0; st < S.STEPS; st++) { var a = S.at(st); if (first[a.section] === undefined) first[a.section] = st; lastStep[a.section] = st; }
@@ -606,7 +606,11 @@
       assert(S.at(first.punkt).chaos === 0 && S.at(lastStep.tunnel).chaos > 0.99, "Chaos-Regler läuft von 0 bis 1");
       assert(S.at(first.fraktal).chaos > S.at(first.bruch).chaos && S.at(first.bruch).chaos > S.at(first.lorenz).chaos, "Chaos steigt von Szene zu Szene");
       assertEqual(Object.keys(S.at(first.stille).events), ["mute"], "Stille vor dem Finale");
-      assert(S.at(first.licht).events.unmute && S.at(first.licht).events.wall, "Lichtwelle setzt mit voller Wand ein");
+      assert(S.at(first.stille + 16).events.heart && S.at(first.stille + 16).events.unmute, "ein Herzschlag vor der Explosion");
+      assert(S.at(first.licht).events.impact && S.at(first.licht).events.wall && S.at(first.licht).events.kick, "die Explosion setzt mit voller Wucht ein");
+      assertEqual(Object.keys(S.at(first.weiss).events), ["hit"], "ein einziger Schlussschlag");
+      assert(S.at(first.tunnel + 3).events.acid && !S.at(first.morph + 3).events.acid, "Acid-Linie im Tunnel");
+      assert(S.at(first.morph).chaos < S.at(lastStep.fraktal).chaos, "der Morph-Teil ist freundlicher als das Fraktal");
       assertEqual(S.MO_MIN.map(function (m, i) { return S.MO_MAJ[i] - m; }), [0, 0, 1, 0], "aus Moll wird Dur: nur die Terz ändert sich");
       for (var k = 0; k < S.STEPS; k += 53) assertEqual(S.stepAt(S.stepTime(k) + S.stepLength(k) / 2).step, k, "Zeittabelle stimmig");
       assertEqual(S.at(S.STEPS + 5).section, "ende");
@@ -909,16 +913,23 @@
           assert(!doc.getElementById("fail").hidden, "Hinweis ohne WebGL2");
           return;
         }
-        ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "tunnel", "licht"].forEach(function (name) {
-          var t = S.sectionStart(name) + 4;
+        ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "morph", "tunnel", "licht"].forEach(function (name) {
+          var t = S.sectionStart(name) + 2.5;
           assertEqual(si.renderAt(t, 0.2), name, "Szene " + name);
           assertEqual(si.renderAt(t + 0.03, 0.2), name);
         });
         assertEqual(si.renderAt(S.sectionStart("punkt") + 6, 0.2), "punkt");
         assertEqual(si.word, "SINGULARITY", "Titel am Anfang");
         assert(si.brightness() > 60, "der Lichtpunkt leuchtet in der Bildmitte");
+        // beide Hälften von Bruch und Fraktal zeichnen ein eigenes Bild
+        ["bruch", "fraktal"].forEach(function (name) {
+          si.renderAt(S.sectionStart(name) + 9, 0.2);
+          assert(si.brightness() > 3, name + ", zweite Hälfte");
+        });
         assertEqual(si.renderAt(S.sectionStart("stille") + 0.7, 0.2), "stille");
         assert(si.brightness() < 3, "Stille ist schwarz");
+        si.renderAt(S.sectionStart("stille") + 1.75, 0.2);
+        assert(si.brightness() > 30, "beim Herzschlag leuchtet der Lichtpunkt auf");
         assertEqual(si.renderAt(S.sectionStart("weiss") + 3, 0.2), "weiss");
         assert(si.brightness() > 250, "am Ende ist alles weiß");
         assertEqual(si.renderAt(S.DURATION + 2, 0.2), "ende");
