@@ -596,6 +596,32 @@
       assert(has.wolle1.lead && has.wolle2.lead && has.band.lead, "Miau-Melodie bei Jagd und Party");
       assertEqual(A.at(A.SONG_BARS * 16).section, "band", "live geht die Party weiter");
     }],
+    ["SINGULARITY: Ablauf, Tempo-Rampe, Chaos-Regler und Motiv", function () {
+      var S = SingularityMusik;
+      assertEqual(S.SECTIONS.map(function (s) { return s.name; }), ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "tunnel", "stille", "licht", "weiss"]);
+      assert(S.DURATION > 115 && S.DURATION < 140, "rund zwei Minuten: " + S.DURATION.toFixed(1));
+      var first = {}, lastStep = {};
+      for (var st = 0; st < S.STEPS; st++) { var a = S.at(st); if (first[a.section] === undefined) first[a.section] = st; lastStep[a.section] = st; }
+      assert(S.stepLength(lastStep.tunnel) < S.stepLength(first.gitter) * 0.5, "der Tunnel ist am Ende mehr als doppelt so schnell wie das Gitter");
+      assert(S.at(first.punkt).chaos === 0 && S.at(lastStep.tunnel).chaos > 0.99, "Chaos-Regler läuft von 0 bis 1");
+      assert(S.at(first.fraktal).chaos > S.at(first.bruch).chaos && S.at(first.bruch).chaos > S.at(first.lorenz).chaos, "Chaos steigt von Szene zu Szene");
+      assertEqual(Object.keys(S.at(first.stille).events), ["mute"], "Stille vor dem Finale");
+      assert(S.at(first.licht).events.unmute && S.at(first.licht).events.wall, "Lichtwelle setzt mit voller Wand ein");
+      assertEqual(S.MO_MIN.map(function (m, i) { return S.MO_MAJ[i] - m; }), [0, 0, 1, 0], "aus Moll wird Dur: nur die Terz ändert sich");
+      for (var k = 0; k < S.STEPS; k += 53) assertEqual(S.stepAt(S.stepTime(k) + S.stepLength(k) / 2).step, k, "Zeittabelle stimmig");
+      assertEqual(S.at(S.STEPS + 5).section, "ende");
+    }],
+    ["SINGULARITY: Tunnel ist laut und begrenzt, danach herrscht Stille", function () {
+      var S = SingularityMusik, stille = S.sectionStart("stille"), from = stille - 2.5;
+      return S.render(3.9, 22050, from).then(function (buf) {
+        var d = buf.getChannelData(0), sr = 22050, peak = 0, loud = 0, quiet = 0, n1 = Math.floor(2.4 * sr), n0 = Math.floor(2.9 * sr);
+        for (var i = 0; i < n1; i++) { peak = Math.max(peak, Math.abs(d[i])); loud += d[i] * d[i]; }
+        for (var j = n0; j < d.length; j++) quiet += d[j] * d[j];
+        assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        assert(Math.sqrt(loud / n1) > 0.12, "Tunnel ist laut: " + Math.sqrt(loud / n1).toFixed(3));
+        assert(Math.sqrt(quiet / (d.length - n0)) < 0.02, "Stille: " + Math.sqrt(quiet / (d.length - n0)).toFixed(4));
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -722,6 +748,7 @@
         assert(w.document.querySelector('a[href="neon.html"]'), "Link zu HYPERFLUX fehlt");
         assert(w.document.querySelector('a[href="gluehwuermchen.html"]'), "Link zu den Glühwürmchen fehlt");
         assert(w.document.querySelector('a[href="andi.html"]'), "Link zur Andi-Demo fehlt");
+        assert(w.document.querySelector('a[href="singularity.html"]'), "Link zu SINGULARITY fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -871,6 +898,31 @@
             assertEqual(an.renderAt(s[1] * bar, true), s[0], "Szene bei Takt " + s[1]);
           });
         });
+      });
+    }],
+    ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {
+      return loadApp("singularity.html").then(function (w) {
+        var doc = w.document, si = w.singularity, S = w.SingularityMusik;
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        if (!si.ok) {
+          assert(!doc.getElementById("fail").hidden, "Hinweis ohne WebGL2");
+          return;
+        }
+        ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "tunnel", "licht"].forEach(function (name) {
+          var t = S.sectionStart(name) + 4;
+          assertEqual(si.renderAt(t, 0.2), name, "Szene " + name);
+          assertEqual(si.renderAt(t + 0.03, 0.2), name);
+        });
+        assertEqual(si.renderAt(S.sectionStart("punkt") + 6, 0.2), "punkt");
+        assertEqual(si.word, "SINGULARITY", "Titel am Anfang");
+        assert(si.brightness() > 60, "der Lichtpunkt leuchtet in der Bildmitte");
+        assertEqual(si.renderAt(S.sectionStart("stille") + 0.7, 0.2), "stille");
+        assert(si.brightness() < 3, "Stille ist schwarz");
+        assertEqual(si.renderAt(S.sectionStart("weiss") + 3, 0.2), "weiss");
+        assert(si.brightness() > 250, "am Ende ist alles weiß");
+        assertEqual(si.renderAt(S.DURATION + 2, 0.2), "ende");
+        return waitFor(function () { return si.frames > 1; }, 8000);
       });
     }],
     ["Katzenspiel: starten, laufen, springen und pausieren", function () {

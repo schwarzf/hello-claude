@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Vorschaubild der Demo SINGULARITY: schwarzes Loch mit Akkretionsscheibe -->
+  <defs><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0.3" stop-color="#000"/><stop offset="0.42" stop-color="#fff"/><stop offset="0.6" stop-color="#ff7a1a"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+  <rect width="64" height="64" fill="#000"/>
+  <ellipse cx="32" cy="34" rx="30" ry="9" fill="#ff7a1a" opacity="0.75"/>
+  <circle cx="32" cy="32" r="22" fill="url(#g)"/>
+  <circle cx="32" cy="32" r="8" fill="#000"/>
+  <path d="M2 34a30 9 0 0 0 60 0" fill="none" stroke="#ffd9a8" stroke-width="2"/>
+</svg>

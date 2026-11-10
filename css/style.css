@@ -219,6 +219,8 @@ a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
 a.promo-demo .promo-text strong { color: #ff9b3a; }
 a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
 a.promo-katzendemo { background: #0b0630; }
+a.promo-sing { background: #000; }
+a.promo-sing .promo-text strong { color: #fff; letter-spacing: 3px; }
 a.promo-andi { background: linear-gradient(100deg, #12063a, #5a0f4a); }
 a.promo-andi .promo-text strong { color: #ffe14d; }
 a.promo-glueh { background: #0d1f3a; }

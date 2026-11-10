@@ -173,6 +173,41 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## SINGULARITY ⚫
+
+`singularity.html` (von der Taskliste verlinkt) ist eine zweiminütige
+Shader-Demo (WebGL2) als eine einzige Eskalation – fast monochrom, mit einer
+Akzentfarbe, die bei jedem harten Schnitt wechselt:
+
+| Szene | Inhalt | Akzent |
+| --- | --- | --- |
+| Point | ein Lichtpunkt, Herzschlag | – |
+| Order | Flug durch ein sauberes Stabgitter | – |
+| Attractor | zwei Lorenz-Bahnen aus Partikeln laufen auseinander, das Gitter zittert | Cyan |
+| Entropy | das Gitter ist zersplittert, harte Schnitte | Orange |
+| Fractal | Flug durch eine Fraktal-Kathedrale, die sich umbaut | Rot |
+| Silence | Atempause mit dem Lichtpunkt | – |
+| Event Horizon | schwarzes Loch mit gebogenen Lichtstrahlen und Akkretionsscheibe | Violett |
+| Tunnel | immer schneller, der Querschnitt morpht, Farben wechseln im Takt | alle |
+| Light | Stille – dann erfasst eine Lichtwelle Galaxie und Universum | Gold |
+
+Am Ende steht Schwarz auf Weiß „SINGULARITY“ und ein „Nochmal“-Knopf.
+
+Technik (`js/singularity.js`): Ein Chaos-Regler (0…1) aus der Musik steuert
+Tempo, Kamerawackeln, Farbsäume, Bildstörungen und Schlieren. Pro Bild drei
+Durchgänge: Szene per Raymarching in eine Textur (Auflösung passt sich an,
+Partikel additiv darüber), Feedback (das vorige Bild wird gezoomt und gedreht
+untergemischt), Nachbearbeitung (Bloom, Farbsäume, Glitch, Körnung, Kinobalken).
+Die Lichtstrahlen am schwarzen Loch werden schrittweise gebogen; die Lichtwelle
+ist eine Kugel, die schneller wächst, als die Kamera zurückweicht.
+
+Sound (`js/singularity-musik.js`): eigene Komposition, Tempo 80 → 212 BPM mit
+gemeinsamer Zeittabelle für Musik und Grafik. Herzschlag und Glocke, präzise
+Arpeggios, die ihre Ordnung verlieren, Drum-and-Bass mit Reese-Bass, Halftime
+am Ereignishorizont, im Tunnel ein Shepard-Ton (scheint endlos zu steigen),
+ein Takt Stille, dann die Lichtwelle in D-Dur. Das Motiv aus vier Tönen bleibt,
+nur die Terz wechselt von Moll nach Dur.
+
 ## Happy Birthday Andi! 🎂🎸
 
 `andi.html` (von der Taskliste verlinkt) ist eine Geburtstags-Demo für Andi,
@@ -241,6 +276,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für SINGULARITY (`js/singularity-musik.js`): Ablauf, Tempo-Rampe, Chaos-Regler, Motiv, Lautstärke im Tunnel und die Stille danach; der UI-Test prüft Shader, alle Szenen, Schwarz in der Stille und Weiß am Ende
 - **Unit-Tests** für den HYPERFLUX-Sound in `js/neon-musik.js` (Aufbau, Tonart, Begrenzer, Bassanteil); der UI-Test prüft, dass die Shader kompilieren und jede Szene ein Bild zeichnet
 - **Unit-Tests** für die Zwei-Katzen-Musik in `js/geschichte-musik.js` (Szenen, Tempi, wer wann knurrt, Pegel)
 - **UI-Tests**, die `index.html`, `katzen.html` und `gesichter.html` in einem iframe laden und bedienen (inkl. Katzenspiel)
@@ -273,6 +309,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
+| `singularity.html` | Shader-Demo SINGULARITY (`js/singularity.js`, `js/singularity-musik.js`, `css/singularity.css`) |
 | `neon.html` | Shader-Demo HYPERFLUX |
 | `andi.html` | Geburtstags-Demo für Andi (`js/andi.js`, `js/andi-musik.js`, `video/andi.mp4`) |
 | `gluehwuermchen.html` | Mini-Demo Glühwürmchen (`js/gluehwuermchen.js`) |

@@ -1,0 +1,119 @@
+/* SINGULARITY: streng, fast monochrom, weite Versalien */
+:root {
+  --bg: #050505;
+  --text: #e9e9e9;
+  --muted: #7d7d7d;
+  --line: rgba(255, 255, 255, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background: var(--bg);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+}
+
+main { max-width: 1280px; margin: 0 auto; padding: 22px 16px 32px; }
+
+h1, .logo, .word, .final p, .kicker, button, #part {
+  font-family: "Syncopate", "IBM Plex Mono", sans-serif;
+  text-transform: uppercase;
+}
+h1 { margin: 0; font-size: clamp(16px, 3vw, 24px); font-weight: 700; letter-spacing: 0.55em; }
+header p { margin: 10px 0 18px; color: var(--muted); line-height: 1.6; max-width: 760px; }
+a { color: var(--text); }
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--line);
+}
+.screen canvas { display: block; width: 100%; height: 100%; }
+.screen:fullscreen, .screen:-webkit-full-screen { border: 0; aspect-ratio: auto; width: 100%; height: 100%; }
+
+/* Wort-Einblendungen */
+.word {
+  position: absolute;
+  left: 6%;
+  bottom: 17%;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  font-size: clamp(11px, 2.4vw, 26px);
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+.word.show { opacity: 1; }
+.word.title { left: 0; right: 0; bottom: 30%; text-align: center; border: 0; font-weight: 400; font-size: clamp(9px, 1.5vw, 15px); letter-spacing: 1.1em; padding-left: 1.1em; transition: opacity 2s; }
+
+/* Schluss: Schwarz auf Weiß */
+.final {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 2.5s;
+}
+.final.show { opacity: 1; pointer-events: auto; }
+.final p { margin: 0; color: #000; font-weight: 700; font-size: clamp(16px, 5vw, 60px); letter-spacing: 0.45em; padding-left: 0.45em; }
+.final button { color: #000; border-color: #000; background: transparent; }
+
+.start, .fail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.62);
+  -webkit-backdrop-filter: blur(6px) grayscale(0.6);
+  backdrop-filter: blur(6px) grayscale(0.6);
+}
+.start[hidden], .fail[hidden] { display: none; }
+.fail { background: rgba(0, 0, 0, 0.94); z-index: 2; pointer-events: none; }
+.fail span { color: var(--muted); max-width: 520px; }
+.kicker { margin: 0; color: var(--muted); letter-spacing: 0.5em; font-size: 10px; }
+.logo { margin: 0 0 10px; font-weight: 700; font-size: clamp(18px, 6vw, 68px); letter-spacing: 0.4em; padding-left: 0.4em; }
+.hint { margin: 8px 0 0; max-width: 520px; color: var(--muted); line-height: 1.6; font-size: 12px; }
+
+button {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  padding: 12px 20px 12px 23px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+button:hover { background: rgba(255, 255, 255, 0.1); }
+button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+button.primary { font-size: 13px; padding: 17px 46px 17px 50px; color: #000; background: #fff; border-color: #fff; }
+button.primary:hover { background: #ff7a1a; border-color: #ff7a1a; }
+button[aria-pressed="true"] { border-color: #fff; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+#part { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: 0.35em; }
+
+@media (max-width: 560px) {
+  h1 { letter-spacing: 0.35em; }
+  .hint { font-size: 11px; }
+  button.primary { padding: 14px 30px 14px 34px; }
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SINGULARITY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syncopate:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/singularity.css?v=202611102143">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SINGULARITY</h1>
+      <p>Zwei Minuten Eskalation in Echtzeit: vom Lichtpunkt über Chaos, Fraktal und Ereignishorizont in den Tunnel – bis das Licht das Universum füllt. · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="gl"></canvas>
+      <div class="word" id="word" aria-live="polite"></div>
+      <div class="final" id="final">
+        <p>SINGULARITY</p>
+        <button type="button" id="again" hidden>Nochmal</button>
+      </div>
+      <div class="fail" id="fail" hidden><strong>Keine Grafik möglich</strong><span></span></div>
+      <div class="start" id="start">
+        <p class="kicker">hello-claude presents</p>
+        <p class="logo">SINGULARITY</p>
+        <button type="button" id="play" class="primary">Start</button>
+        <button type="button" id="play-silent">Ohne Ton</button>
+        <p class="hint">Mit Kopfhörern, laut, im Vollbild. Achtung: Die Demo enthält schnelle Lichtwechsel, Stroboskop-Effekte und endet in hellem Weiß. „Weniger Blitze“ schwächt das ab.</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">Ton</button>
+      <button type="button" id="btn-calm" aria-pressed="false">Weniger Blitze</button>
+      <button type="button" id="btn-full">Vollbild</button>
+      <span id="part"></span>
+    </div>
+  </main>
+
+  <script src="js/musik.js?v=202611102143"></script>
+  <script src="js/singularity-musik.js?v=202611102143"></script>
+  <script src="js/singularity.js?v=202611102143"></script>
+</body>
+</html>
