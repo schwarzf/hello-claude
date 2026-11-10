@@ -582,6 +582,20 @@
         assert(low / all > 0.3, "Bassanteil " + Math.round(low / all * 100) + " %");
       });
     }],
+    ["Andi-Demo: Songablauf mit Solo-Flug, Jagd und Party", function () {
+      var A = AndiMusik;
+      assertEqual(A.SECTIONS.map(function (s) { return s.name; }), ["flug1", "flug2", "wolle1", "wolle2", "band", "longcat", "finale"]);
+      var has = {};
+      for (var st = 0; st < A.SONG_BARS * 16; st++) {
+        var a = A.at(st, true);
+        has[a.section] = has[a.section] || {};
+        Object.keys(a.events).forEach(function (k) { has[a.section][k] = true; });
+      }
+      assert(!has.flug1.bass && !has.flug1.lead, "Solo-Flug ist ruhig");
+      assert(has.flug2.bass && has.flug2.kick, "mit Regenbogen kommt der Beat");
+      assert(has.wolle1.lead && has.wolle2.lead && has.band.lead, "Miau-Melodie bei Jagd und Party");
+      assertEqual(A.at(A.SONG_BARS * 16).section, "band", "live geht die Party weiter");
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -707,6 +721,7 @@
         assert(w.document.querySelector('a[href="zweikatzen.html"]'), "Link zu Zwei Katzen fehlt");
         assert(w.document.querySelector('a[href="neon.html"]'), "Link zu HYPERFLUX fehlt");
         assert(w.document.querySelector('a[href="gluehwuermchen.html"]'), "Link zu den Glühwürmchen fehlt");
+        assert(w.document.querySelector('a[href="andi.html"]'), "Link zur Andi-Demo fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -843,6 +858,19 @@
         g.draw();
         assert(avgDist() < before * 0.6, "sammeln sich: " + Math.round(before) + " → " + Math.round(avgDist()));
         g.flies.forEach(function (f) { assert(isFinite(f.x) && isFinite(f.y), "Positionen gültig"); });
+      });
+    }],
+    ["Andi-Demo: startet und zeigt alle Szenen", function () {
+      return loadApp("andi.html").then(function (w) {
+        var doc = w.document, an = w.andi, bar = 60 / 130 * 4;
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden, "Demo läuft");
+        return waitFor(function () { return an.frames > 5; }, 3000).then(function () {
+          assertEqual(an.scene, "flug1");
+          [["flug1", 2], ["flug2", 10], ["wolle1", 17], ["wolle2", 21], ["band", 26], ["longcat", 34], ["finale", 41], ["ende", 44.5]].forEach(function (s) {
+            assertEqual(an.renderAt(s[1] * bar, true), s[0], "Szene bei Takt " + s[1]);
+          });
+        });
       });
     }],
     ["Katzenspiel: starten, laufen, springen und pausieren", function () {

@@ -173,6 +173,22 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Happy Birthday Andi! 🎂🎸
+
+`andi.html` (von der Taskliste verlinkt) ist eine Geburtstags-Demo für Andi,
+aufgebaut auf der Katzen-Demo – live oder als Video (`video/andi.mp4`, mit Ton).
+Die Andi-Katze ist schwarz mit verspiegelter Sonnenbrille, Partyhut und
+Regenbogen-Schimmer:
+
+1. Andi fliegt allein auf einer E-Gitarre durch den Weltraum
+2. Regenbogenschweif, kleine und große Begleiter, höheres Tempo
+3. Wollknäuel-Jagd – erst mit zwei, dann mit vier kleinen Katzen
+4. Mega-Geburtstagsparty von The Miaus mit Andi an der Gitarre, Torte,
+   Luftballons, Wimpeln, tanzenden Katzen, Longcats und Konfetti:
+   „HAPPY BIRTHDAY ANDI!“
+
+Die Musik (`js/andi-musik.js`) ist der Song der Katzen-Demo, neu arrangiert.
+
 ## Glühwürmchen ✨
 
 `gluehwuermchen.html` (von der Taskliste verlinkt) ist eine kleine, ruhige
@@ -258,6 +274,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
 | `neon.html` | Shader-Demo HYPERFLUX |
+| `andi.html` | Geburtstags-Demo für Andi (`js/andi.js`, `js/andi-musik.js`, `video/andi.mp4`) |
 | `gluehwuermchen.html` | Mini-Demo Glühwürmchen (`js/gluehwuermchen.js`) |
 | `zweikatzen.html` | Demo „Zwei Katzen“ |
 | `video/zweikatzen.mp4` | Zwei Katzen als Video |
