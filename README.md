@@ -178,8 +178,8 @@ Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 `singularity.html` (von der Taskliste verlinkt) ist eine gut zweiminütige
 Shader-Demo (WebGL2) als eine einzige Eskalation. Die ersten 80 Sekunden sind
 fast monochrom mit einer Akzentfarbe, die bei jedem harten Schnitt wechselt;
-danach bricht die Farbe herein. Der Lichtpunkt vom Anfang bleibt in jeder Szene
-in der Bildmitte sichtbar.
+danach bricht die Farbe herein. Der Lichtpunkt vom Anfang kehrt in der
+Atempause, am Tunnelende und vor der Explosion wieder.
 
 | Wort | Bild | Farbe |
 | --- | --- | --- |

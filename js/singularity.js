@@ -6,7 +6,8 @@
  * zu einem flüssigen Acid-Objekt wird → runder Acid-Tunnel → Stille, ein
  * Herzschlag → eine Lichtwelle erfasst das Universum.
  * Erst fast monochrom mit einer wechselnden Akzentfarbe, ab dem Morph-Objekt
- * in vollen Farben. Der Lichtpunkt vom Anfang bleibt in jeder Szene sichtbar.
+ * in vollen Farben. Der Lichtpunkt vom Anfang kehrt in der Atempause, am
+ * Tunnelende und vor der Explosion wieder.
  *
  * Ein „Chaos-Regler“ (0…1) aus der Musik (SingularityMusik) steuert Tempo,
  * Kamerawackeln, Farbsäume, Bildstörungen und Schlieren; der Bass verformt
@@ -109,17 +110,19 @@
     "}",
 
     // ---- Würfel-Fraktal (Menger-Schwamm) ----
+    "float smax(float a,float b,float k){float h=clamp(.5+.5*(a-b)/k,0.,1.);return mix(b,a,h)+k*h*(1.-h);}",
     "float menger(vec3 p){",
-    "  float d=sdBox(p,vec3(1.)),s=1.;",
+    "  p+=.035*sin(p.yzx*3.+gT*1.3);",
+    "  float d=sdBox(p,vec3(.86))-.14,s=1.;",
     "  for(int i=0;i<3;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
-    "    d=max(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s);}",
+    "    d=smax(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s,.22/s);}",
     "  return d;",
     "}",
     // Selbstähnlich: in der Mitte jedes Würfels schwebt derselbe Würfel, fünfmal kleiner und etwas gedreht
     "float mapZoom(vec3 p){",
     "  float d=1e9,sc=5.;",
     "  for(int k=0;k<5;k++){vec3 q=p/sc;q.xy*=rot(float(k)*.5236);float m=menger(q)*sc;if(m<d){d=m;gH=float(k);}sc/=5.;}",
-    "  return d;",
+    "  return d*.85;",
     "}",
     "vec3 zoomScene(vec2 uv){",
     "  float U=uSub*3.+uSub*uSub*1.5,fr=fract(U),s=pow(5.,-fr);",
@@ -136,14 +139,16 @@
     "    col+=uAccent*.25*mod(lv,2.)*ao*(1.+uKick);",
     "    col*=exp(-d/s*.22);",
     "  }",
-    "  return col+uAccent*.005/(dot(uv,uv)+.02)+vec3(.0008/(dot(uv,uv)+.0001));",
+    "  return col+uAccent*.005/(dot(uv,uv)+.02);",
     "}",
     // Unendlich: Flug durch die Schächte eines Schwamms ohne Rand
     "float mapInf(vec3 p){",
+    "  p+=.04*sin(p.yzx*2.5+gT*1.1);",
     "  float d=-1e9,s=1.;",
     "  for(int i=0;i<4;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
-    "    d=max(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s);}",
-    "  return d;",
+    "    float c=(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s;",
+    "    d=i==0?c:smax(d,c,.25/s);}",
+    "  return d*.85;",
     "}",
     "vec3 infScene(vec2 uv,float t){",
     "  vec3 ro=vec3(.12*sin(t*.9),.12*cos(t*.7),t*1.6),rd=normalize(vec3(uv,.8-.2*uSub));",
@@ -174,7 +179,7 @@
     "}",
     "vec3 hole(vec2 uv,float t){",
     "  float con=smoothstep(.55,1.,uProg),D=mix(13.,6.,uProg),an=t*.1+1.;",
-    "  vec3 ro=vec3(cos(an)*D,D*.16,sin(an)*D);",
+    "  vec3 ro=vec3(cos(an)*D*.45,D*.9,sin(an)*D*.45);",
     "  vec3 ww=normalize(-ro),uu=normalize(cross(ww,vec3(0.,1.,0.))),vv=cross(uu,ww);",
     "  uv*=rot(.25*sin(t*.2)+uProg*.6);",
     "  vec3 rd=normalize(uv.x*uu+uv.y*vv+1.1*ww);",
@@ -276,14 +281,13 @@
     "  float a=atan(uv.y,uv.x),r=length(uv)*(1.+.07*uBass)+1e-3;",
     "  float z=.5/pow(r,1.+pr*.5)+uTravel;",
     "  float tw=a/PI*8.+z*.15*(1.+pr*3.)*sin(t*.2+1.);",
-    "  vec2 g=vec2(tw,z*.8),id=floor(g),f=fract(g)-.5;",
-    "  float h=hash(id),h2=hash(id+7.3);",
-    "  float m=max(abs(f.x),abs(f.y)),panel=smoothstep(.5,.42,m),edge=smoothstep(.43,.5,m);",
-    "  vec2 w=vec2(cos(a),sin(a))*2.+vec2(z*.35,0.);",
-    "  w+=1.5*vec2(fbm(w+t*.4),fbm(w.yx-t*.3));",
-    "  vec3 wall=pal(fbm(w)*1.6+z*.06+t*.2);",
-    "  vec3 col=wall*(.3+.7*panel*h2)+pal(h+z*.1+t*.5)*panel*step(.7,h2)*1.5+vec3(edge*.2);",
-    "  col+=pal(z*.15-t)*smoothstep(.85,1.,sin(z*2.))*.8;",
+    "  float sw=tw*PI/8.;",
+    "  vec2 w=vec2(cos(sw),sin(sw))*2.+vec2(z*.3,0.);",
+    "  w+=1.6*vec2(fbm(w+t*.4),fbm(w.yx-t*.3));",
+    "  float n=fbm(w),n2=fbm(w*2.3+n*2.-t*.2);",
+    "  vec3 col=pal(n*1.7+z*.06+t*.2)*(.35+.65*smoothstep(.25,.75,n2));",
+    "  col+=pal(n*3.+z*.1+t*.5)*pow(1.-abs(sin(n*14.+z*.5-t*2.)),7.)*1.3;",   // fließende Adern
+    "  col+=pal(z*.15-t)*smoothstep(.55,1.,sin(z*1.3+n*5.))*.45;",           // weiche Wellen statt Ringe
     "  col*=min(1.,r*2.4)*(1.+uKick*.7);",
     "  col+=vec3(.004/(r*r+.003)*(.5+pr*pr*3.));",
     "  float rw=pow(max(pr-.82,0.)/.18,2.)*1.6;",
@@ -306,19 +310,18 @@
     "  gT=uTime;gS=1.;",
     "  vec2 uv=(gl_FragCoord.xy-.5*uRes)/uRes.y;",
     "  vec3 col=vec3(0.);",
-    "  vec3 dot0=vec3(.0006/(dot(uv,uv)+.00012));",   // der Lichtpunkt vom Anfang bleibt in jeder Szene
     "  if(uScene==0)col=punkt(uv,0.);",
-    "  else if(uScene==1)col=gridScene(uv,gT,1.)+dot0;",
-    "  else if(uScene==2)col=gridScene(uv,gT*.6,.3)+dot0;",
-    "  else if(uScene==3)col=shardScene(uv,gT)+dot0;",
+    "  else if(uScene==1)col=gridScene(uv,gT,1.);",
+    "  else if(uScene==2)col=gridScene(uv,gT*.6,.3);",
+    "  else if(uScene==3)col=shardScene(uv,gT);",
     "  else if(uScene==4)col=zoomScene(uv);",
     "  else if(uScene==5)col=punkt(uv,1.);",
     "  else if(uScene==6)col=hole(uv,gT);",
     "  else if(uScene==7)col=tunnel(uv,gT);",
     "  else if(uScene==9)col=licht(uv);",
     "  else if(uScene==10)col=vec3(6.);",
-    "  else if(uScene==11)col=gridScene(uv,gT,1.)+dot0;",
-    "  else if(uScene==12)col=infScene(uv,gT)+dot0;",
+    "  else if(uScene==11)col=gridScene(uv,gT,1.);",
+    "  else if(uScene==12)col=infScene(uv,gT);",
     "  else if(uScene==13)col=morphScene(uv,gT);",
     "  else if(uScene==14)col=punkt(uv,0.)*(.25+uKick*1.5);",
     "  outCol=vec4(1.-exp(-col*1.2),1.);",
@@ -675,7 +678,7 @@
       for (var k = 0; k < K_LORENZ; k++) {
         var mixW = k === 0 ? 1 : 0.15 + 0.5 * ((k * 0.37) % 1);
         var colK = [accent[0] + (1 - accent[0]) * mixW, accent[1] + (1 - accent[1]) * mixW, accent[2] + (1 - accent[2]) * mixW];
-        drawPoints(vaoLorenz, k * N_LORENZ, N_LORENZ, 0, colK.map(function (c) { return c * 0.8; }), rotL, 2.6 - pr * 0.6, 0.011 * h, t, 0, spread, morph, 0.05 * spread * spread);
+        drawPoints(vaoLorenz, k * N_LORENZ, N_LORENZ, 0, colK.map(function (c) { return c * 0.8; }), rotL, 2.05 - pr * 0.45, 0.012 * h, t, 0, spread, morph, 0.05 * spread * spread);
       }
     } else if (n === "licht") {
       drawPoints(vaoUni, 0, N_UNI, 1, [1.3, 1.35, 1.6], rotation(0.4 + pr * 1.2, 0.95 - pr * 0.5), dist, 0.0022 * h, t, rad);
