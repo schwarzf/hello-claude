@@ -189,11 +189,11 @@ Atempause, am Tunnelende und vor der Explosion wieder.
 | UNPREDICTABLE | die Bahnen fächern zu einem Knäuel auf, das Gitter dahinter zerfällt | Cyan |
 | ENTROPY | Würfel lösen sich aus dem Gitter, kippen und treiben auseinander | Orange |
 | BREAK | alles zerspringt in Splitter, harte Schnitte | Orange |
-| SELF-SIMILAR | Endlos-Zoom in einen Würfel-Schwamm: in jedem steckt derselbe Würfel, fünfmal kleiner | Blau |
-| INFINITE | Flug durch die Schächte eines Schwamms ohne Rand | Blau |
+| SELF-SIMILAR | stetiger Zoom in eine Fraktal-Kathedrale aus Kugelformen, die im Kleinen aussieht wie im Großen | Blau |
+| INFINITE | Flug durch die Kathedrale, die sich bei jedem Schnitt umbaut | Violett |
 | EVENT HORIZON | Atempause, dann ein schwarzes Loch mit gebogenen Lichtstrahlen; seine Scheibe zieht sich zusammen … | Violett |
 | – | … und wird zu einem flüssig morphenden, schillernden Objekt | Acid |
-| FASTER … NOW | runder Tunnel in Acid-Farben, bis zum Ende immer schneller | Acid |
+| FASTER … NOW | runder Tunnel in Acid-Farben: erst Kacheln, die sich in fließende Muster auflösen, bis zum Ende immer schneller | Acid |
 | – | Schwarz und Stille, ein Herzschlag – dann erfasst eine Lichtwelle Galaxie und Universum | Weiß |
 
 Am Ende steht Schwarz auf Weiß „SINGULARITY“ und ein „Nochmal“-Knopf.
@@ -205,10 +205,10 @@ Szene per Raymarching in eine Textur (Auflösung passt sich an, Partikel additiv
 darüber), Feedback (das vorige Bild wird gezoomt und gedreht untergemischt),
 Nachbearbeitung (Bloom, Farbsäume, Glitch, Körnung, Kinobalken). Die Partikel
 des Attraktors haben drei Positionen (Gitterstab, gemeinsame Bahn, eigene
-Bahn), zwischen denen überblendet wird. Der Endlos-Zoom nutzt, dass Skalieren
-um den Faktor 5 samt 30° Drehung das Bild auf sich selbst abbildet.
+Bahn), zwischen denen überblendet wird. Szenenwechsel blenden weich über, indem das
+alte Bild als Schliere ausklingt; hart bleibt nur der Schnitt auf BREAK.
 
-Sound (`js/singularity-musik.js`): eigene Komposition, Tempo 80 → 212 BPM mit
+Sound (`js/singularity-musik.js`): eigene Komposition, Tempo 80 → 224 BPM mit
 gemeinsamer Zeittabelle für Musik und Grafik. Herzschlag und Glocke, präzise
 Arpeggios, die ihre Ordnung verlieren, Drum-and-Bass mit Reese-Bass, Halftime
 am Ereignishorizont, ein heller, treibender Morph-Teil in Dur, im Tunnel eine

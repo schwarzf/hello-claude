@@ -109,62 +109,35 @@
     "  return col+uAccent*uSnare*.05;",
     "}",
 
-    // ---- Würfel-Fraktal (Menger-Schwamm) ----
-    "float smax(float a,float b,float k){float h=clamp(.5+.5*(a-b)/k,0.,1.);return mix(b,a,h)+k*h*(1.-h);}",
-    "float menger(vec3 p){",
-    "  p+=.035*sin(p.yzx*3.+gT*1.3);",
-    "  float d=sdBox(p,vec3(.86))-.14,s=1.;",
-    "  for(int i=0;i<3;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
-    "    d=smax(d,(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s,.22/s);}",
-    "  return d;",
+    // ---- Fraktal-Kathedrale aus Kugelinversionen ----
+    // zoom=1 (SELF-SIMILAR): stetiger Zoom in eine Stelle – zoom=0 (INFINITE): Flug mit Schnitten
+    "float gZ;",
+    "float mapFr(vec3 p){",
+    "  float sc=1.,s=1.22+.12*sin(gZ>.5?1.3+uSub*.8:uCut*2.4)+.02*uKick+.02*uBass;gTrap=1e9;",
+    "  for(int i=0;i<8;i++){p=-1.+2.*fract(.5*p+.5);float r2=dot(p,p);gTrap=min(gTrap,r2);float k=s/r2;p*=k;sc*=k;}",
+    "  return .25*abs(p.y)/sc;",
     "}",
-    // Selbstähnlich: in der Mitte jedes Würfels schwebt derselbe Würfel, fünfmal kleiner und etwas gedreht
-    "float mapZoom(vec3 p){",
-    "  float d=1e9,sc=5.;",
-    "  for(int k=0;k<5;k++){vec3 q=p/sc;q.xy*=rot(float(k)*.5236);float m=menger(q)*sc;if(m<d){d=m;gH=float(k);}sc/=5.;}",
-    "  return d*.85;",
-    "}",
-    "vec3 zoomScene(vec2 uv){",
-    "  float U=uSub*3.+uSub*uSub*1.5,fr=fract(U),s=pow(5.,-fr);",
-    "  vec3 ro=vec3(.04*s*sin(gT),.04*s*cos(gT*.8),-1.6*s),rd=normalize(vec3(uv,1.));",
-    "  mat2 roll=rot(-fr*.5236+.3*sin(gT*.3));ro.xy*=roll;rd.xy*=roll;",
-    "  float d=0.,steps=0.;vec3 p=ro;bool hit=false;",
-    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapZoom(p);steps+=1.;if(h<.0015*s){hit=true;break;}d+=h;if(d>40.*s)break;}",
+    "vec3 fractalScene(vec2 uv,float t,float zoom){",
+    "  gZ=zoom;",
+    "  float tt=zoom>.5?.4+uSub*.35:t*.22+uCut*1.7;",
+    "  float fl=zoom>.5?1.1*pow(3.2,uSub):1.1-.3*uChaos;",
+    "  if(zoom>.5)uv*=rot(uSub*1.2);",
+    "  vec3 ro=vec3(2.8*cos(.1+.33*tt),.4+.3*cos(.37*tt),2.8*cos(.5+.35*tt));",
+    "  vec3 ta=vec3(1.9*cos(1.2+.41*tt),.4+.1*cos(.27*tt),1.9*cos(2.+.38*tt));",
+    "  vec3 ww=normalize(ta-ro),uu=normalize(cross(ww,vec3(sin(.3*tt)*.4,1.,0.))),vv=cross(uu,ww);",
+    "  vec3 rd=normalize(uv.x*uu+uv.y*vv+fl*ww);",
+    "  float d=.01,steps=0.,eps=.0012*1.1/fl;vec3 p=ro;bool hit=false;",
+    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapFr(p);steps+=1.;if(h<eps*d){hit=true;break;}d+=h;if(d>12.)break;}",
     "  vec3 col=vec3(0.);",
     "  if(hit){",
-    "    float lv=gH;vec2 e=vec2(.002*s,0.);",
-    "    vec3 n=normalize(vec3(mapZoom(p+e.xyy)-mapZoom(p-e.xyy),mapZoom(p+e.yxy)-mapZoom(p-e.yxy),mapZoom(p+e.yyx)-mapZoom(p-e.yyx)));",
-    "    float ao=1.-steps/90.,ndl=max(dot(n,-rd),0.);",
-    "    col=vec3(.34,.38,.45)*ao*(.08+.8*ndl*ndl)+uAccent*pow(1.-ndl,3.)*.6*ao;",
-    "    col+=uAccent*.25*mod(lv,2.)*ao*(1.+uKick);",
-    "    col*=exp(-d/s*.22);",
+    "    float tr=gTrap;vec2 e=vec2(eps*d+.0003,0.);",
+    "    vec3 n=normalize(vec3(mapFr(p+e.xyy)-mapFr(p-e.xyy),mapFr(p+e.yxy)-mapFr(p-e.yxy),mapFr(p+e.yyx)-mapFr(p-e.yyx)));",
+    "    float ao=1.-steps/90.,ndl=max(dot(n,normalize(vec3(.4,.8,-.3))),0.);",
+    "    col=vec3(.9,.95,1.)*ao*ao*(.12+.7*ndl)+vec3(.4,.45,.6)*pow(1.-abs(dot(n,rd)),3.)*ao;",
+    "    col+=uAccent*pow(clamp(1.-tr*1.6,0.,1.),2.)*(1.2+uKick*2.);",
     "  }",
-    "  return col+uAccent*.005/(dot(uv,uv)+.02);",
-    "}",
-    // Unendlich: Flug durch die Schächte eines Schwamms ohne Rand
-    "float mapInf(vec3 p){",
-    "  p+=.04*sin(p.yzx*2.5+gT*1.1);",
-    "  float d=-1e9,s=1.;",
-    "  for(int i=0;i<4;i++){vec3 a=mod(p*s,2.)-1.;s*=3.;vec3 r=abs(1.-3.*abs(a));",
-    "    float c=(min(max(r.x,r.y),min(max(r.y,r.z),max(r.z,r.x)))-1.)/s;",
-    "    d=i==0?c:smax(d,c,.25/s);}",
-    "  return d*.85;",
-    "}",
-    "vec3 infScene(vec2 uv,float t){",
-    "  vec3 ro=vec3(.12*sin(t*.9),.12*cos(t*.7),t*1.6),rd=normalize(vec3(uv,.8-.2*uSub));",
-    "  rd.xy*=rot(uCut*1.5708+t*.15);rd.xz*=rot(sin(t*.4+uCut)*.1);rd.yz*=rot(cos(t*.33)*.07);",
-    "  float c=mod(uCut,3.);if(c>1.5){ro=ro.zxy;rd=rd.zxy;}else if(c>.5){ro=ro.yzx;rd=rd.yzx;}",
-    "  float d=.02,steps=0.;vec3 p=ro;bool hit=false;",
-    "  for(int i=0;i<90;i++){p=ro+rd*d;float h=mapInf(p);steps+=1.;if(h<.001*(1.+d)){hit=true;break;}d+=h;if(d>24.)break;}",
-    "  vec3 col=vec3(0.);",
-    "  if(hit){",
-    "    vec2 e=vec2(.002,0.);",
-    "    vec3 n=normalize(vec3(mapInf(p+e.xyy)-mapInf(p-e.xyy),mapInf(p+e.yxy)-mapInf(p-e.yxy),mapInf(p+e.yyx)-mapInf(p-e.yyx)));",
-    "    float ao=1.-steps/90.,ndl=max(dot(n,-rd),0.);",
-    "    col=vec3(.34,.38,.45)*ao*(.08+.7*ndl)+uAccent*pow(1.-ndl,3.)*.5*ao;",
-    "    col+=uAccent*step(.5,fract(p.z*.25+p.x*.25+p.y*.25-t*.3))*.12*ao*(1.+uKick*2.);",
-    "  }",
-    "  return mix(col,uAccent*.25,1.-exp(-d*.16))+vec3(uSnare*.04);",
+    "  col=mix(col,uAccent*.14,1.-exp(-d*(zoom>.5?.2:.45)));",
+    "  return col+vec3(uSnare*.04);",
     "}",
 
     // ---- Ereignishorizont: gebogene Lichtstrahlen; die Scheibe zieht sich am Ende zusammen ----
@@ -288,6 +261,13 @@
     "  vec3 col=pal(n*1.7+z*.06+t*.2)*(.35+.65*smoothstep(.25,.75,n2));",
     "  col+=pal(n*3.+z*.1+t*.5)*pow(1.-abs(sin(n*14.+z*.5-t*2.)),7.)*1.3;",   // fließende Adern
     "  col+=pal(z*.15-t)*smoothstep(.55,1.,sin(z*1.3+n*5.))*.45;",           // weiche Wellen statt Ringe
+    "  float tile=1.-smoothstep(.04,.42,pr);",
+    "  if(tile>0.){",
+    "    vec2 g=vec2(tw,z*.8),id=floor(g),f=fract(g)-.5;float h=hash(id),h2=hash(id+7.3);",
+    "    float soft=.08+.4*(1.-tile);",                 // die Kachelränder werden immer weicher
+    "    float m=max(abs(f.x),abs(f.y)),panel=smoothstep(.5,.5-soft,m);",
+    "    col=mix(col,col*(.25+.75*panel*(.35+.65*h2))+pal(h+z*.1+t*.5)*panel*step(.72,h2)*1.2+vec3(smoothstep(.44,.5,m)*.22),tile);",
+    "  }",
     "  col*=min(1.,r*2.4)*(1.+uKick*.7);",
     "  col+=vec3(.004/(r*r+.003)*(.5+pr*pr*3.));",
     "  float rw=pow(max(pr-.82,0.)/.18,2.)*1.6;",
@@ -314,14 +294,14 @@
     "  else if(uScene==1)col=gridScene(uv,gT,1.);",
     "  else if(uScene==2)col=gridScene(uv,gT*.6,.3);",
     "  else if(uScene==3)col=shardScene(uv,gT);",
-    "  else if(uScene==4)col=zoomScene(uv);",
+    "  else if(uScene==4)col=fractalScene(uv,gT,1.);",
     "  else if(uScene==5)col=punkt(uv,1.);",
     "  else if(uScene==6)col=hole(uv,gT);",
     "  else if(uScene==7)col=tunnel(uv,gT);",
     "  else if(uScene==9)col=licht(uv);",
     "  else if(uScene==10)col=vec3(6.);",
     "  else if(uScene==11)col=gridScene(uv,gT,1.);",
-    "  else if(uScene==12)col=infScene(uv,gT);",
+    "  else if(uScene==12)col=fractalScene(uv,gT,0.);",
     "  else if(uScene==13)col=morphScene(uv,gT);",
     "  else if(uScene==14)col=punkt(uv,0.)*(.25+uKick*1.5);",
     "  outCol=vec4(1.-exp(-col*1.2),1.);",
@@ -555,7 +535,7 @@
     ["fraktal", 8, 28, "SELF-SIMILAR"], ["fraktal", 68, 84, "INFINITE"],
     ["pause", 16, 32, "EVENT HORIZON"],
     ["horizont", 8, 28, "NO RETURN"],
-    ["tunnel", 32, 40, "FASTER"], ["tunnel", 96, 104, "CLOSER"], ["tunnel", 160, 166, "HOTTER"], ["tunnel", 192, 196, "BRIGHTER"], ["tunnel", 224, 228, "NOW"]
+    ["tunnel", 48, 56, "FASTER"], ["tunnel", 128, 136, "CLOSER"], ["tunnel", 208, 214, "HOTTER"], ["tunnel", 256, 260, "BRIGHTER"], ["tunnel", 288, 292, "NOW"]
   ];
 
   /** Szene im Shader; manche Abschnitte haben zwei Hälften mit eigenem Bild. */
@@ -588,7 +568,7 @@
   function frac01(x) { return x - Math.floor(x); }
   function hash1(n) { return frac01(Math.sin(n * 127.1) * 43758.5453); }
 
-  var quality = 0.5, calm = false, lastScene = -1, current = { scene: "punkt", index: 0, word: "", progress: 0 };
+  var quality = 0.5, calm = false, lastScene = -1, sceneSince = 0, current = { scene: "punkt", index: 0, word: "", progress: 0 };
 
   function resize() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -636,8 +616,9 @@
     var kick = Math.exp(-since(step, frac, ["kick", "heart", "timp"]) * 7), snare = Math.exp(-since(step, frac, ["snare"]) * 10);
     var soft = calm ? 0.3 : 1;
     var accent = ACCENT[n], scene = sceneId(n, a);
+    if (scene === 12) accent = [0.5, 0.3, 1];
     var time = t * (0.6 + 1.8 * chaos);
-    var travel = n === "tunnel" ? secLen * 3 * (Math.exp(2.6 * pr) - 1) / 2.6 : 0;
+    var travel = n === "tunnel" ? secLen * 3 * (Math.exp(3.1 * pr) - 1) / 3.1 : 0;
     // die Lichtkugel überholt die Kamera schon nach der halben Szene
     var rad = 0.01 * Math.exp(12.8 * pr), dist = 0.25 * Math.exp(6.4 * pr);
     var half = len / 2, sub = a.step < half ? (a.step + frac) / half : (a.step + frac - half) / half;
@@ -678,7 +659,7 @@
       for (var k = 0; k < K_LORENZ; k++) {
         var mixW = k === 0 ? 1 : 0.15 + 0.5 * ((k * 0.37) % 1);
         var colK = [accent[0] + (1 - accent[0]) * mixW, accent[1] + (1 - accent[1]) * mixW, accent[2] + (1 - accent[2]) * mixW];
-        drawPoints(vaoLorenz, k * N_LORENZ, N_LORENZ, 0, colK.map(function (c) { return c * 0.8; }), rotL, 2.05 - pr * 0.45, 0.012 * h, t, 0, spread, morph, 0.05 * spread * spread);
+        drawPoints(vaoLorenz, k * N_LORENZ, N_LORENZ, 0, colK.map(function (c) { return c * 0.8; }), rotL, 1.5 + 0.35 * spread, 0.012 * h, t, 0, spread, morph, 0.05 * spread * spread);
       }
     } else if (n === "licht") {
       drawPoints(vaoUni, 0, N_UNI, 1, [1.3, 1.35, 1.6], rotation(0.4 + pr * 1.2, 0.95 - pr * 0.5), dist, 0.0022 * h, t, rad);
@@ -696,8 +677,11 @@
     gl.uniform1i(progFb.u.uPrev, 1);
     gl.uniform2f(progFb.u.uRes, w, h);
     // beim Szenenwechsel keine Schlieren der alten Szene mitnehmen
-    gl.uniform1f(progFb.u.uFb, scene !== lastScene ? 0 : fb * (calm ? 0.8 : 1));
-    lastScene = scene;
+    var hardCut = scene === 3 || scene === 8 || scene === 14 || scene === 9 || scene === 10 || scene === 0;
+    if (scene !== lastScene) { sceneSince = t; lastScene = scene; }
+    var age = Math.max(0, t - sceneSince), fbUse = fb * (calm ? 0.8 : 1);
+    if (hardCut) { if (age < 0.02) fbUse = 0; } else if (age < 1) fbUse = Math.max(fbUse, 0.95 * (1 - age));
+    gl.uniform1f(progFb.u.uFb, fbUse);
     gl.uniform1f(progFb.u.uZoom, n === "horizont" ? 0.985 : 1.006 + chaos * 0.03);
     gl.uniform1f(progFb.u.uRotF, (0.002 + chaos * 0.012) * (a.cut % 2 ? 1 : -1));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -709,10 +693,8 @@
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.useProgram(progPost.p);
     u = progPost.u;
-    var hard = n !== "punkt" && n !== "stille" && n !== "licht" && n !== "weiss" && n !== "ende";
-    var trans = hard ? Math.max(0, 1 - secT / 0.3) : 0;
-    // auch der Wechsel zur zweiten Hälfte (BREAK, INFINITE) ist ein harter Schnitt
-    if ((n === "bruch" || n === "fraktal") && a.step >= 64) trans = Math.max(trans, 1 - (t - M.stepTime(step - a.step + 64)) / 0.3);
+    // Bildstörung nur noch beim harten Schnitt auf BREAK; alle anderen Wechsel blenden weich über
+    var trans = scene === 3 ? Math.max(0, 1 - age / 0.3) : 0;
     var burst = hash1(Math.floor(t * 10)) < chaos * 0.18 ? chaos * 0.45 : 0;
     var shake = (chaos * chaos * 0.012 + kick * 0.004 * chaos) * soft;
     var strobe = calm ? 0 : snare * chaos * chaos * 0.35 + (n === "licht" || n === "morph" ? Math.exp(-secT * 6) * 0.9 : 0);

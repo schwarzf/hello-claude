@@ -599,7 +599,7 @@
     ["SINGULARITY: Ablauf, Tempo-Rampe, Chaos-Regler und Motiv", function () {
       var S = SingularityMusik;
       assertEqual(S.SECTIONS.map(function (s) { return s.name; }), ["punkt", "gitter", "lorenz", "bruch", "fraktal", "pause", "horizont", "morph", "tunnel", "stille", "licht", "weiss"]);
-      assert(S.DURATION > 115 && S.DURATION < 140, "rund zwei Minuten: " + S.DURATION.toFixed(1));
+      assert(S.DURATION > 115 && S.DURATION < 145, "rund zwei Minuten: " + S.DURATION.toFixed(1));
       var first = {}, lastStep = {};
       for (var st = 0; st < S.STEPS; st++) { var a = S.at(st); if (first[a.section] === undefined) first[a.section] = st; lastStep[a.section] = st; }
       assert(S.stepLength(lastStep.tunnel) < S.stepLength(first.gitter) * 0.5, "der Tunnel ist am Ende mehr als doppelt so schnell wie das Gitter");

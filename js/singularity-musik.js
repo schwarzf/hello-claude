@@ -4,7 +4,7 @@
  * Drum-and-Bass mit Reese-Bass → Halftime am Ereignishorizont → heller,
  * treibender Morph-Teil in Dur → Tunnel mit Acid-Linie und Shepard-Ton
  * (scheint endlos zu steigen) → Stille, ein Herzschlag → Explosion.
- * Das Tempo steigt von 80 auf über 200 BPM; jeder Schritt hat deshalb eine
+ * Das Tempo steigt von 80 auf 224 BPM; jeder Schritt hat deshalb eine
  * feste Startzeit (stepTime), die Musik und Grafik gemeinsam nutzen.
  *
  * Ein Motiv aus vier Tönen (A–D–F–E) zieht sich durch alles; ab dem
@@ -23,7 +23,7 @@
     { name: "pause", bars: 2, bpm: [80, 80], chaos: [0.2, 0.3] },
     { name: "horizont", bars: 3, bpm: [170, 170], chaos: [0.7, 0.75] },
     { name: "morph", bars: 8, bpm: [172, 172], chaos: [0.45, 0.65] },
-    { name: "tunnel", bars: 16, bpm: [176, 212], chaos: [0.8, 1] },
+    { name: "tunnel", bars: 20, bpm: [176, 224], chaos: [0.8, 1] },
     { name: "stille", bars: 2, bpm: [150, 150], chaos: [0, 0] },
     { name: "licht", bars: 4, bpm: [174, 174], chaos: [0.6, 0.6] },
     { name: "weiss", bars: 2, bpm: [96, 96], chaos: [0, 0] }
@@ -142,9 +142,9 @@
       if (bar >= 6) e.riser = (k - 96) / 32;
       if (bar === 7 && inBar >= 8) e.snare = 0.4 + (inBar - 8) / 12;
     } else if (n === "tunnel") {
-      cut = bar < 8 ? Math.floor(k / 16) : bar < 12 ? 8 + Math.floor((k - 128) / 8) : 16 + Math.floor((k - 192) / 4);
-      if (bar < 12 ? (inBar === 0 || inBar === 10) : four) e.kick = 1;
-      if (bar < 12 ? (inBar === 4 || inBar === 12) : bar === 12 ? four : bar < 15 ? inBar % 2 === 0 : true) e.snare = bar < 12 ? 1 : 0.5 + (k - 192) / 64 * 0.7;
+      cut = bar < 10 ? Math.floor(k / 16) : bar < 16 ? 10 + Math.floor((k - 160) / 8) : 22 + Math.floor((k - 256) / 4);
+      if (bar < 16 ? (inBar === 0 || inBar === 10) : four) e.kick = 1;
+      if (bar < 16 ? (inBar === 4 || inBar === 12) : bar === 16 ? four : bar < 19 ? inBar % 2 === 0 : true) e.snare = bar < 16 ? 1 : 0.5 + (k - 256) / 64 * 0.7;
       e.hat = 1;
       if (inBar % 2 === 0) e.reese = { midi: RT_MAJ[b4], len: 2, wob: 1 };
       e.acid = { midi: 50 + ACID[inBar] + (RT_MAJ[b4] - 38), accent: ACID_ACCENT[inBar], cut: 0.25 + 0.75 * pr };
