@@ -1,0 +1,63 @@
+/* Katzen-Habanera: Papier, Tusche und Aquarell */
+:root { --paper: #f6efdd; --ink: #2b2420; --red: #c2264a; --blue: #2c3a78; --yellow: #fbe7a0; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper) radial-gradient(ellipse at top, #fffaf0 0%, var(--paper) 70%) no-repeat;
+  color: var(--ink);
+  font-family: "Patrick Hand", "Comic Sans MS", "Chalkboard SE", cursive;
+  font-size: 19px;
+  line-height: 1.4;
+}
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+header h1 {
+  margin: 0 0 4px;
+  font-family: "Bangers", "Impact", sans-serif;
+  font-weight: 400;
+  font-size: clamp(30px, 6vw, 54px);
+  letter-spacing: 2px;
+  color: var(--red);
+  text-shadow: 3px 3px 0 var(--yellow), 4px 4px 0 var(--ink);
+  transform: rotate(-1.2deg);
+}
+header p { margin: 0 0 14px; }
+a { color: var(--red); }
+.screen {
+  position: relative;
+  border: 4px solid var(--ink);
+  border-radius: 10px 14px 9px 16px;
+  overflow: hidden;
+  background: #1e2a5c;
+  box-shadow: 7px 8px 0 rgba(43, 36, 32, 0.25);
+}
+.screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 1280 / 800; }
+.screen:fullscreen, .screen:-webkit-full-screen { border: 0; border-radius: 0; display: flex; align-items: center; justify-content: center; background: #000; }
+.screen:fullscreen canvas, .screen:-webkit-full-screen canvas { width: auto; height: 100%; max-width: 100%; }
+.start {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px; text-align: center;
+  background: rgba(246, 239, 221, 0.78);
+}
+.start[hidden] { display: none; }
+.start .title { margin: 0; font-family: "Bangers", "Impact", sans-serif; font-size: clamp(22px, 4.5vw, 44px); letter-spacing: 2px; color: var(--blue); transform: rotate(-2deg); }
+.start .hint { margin: 0; font-size: clamp(14px, 2.2vw, 20px); }
+button {
+  font: inherit;
+  font-size: clamp(16px, 2.6vw, 24px);
+  color: var(--ink);
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  border-radius: 14px 10px 16px 9px;
+  padding: 8px 18px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  touch-action: manipulation;
+}
+button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+button.secondary { background: #fffdf4; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
+.bar button { font-size: 18px; padding: 5px 14px; }
+.bar button[aria-pressed="false"] { background: #fffdf4; opacity: 0.75; }
+#part { margin-left: auto; font-size: 22px; color: var(--blue); }
+.note { margin-top: 14px; font-size: 16px; opacity: 0.8; }

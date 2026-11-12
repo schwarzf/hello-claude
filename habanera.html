@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Katzen-Habanera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&display=swap">
+  <link rel="stylesheet" href="css/habanera.css?v=202611121931">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Katzen-Habanera</h1>
+      <p>Ein gezeichneter Comic: Zwei Katzen singen auf dem Dach die Habanera aus „Carmen“ – als Pop-Rock-Rap. · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="demo" width="1280" height="800"></canvas>
+      <div class="start" id="start">
+        <p class="title">Die Diva &amp; der Kater: „L'amour est un … Miau!“</p>
+        <button type="button" id="play">▶ Vorhang auf!</button>
+        <button type="button" id="play-silent" class="secondary">Ohne Ton</button>
+        <p class="hint">Dauert knapp eine Minute. Am schönsten mit Ton.</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">🔊 Ton</button>
+      <button type="button" id="btn-full">⛶ Vollbild</button>
+      <span id="part" aria-live="polite"></span>
+    </div>
+    <p class="note">Musik: Georges Bizet, Habanera aus „Carmen“ (1875, gemeinfrei) – neu arrangiert und komplett im Browser erzeugt, ohne Aufnahmen.</p>
+  </main>
+
+  <script src="js/musik.js?v=202611121931"></script>
+  <script src="js/habanera-musik.js?v=202611121931"></script>
+  <script src="js/habanera.js?v=202611121931"></script>
+</body>
+</html>

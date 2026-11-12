@@ -173,6 +173,32 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Katzen-Habanera 🎤
+
+`habanera.html` (von der Taskliste verlinkt) ist ein knapp einminütiger
+**gezeichneter Comic**: Eine Diva mit Schleife und ein Kater mit Kappe singen
+nachts auf dem Dach die Habanera aus Bizets „Carmen“ (1875, gemeinfrei) – als
+Pop-Rock-Rap. Ablauf: Vorspiel → Strophe (erst sie, dann er) → Katzen-Rap →
+Aufbau → Rock-Refrain zu zweit → Miau-Battle → großer Refrain → ein Nachbar
+ruft „RUHE!!!“ und wirft einen Stiefel.
+
+Zeichenstil (`js/habanera.js`, `css/habanera.css`): kein Pixel-Look, sondern
+Tusche und Aquarell auf Papier in 1280×800. Jede Form besteht aus wenigen
+Stützpunkten, die sieben Mal pro Sekunde neu verwackelt und als weiche Kurve
+doppelt nachgezogen werden („Line Boil“ wie im handgezeichneten Trickfilm).
+Die Flächen laufen leicht über die Linie und haben einen dunkleren Rand;
+darüber liegt eine Papierstruktur. Dazu Sprechblasen, in denen die gerade
+gesungene Silbe aufleuchtet, Zackenblasen für den Rap, Erzählkästen,
+Schlagwörter, Noten, Kamerafahrten und harte Schnitte wie zwischen
+Comic-Panels. Münder, Gesten und Blasen lesen dieselben Song-Daten wie die
+Musik.
+
+Musik (`js/habanera-musik.js`): Bass und Gitarren sind gezupfte Saiten
+(Karplus-Strong), die Rock-Gitarre läuft durch eine Verzerrung, die
+Katzenstimmen sind Formant-Synthese („mi-a-u“ mit Vibrato, angeschliffenen
+Tönen und Atem); dazu Hall und leicht ungenaues Timing wie bei echten
+Spielern. Alles entsteht live im Browser, ohne Aufnahmen.
+
 ## SINGULARITY ⚫
 
 `singularity.html` (von der Taskliste verlinkt) ist eine gut zweiminütige
@@ -284,6 +310,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für die Katzen-Habanera (`js/habanera-musik.js`): Bizets Melodie, Aufbau, wer wann singt oder rappt, Pegel; der UI-Test prüft alle Szenen, offene Münder, Sprechblasen und die wackelnde Tuschelinie
 - **Unit-Tests** für SINGULARITY (`js/singularity-musik.js`): Ablauf, Tempo-Rampe, Chaos-Regler, Motiv, Lautstärke im Tunnel und die Stille danach; der UI-Test prüft Shader, alle Szenen, Schwarz in der Stille und Weiß am Ende
 - **Unit-Tests** für den HYPERFLUX-Sound in `js/neon-musik.js` (Aufbau, Tonart, Begrenzer, Bassanteil); der UI-Test prüft, dass die Shader kompilieren und jede Szene ein Bild zeichnet
 - **Unit-Tests** für die Zwei-Katzen-Musik in `js/geschichte-musik.js` (Szenen, Tempi, wer wann knurrt, Pegel)
@@ -317,6 +344,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
 | `video/katzenfrieden.mp4` | Katzenfrieden als Video |
+| `habanera.html` | Comic „Katzen-Habanera“ (`js/habanera.js`, `js/habanera-musik.js`, `css/habanera.css`) |
 | `singularity.html` | Shader-Demo SINGULARITY (`js/singularity.js`, `js/singularity-musik.js`, `css/singularity.css`) |
 | `neon.html` | Shader-Demo HYPERFLUX |
 | `andi.html` | Geburtstags-Demo für Andi (`js/andi.js`, `js/andi-musik.js`, `video/andi.mp4`) |

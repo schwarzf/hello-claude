@@ -626,6 +626,43 @@
         assert(Math.sqrt(quiet / (d.length - n0)) < 0.02, "Stille: " + Math.sqrt(quiet / (d.length - n0)).toFixed(4));
       });
     }],
+    ["Katzen-Habanera: Bizets Melodie, Aufbau und wer wann singt", function () {
+      var H = HabaneraMusik, v = H.song.vocals;
+      assertEqual(H.SECTIONS.map(function (s) { return s.name; }), ["intro", "strophe", "rap", "aufbau", "refrain", "rap2", "refrain2", "outro"]);
+      assert(H.DURATION > 50 && H.DURATION < 65, "knapp eine Minute: " + H.DURATION.toFixed(1));
+      // die berühmte chromatische Linie abwärts: d'' cis'' c'' c'' c'' h' b' a' a'
+      assertEqual(H.P1.map(function (n) { return n[2]; }), [74, 73, 72, 72, 72, 71, 70, 69, 69]);
+      assertEqual(H.at(0).section, "intro");
+      var st = H.SECTIONS[1].start * H.BAR, first = v.filter(function (e) { return e.type === "sing" && e.t >= st; })[0];
+      assertEqual([first.cat, first.midi], [0, 74], "die Diva beginnt die Strophe auf d''");
+      function who(name, type) {
+        var s = H.SECTIONS.filter(function (x) { return x.name === name; })[0], cats = {};
+        v.forEach(function (e) { if (e.type === type && e.t >= s.start * H.BAR && e.t < (s.start + s.bars) * H.BAR) cats[e.cat] = true; });
+        return Object.keys(cats).join("");
+      }
+      assertEqual(who("rap", "rap"), "1", "im Rap rappt nur der Kater");
+      assertEqual(who("rap", "sing"), "", "im Rap wird nicht gesungen");
+      assertEqual(who("refrain", "sing"), "01", "im Refrain singen beide");
+      assertEqual(who("rap2", "rap"), "01", "im Battle rappen beide");
+      var ref = H.SECTIONS[4].start * H.BAR, duo = v.filter(function (e) { return e.type === "sing" && e.t === ref; });
+      assertEqual(duo.map(function (e) { return e.midi; }).sort(), [62, 74], "Refrain in Oktaven");
+      assert(H.song.guitar.some(function (g) { return g.dist; }) && !H.song.guitar.some(function (g) { return g.dist && g.t < H.SECTIONS[3].start * H.BAR; }), "die Rock-Gitarre kommt erst zum Aufbau");
+      assertEqual(H.song.sfx.map(function (e) { return e.type; }), ["whoosh", "thud"], "am Ende fliegt ein Stiefel");
+      assertEqual(H.at(H.DURATION - 0.5).section, "ende");
+    }],
+    ["Katzen-Habanera: Refrain ist lauter als die Strophe und übersteuert nicht", function () {
+      var H = HabaneraMusik;
+      function rms(d) { var s = 0; for (var i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); }
+      return H.render(3, 22050, 6).then(function (a) {
+        return H.render(3, 22050, 28).then(function (b) {
+          var d = b.getChannelData(0), peak = 0, ra = rms(a.getChannelData(0)), rb = rms(d);
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          assert(ra > 0.04, "Strophe hörbar: " + ra.toFixed(3));
+          assert(rb > ra * 1.2, "Refrain lauter: " + rb.toFixed(3) + " gegen " + ra.toFixed(3));
+          assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        });
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -753,6 +790,7 @@
         assert(w.document.querySelector('a[href="gluehwuermchen.html"]'), "Link zu den Glühwürmchen fehlt");
         assert(w.document.querySelector('a[href="andi.html"]'), "Link zur Andi-Demo fehlt");
         assert(w.document.querySelector('a[href="singularity.html"]'), "Link zu SINGULARITY fehlt");
+        assert(w.document.querySelector('a[href="habanera.html"]'), "Link zur Katzen-Habanera fehlt");
       });
     }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
@@ -902,6 +940,36 @@
             assertEqual(an.renderAt(s[1] * bar, true), s[0], "Szene bei Takt " + s[1]);
           });
         });
+      });
+    }],
+    ["Katzen-Habanera: Comic startet, Katzen singen, die Linien leben", function () {
+      return loadApp("habanera.html").then(function (w) {
+        var doc = w.document, ha = w.habanera, H = w.HabaneraMusik, cv = doc.getElementById("demo"), c = cv.getContext("2d");
+        assertEqual([cv.width, cv.height], [1280, 800], "volle Auflösung statt Pixel-Look");
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && ha.running, "Demo läuft");
+        function secStart(name) { return H.SECTIONS.filter(function (s) { return s.name === name; })[0].start * H.BAR * H.BEAT; }
+        H.SECTIONS.forEach(function (s) { assertEqual(ha.renderAt(secStart(s.name) + 1.3), s.name, "Szene " + s.name); });
+        // Strophe: die Diva singt mit offenem Mund, der Kater schweigt; unten steht Bizets Zeile
+        ha.renderAt(secStart("strophe") + 0.3);
+        assert(ha.state.open[0] > 0.5 && ha.state.open[1] === 0, "nur die Diva singt: " + ha.state.open.join(" / "));
+        assertEqual(ha.state.line, H.LINES[0]);
+        assert(/^Miau/.test(ha.state.bubble), "Sprechblase: " + ha.state.bubble);
+        // Rap: der Kater ist dran
+        ha.renderAt(secStart("rap") + 0.05);
+        assert(ha.state.open[1] > 0.5, "der Kater rappt");
+        ha.renderAt(secStart("refrain") + 0.3);
+        assert(ha.state.open[0] > 0.5 && ha.state.open[1] > 0.5, "im Refrain singen beide");
+        // „Line Boil“: dasselbe Motiv wird neu gezeichnet, die Tuschelinie wackelt
+        function ink(boil) { ha.renderAt(2, boil); var d = c.getImageData(300, 200, 400, 300).data, n = 0; for (var i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] < 200) n += i % 977; return n; }
+        var a = ink(0), b = ink(0.05), d2 = ink(0.5);
+        assert(a > 0, "es gibt Tuschelinien");
+        assertEqual(a, b, "innerhalb eines Zeichentrick-Bildes steht die Linie");
+        assert(a !== d2, "im nächsten Bild ist sie neu gezeichnet");
+        // Papier statt Schwarz: der Bildrand ist hell
+        ha.renderAt(2);
+        assert(pixel(c, 5, 400)[0] > 200, "heller Papierrand");
+        assertEqual(ha.renderAt(H.DURATION - 0.3), "ende");
       });
     }],
     ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {
