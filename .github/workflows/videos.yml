@@ -1,0 +1,88 @@
+# Rendert die Demo-Videos und veröffentlicht sie im Release „videos“.
+# Läuft nur von Hand (Actions → „Demo-Videos“ → Run workflow), nie automatisch.
+# Standard: nur Videos, die im Release noch fehlen. Videos liegen nie im Repo.
+name: Demo-Videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      demos:
+        description: "fehlende | alle | Liste, z. B. habanera,neon"
+        default: fehlende
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      list: ${{ steps.plan.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WAHL: ${{ inputs.demos }}
+        run: |
+          all=$(node -e "console.log(Object.keys(require('./tools/video/demos.js')).join(' '))")
+          have=$(gh release view videos --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' 2>/dev/null || true)
+          list=()
+          for d in $all; do
+            case "$WAHL" in
+              alle) list+=("$d") ;;
+              fehlende) grep -qx "$d.mp4" <<<"$have" || list+=("$d") ;;
+              *) [[ ",$WAHL," == *",$d,"* ]] && list+=("$d") ;;
+            esac
+          done
+          json=$(printf '%s\n' "${list[@]}" | node -e "const l=require('fs').readFileSync(0,'utf8').split('\n').filter(Boolean);console.log(JSON.stringify(l))")
+          echo "Zu rendern: $json"
+          echo "list=$json" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: plan
+    if: needs.plan.outputs.list != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        demo: ${{ fromJSON(needs.plan.outputs.list) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Werkzeuge
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          npm install --no-save --no-audit --no-fund playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Rendern
+        run: node tools/video/render.js ${{ matrix.demo }} ${{ matrix.demo }}.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.demo }}
+          path: ${{ matrix.demo }}.mp4
+          retention-days: 3
+
+  publish:
+    needs: render
+    if: always() && needs.render.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Ins Release laden
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la out
+          ls out/*.mp4 >/dev/null 2>&1 || { echo "Keine Videos gerendert"; exit 1; }
+          gh release view videos --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create videos --repo "$GITHUB_REPOSITORY" --target "$GITHUB_REF_NAME" --title "Demo-Videos" \
+              --notes "Alle Demos als Video (1280×800, 30 fps, mit Ton). Erzeugt vom Workflow „Demo-Videos“."
+          gh release upload videos out/*.mp4 --repo "$GITHUB_REPOSITORY" --clobber
