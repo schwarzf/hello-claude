@@ -174,6 +174,30 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Miau-Rave 🪩
+
+`rave.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
+ist eine knapp dreiminütige Katzen-Demo im **Mischstil aus handgezeichnet und
+Amiga**: Leo (mit Entdeckerhut), Kiki (Neon-Stirnband), Bruno (Rucksack) und
+Mini (Kätzchen mit Ohrenschützern) fahren im Bus zur Rave-Party, bauen ihr
+Zelt auf (es klappt zweimal über Bruno zusammen), vereinbaren den Mond-Ballon
+als Treffpunkt, feiern vor der DJ-Katze, verlieren Mini in der Menge – und
+finden sich am Ballon mit dem Gruppen-Ruf „Mi-a-u!“ wieder. Danach kommen
+Finale mit Feuerwerk und ein Sonnenaufgang mit schlafenden Katzen. Für Kinder
+und Erwachsene; die Botschaft: immer einen Treffpunkt ausmachen.
+
+Grafik (`js/rave.js`, `css/rave.css` auf Basis von `css/demo.css`):
+handgezeichnete Figuren mit wackelnder Tusche-Linie in 640×400, dazu
+Copper-Bars, Chrom-Logo, Sinus-Scroller, Sternenfeld, Plasma auf der LED-Wand,
+Schachbrett-Tanzboden, Laser und Pixel-Feuerwerk. Jedes Bild wird am Ende auf
+6 Stufen je Farbkanal reduziert, mit 4×4-Bayer-Dithering wie auf dem Amiga.
+
+Musik (`js/rave-musik.js`): eigene Komposition, Happy Rave mit 140 BPM –
+Chip-Arpeggios im Bus, gezupfte Gitarre und Grillen am Zelt, Rave-Piano,
+Offbeat-Bass mit Sidechain-Pumpen, Supersaw und Lead mit Echo auf der Party,
+nur Spieluhr und Herzschlag beim Verlieren, Rückung nach D-Dur im Finale und
+ein Spieluhr-Schlaflied am Morgen; die Katzen sprechen per Formant-Synthese.
+
 ## Katzen-Habanera 🎤
 
 `habanera.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
@@ -335,6 +359,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für den Miau-Rave (`js/rave-musik.js`): Ablauf, Länge, Drums nur auf der Party, Herzschlag beim Verlieren, Gruppen-Ruf, Rückung, Pegel; der UI-Test prüft alle Kapitel, die Amiga-Palette, wer wann zu sehen ist und die Sprechblasen
 - **Unit-Tests** für die Katzen-Habanera (`js/habanera-musik.js`): Bizets Melodie, Aufbau, wer wann singt oder rappt, Pegel; der UI-Test prüft alle Szenen, offene Münder, Sprechblasen und die wackelnde Tuschelinie
 - **Unit-Tests** für SINGULARITY (`js/singularity-musik.js`): Ablauf, Tempo-Rampe, Chaos-Regler, Motiv, Lautstärke im Tunnel und die Stille danach; der UI-Test prüft Shader, alle Szenen, Schwarz in der Stille und Weiß am Ende
 - **Unit-Tests** für den HYPERFLUX-Sound in `js/neon-musik.js` (Aufbau, Tonart, Begrenzer, Bassanteil); der UI-Test prüft, dass die Shader kompilieren und jede Szene ein Bild zeichnet
@@ -367,6 +392,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
+| `rave.html` | Katzen-Demo „Miau-Rave“ (`js/rave.js`, `js/rave-musik.js`, `css/rave.css`) |
 | `habanera.html` | Comic „Katzen-Habanera“ (`js/habanera.js`, `js/habanera-musik.js`, `css/habanera.css`) |
 | `singularity.html` | Shader-Demo SINGULARITY (`js/singularity.js`, `js/singularity-musik.js`, `css/singularity.css`) |
 | `neon.html` | Shader-Demo HYPERFLUX |

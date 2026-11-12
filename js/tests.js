@@ -663,6 +663,40 @@
         });
       });
     }],
+    ["Miau-Rave: knapp drei Minuten, Geschichte im Song, Rückung im Finale", function () {
+      var R = RaveMusik, S = R.song;
+      assertEqual(R.SECTIONS.map(function (s) { return s.name; }), ["abfahrt", "zelten", "party", "verloren", "wiederfinden", "finale", "morgen"]);
+      assert(R.DURATION > 160 && R.DURATION < 180, "knapp drei Minuten: " + R.DURATION.toFixed(1));
+      function inSec(list, name, pred) {
+        var s = R.SECTIONS.filter(function (x) { return x.name === name; })[0], a = s.start * R.BAR, b = (s.start + s.bars) * R.BAR;
+        return list.filter(function (e) { return e.t >= a && e.t < b && (!pred || pred(e)); });
+      }
+      assert(inSec(S.drums, "party", function (e) { return e.type === "k"; }).length > 100, "Party mit durchgehender Bassdrum");
+      assertEqual(inSec(S.drums, "verloren", function (e) { return e.type !== "hb"; }).length, 0, "Verloren: nur der Herzschlag, keine Drums");
+      assert(inSec(S.vocals, "verloren", function (e) { return e.cat === 3 && e.word === "Miau?"; }).length === 3, "Mini ruft dreimal „Miau?“");
+      // der Gruppen-Ruf „Mi-a-u!“ verbindet Zelten, Wiederfinden und Finale
+      ["zelten", "wiederfinden", "finale"].forEach(function (n) {
+        assert(inSec(S.vocals, n, function (e) { return e.cat === 3 && e.type === "sing"; }).length >= 3, "Gruppen-Ruf im Abschnitt " + n);
+      });
+      assert(inSec(S.vocals, "wiederfinden", function (e) { return e.type === "sing"; }).map(function (e) { return e.cat; }).filter(function (c, i, a) { return a.indexOf(c) === i; }).length === 4, "beim Wiederfinden rufen alle vier");
+      var p = inSec(S.lead, "party"), f = inSec(S.lead, "finale");
+      assertEqual(f[0].midi - p[0].midi, 2, "Finale zwei Halbtöne höher");
+      assert(inSec(S.chip, "abfahrt").length > 100 && inSec(S.gtr, "zelten").length > 30, "Chip-Arpeggios bei der Abfahrt, Gitarre beim Zelten");
+      assertEqual(R.at(R.DURATION - 0.5).section, "ende");
+    }],
+    ["Miau-Rave: Party ist laut und begrenzt, Verloren leise", function () {
+      var R = RaveMusik;
+      function rms(d) { var s = 0; for (var i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); }
+      return R.render(2.5, 22050, R.sectionStart("party") + 25).then(function (a) {
+        return R.render(2.5, 22050, R.sectionStart("verloren") + 3).then(function (b) {
+          var d = a.getChannelData(0), peak = 0, ra = rms(d), rb = rms(b.getChannelData(0));
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          assert(ra > 0.12, "Party laut: " + ra.toFixed(3));
+          assert(rb < ra * 0.5 && rb > 0.01, "Verloren leise, aber hörbar: " + rb.toFixed(3));
+          assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        });
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -791,10 +825,11 @@
         assert(w.document.querySelector('a[href="andi.html"]'), "Link zur Andi-Demo fehlt");
         assert(w.document.querySelector('a[href="singularity.html"]'), "Link zu SINGULARITY fehlt");
         assert(w.document.querySelector('a[href="habanera.html"]'), "Link zur Katzen-Habanera fehlt");
+        assert(w.document.querySelector('a[href="rave.html"]'), "Link zum Miau-Rave fehlt");
       });
     }],
     ["Jede Demo mit festem Ablauf verlinkt ihr Video im Release", function () {
-      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera"];
+      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave"];
       return Promise.all(pages.map(function (p) {
         return fetch(p + ".html").then(function (r) { return r.text(); }).then(function (html) {
           assert(html.indexOf('href="https://github.com/schwarzf/hello-claude/releases/download/videos/' + p + '.mp4"') >= 0, p + ".html verlinkt sein Video nicht");
@@ -978,6 +1013,32 @@
         ha.renderAt(2);
         assert(pixel(c, 5, 400)[0] > 200, "heller Papierrand");
         assertEqual(ha.renderAt(H.DURATION - 0.3), "ende");
+      });
+    }],
+    ["Miau-Rave: alle Kapitel, Amiga-Farben, Mini verloren und wiedergefunden", function () {
+      return loadApp("rave.html").then(function (w) {
+        var doc = w.document, ra = w.rave, R = w.RaveMusik, cv = doc.getElementById("demo"), c = cv.getContext("2d");
+        assertEqual([cv.width, cv.height], [640, 400]);
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && ra.running, "Demo läuft");
+        R.SECTIONS.forEach(function (s) { assertEqual(ra.renderAt(R.sectionStart(s.name) + 1), s.name, "Kapitel " + s.name); });
+        // Amiga-Look: jede Farbe besteht nur aus 6 Stufen je Kanal
+        ra.renderAt(R.sectionStart("party") + 30);
+        var d = c.getImageData(0, 0, 640, 400).data, ok = true;
+        for (var i = 0; i < d.length; i += 4 * 97) if ([0, 51, 102, 153, 204, 255].indexOf(d[i]) < 0 || [0, 51, 102, 153, 204, 255].indexOf(d[i + 2]) < 0) ok = false;
+        assert(ok, "nur Palettenfarben nach dem Dithering");
+        // auf der Party sind alle da, im Verloren-Kapitel sucht Mini allein bzw. die Freunde ohne Mini
+        assertEqual(ra.state.heads, [0, 1, 2, 3, 4]);
+        ra.renderAt(R.sectionStart("verloren") + 1);
+        assertEqual(ra.state.heads, [3], "Mini allein");
+        ra.renderAt(R.sectionStart("verloren") + 2 * R.BAR * R.BEAT + 1);
+        assertEqual(ra.state.heads, [0, 1, 2], "die Freunde suchen");
+        ra.renderAt(R.sectionStart("wiederfinden") + 6 * R.BAR * R.BEAT + 3.3 * R.BEAT);
+        assertEqual(ra.state.heads, [0, 1, 2, 3], "wieder vereint");
+        assertEqual(ra.state.bubble, "Mi-a-u!", "der Gruppen-Ruf");
+        ra.renderAt(R.sectionStart("party") + 0.1);
+        assertEqual(ra.state.bubble, "Pfoten hoch!");
+        assertEqual(ra.renderAt(R.DURATION - 0.3), "ende");
       });
     }],
     ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {

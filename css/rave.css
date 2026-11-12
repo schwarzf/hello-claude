@@ -1,0 +1,6 @@
+/* Miau-Rave: Amiga-Layout aus demo.css, dazu Neon-Akzente */
+:root { --accent: #ff3fb4; --blue: #5ad8ff; }
+body { background: #07051a radial-gradient(ellipse at top, #2a0f4a 0%, #07051a 65%) no-repeat; }
+header h1 { color: #ffe36b; text-shadow: 3px 3px 0 #ff3fb4, 0 0 22px rgba(255, 63, 180, 0.6); }
+.screen { border-color: #3a1f66; box-shadow: 0 0 0 2px #000, 0 0 44px rgba(255, 63, 180, 0.35); }
+.start p.blink { color: #ffe36b; }

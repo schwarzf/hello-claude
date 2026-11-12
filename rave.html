@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Miau-Rave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Patrick+Hand&display=swap">
+  <link rel="stylesheet" href="css/demo.css?v=202611122205">
+  <link rel="stylesheet" href="css/rave.css?v=202611122205">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Miau-Rave</h1>
+      <p>Leo, Kiki, Bruno und Mini fahren zur Rave-Party, zelten, feiern, verlieren sich – und finden sich am Treffpunkt wieder. Handgezeichnet trifft Amiga, knapp 3 Minuten. · <a href="https://github.com/schwarzf/hello-claude/releases/download/videos/rave.mp4">🎬 Als Video ansehen</a> · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="demo" width="640" height="400"></canvas>
+      <div class="crt" aria-hidden="true"></div>
+      <div class="start" id="start">
+        <p class="blink">MIAU-RAVE · EINE KATZEN-DEMO</p>
+        <button type="button" id="play">▶ AUF ZUR PARTY!</button>
+        <button type="button" id="play-silent" class="secondary">OHNE TON</button>
+        <p class="hint">Mit Ton am schönsten – knapp 3 Minuten.</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">🔊 TON</button>
+      <button type="button" id="btn-crt" aria-pressed="true">📺 RÖHRE</button>
+      <button type="button" id="btn-full">⛶ VOLLBILD</button>
+      <span id="part" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <script src="js/musik.js?v=202611122205"></script>
+  <script src="js/rave-musik.js?v=202611122205"></script>
+  <script src="js/rave.js?v=202611122205"></script>
+</body>
+</html>
