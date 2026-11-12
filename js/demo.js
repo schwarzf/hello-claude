@@ -395,8 +395,33 @@
   idle();
   requestAnimationFrame(frame);
 
+  /** Ein Bild zur Songzeit t (Sekunden, ohne Wiederholung) – für das Video. */
+  function renderVideo(t, dt) {
+    var steps = Math.floor(t / DemoMusik.STEP), total = 0, sec = DemoMusik.SECTIONS[DemoMusik.SECTIONS.length - 1], k = 0;
+    for (var i = 0; i < DemoMusik.SECTIONS.length; i++) {
+      if (steps < (total + DemoMusik.SECTIONS[i].bars) * 16) { sec = DemoMusik.SECTIONS[i]; break; }
+      total += DemoMusik.SECTIONS[i].bars;
+    }
+    var lastKick = null, lastSnare = null;
+    for (var st = steps; st >= Math.max(0, steps - 16); st--) {
+      if (lastKick === null && sec.kick && st % 4 === 0) lastKick = st;
+      if (lastSnare === null && sec.snare && (st % 16 === 4 || st % 16 === 12)) lastSnare = st;
+    }
+    timeline.scene = sec.name;
+    timeline.sinceKick = lastKick === null ? 9 : t - lastKick * DemoMusik.STEP;
+    timeline.sinceSnare = lastSnare === null ? 9 : t - lastSnare * DemoMusik.STEP;
+    clock = t;
+    ctx.save();
+    if (timeline.scene === "finale" && timeline.sinceSnare < 0.08) ctx.translate((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 3);
+    drawScene(t, dt);
+    ctx.restore();
+    return sec.name;
+  }
+
   // für Tests
   window.demo = {
+    renderVideo: renderVideo,
+    duration: function () { return DemoMusik.SECTIONS.reduce(function (n, s) { return n + s.bars; }, 0) * BAR_TIME; },
     get scene() { return timeline.scene; },
     get frames() { return frames; },
     get running() { return running; },
