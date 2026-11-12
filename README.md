@@ -174,6 +174,55 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Zeichentrick-Werkzeugkasten `js/toon/` 🎞️
+
+`js/toon/toon.js` ist ein wiederverwendbarer Werkzeugkasten für Zeichentrick
+und Comic im Browser:
+
+- **Zeitleiste** (`Toon.track`): Keyframes mit Easing, für Zahlen und Listen
+- **Kamera** (`Toon.camera`): Zoom, Drehung, Parallax-Ebenen mit eigener Tiefe
+- **Gelenk-Gerüst** (`Toon.figure`, `Toon.ik`): Figuren aus Knochen mit Posen,
+  Zwei-Knochen-IK (Hand oder Fuß an einen Zielpunkt); fertig sind
+  `Toon.human` (Erwachsene, Kinder, Mantel, Hut) und `Toon.cat`, dazu
+  Lauf-Zyklen (`Toon.walk`, `Toon.catWalk`) und `Toon.catSit`
+- **Cel-Zeichnung** (`Toon.shaded`): flache Farbe, harter Schatten auf der
+  lichtabgewandten Seite, Tuschekontur
+- **Filter** (`Toon.filters`): Farbverlauf-Palette, Posterisierung,
+  Tuschekanten, **Comic-Tusche** (Schwarz, Kreuz- und Einzelschraffur,
+  Rasterpunkte, Papier, eine Akzentfarbe bleibt), Filmkorn, Vignette, Lichtfarbe
+- **Comic-Text**: Sprech- und Denkblasen, Erzählkästen, Lautwörter
+
+## Morgenlicht 🏮
+
+`morgenlicht.html` (von der Taskliste verlinkt, auch als Video im Release
+„videos“) ist ein gut zweiminütiger Zeichentrickfilm im Stil des animierten
+Dokumentarfilms: dicke Konturen, flache Farben, harte Schatten,
+Cutout-Figuren, Parallax-Kamera und eine stark gefärbte Palette (Nachtblau,
+Orange, Gelb), dazu Filmkorn und Untertitel. Ein Mann kann nachts nicht
+schlafen, geht durch die leere Stadt ans Meer und sitzt allein auf dem Steg,
+während Laternen über dem Wasser aufsteigen. Am Strand trifft er einen Jungen
+mit einer Laterne – sich selbst als Kind. Gemeinsam lassen sie die Laterne
+fliegen, und der Morgen bricht an: „Manche Nächte sind lang. Aber der Morgen
+kommt immer.“ Musik (`js/morgenlicht-musik.js`): Klavier und Flächen in
+a-Moll, ein leiser Puls durch die Stadt, Meeresrauschen; zum Sonnenaufgang
+ein aufsteigendes C-Dur mit sanftem Beat.
+
+## Die Katze im Regen 🕵️
+
+`regenkatze.html` (von der Taskliste verlinkt, auch als Video im Release
+„videos“) ist ein animierter Comic-Roman im Noir-Stil auf sechs Seiten. Jede
+Seite wird in Grautönen gezeichnet und Panel für Panel durch den Comic-Filter
+geschickt; Rot bleibt als einzige Farbe (Kette, Neonschrift, Schleife).
+Die Panels erscheinen nacheinander wie beim Lesen, die Kamera gleitet zum
+neuesten Panel, Seiten wechseln mit einem Wisch. Eine Detektivin ermittelt
+nachts im Regen beim Juwelier, findet Pfotenspuren, befragt einen
+Verdächtigen, jagt einen Schatten über die Dächer – und findet auf dem
+Dachboden eine Katzenmutter, die für ihre Jungen glänzende Dinge sammelt.
+Der Juwelier bekommt seine Kette zurück, und die Katzen dürfen bleiben.
+Musik (`js/regenkatze-musik.js`): Noir-Jazz im Swing – Kontrabass,
+Besen und Ride-Becken, Klavier, gestopfte Trompete; bei der Verfolgung
+doppelt so schnell, im Epilog in D-Dur.
+
 ## Drachenfeuer 🐉
 
 `drachen.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
@@ -410,6 +459,8 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für den Werkzeugkasten `js/toon/toon.js` (Zeitleiste, IK, Gelenk-Gerüst, Lauf-Zyklus, Comic-Filter, Farbverlauf-Palette)
+- **Unit-Tests** für Morgenlicht und Die Katze im Regen (Ablauf, Moll → Dur, Beat erst am Morgen, Swing, Verfolgung schneller, Pegel); die UI-Tests prüfen Szenen, Untertitel, kühle Nacht und warmen Morgen bzw. Panels, die nacheinander erscheinen, und die rote Akzentfarbe
 - **Unit-Tests** für Drachenfeuer (`js/drachen-musik.js`): Ablauf, Heldenthema in Moll und Dur, Kampf-Effekte, ruhige Wende, Pegel; der UI-Test prüft alle Szenen, die 12-Bit-Farben, den warmen Himmel, Erzähler und Rufe
 - **Unit-Tests** für den Regenbogen-Roadtrip (`js/roadtrip-musik.js`): Stationen, Rückkehr der Farben, ein Instrument pro Farbe, einsames Motiv, Pegel; der UI-Test prüft alle Kapitel, die Farbleiste, die graue und die wieder bunte Stadt und die Dialoge
 - **Unit-Tests** für den Miau-Rave (`js/rave-musik.js`): Ablauf, Länge, Drums nur auf der Party, Herzschlag beim Verlieren, Gruppen-Ruf, Rückung, Pegel; der UI-Test prüft alle Kapitel, die Amiga-Palette, wer wann zu sehen ist und die Sprechblasen
@@ -445,6 +496,9 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
+| `js/toon/toon.js` | Zeichentrick-Werkzeugkasten (Zeitleiste, Kamera, Gelenk-Figuren, Cel-Zeichnung, Filter, Comic-Text) |
+| `morgenlicht.html` | Zeichentrickfilm „Morgenlicht“ (`js/morgenlicht.js`, `js/morgenlicht-musik.js`, `css/morgenlicht.css`) |
+| `regenkatze.html` | Comic-Roman „Die Katze im Regen“ (`js/regenkatze.js`, `js/regenkatze-musik.js`, `css/regenkatze.css`) |
 | `drachen.html` | Fantasy-Demo „Drachenfeuer“ (`js/drachen.js`, `js/drachen-musik.js`, `css/drachen.css`) |
 | `roadtrip.html` | Katzen-Demo „Regenbogen-Roadtrip“ (`js/roadtrip.js`, `js/roadtrip-musik.js`, `css/roadtrip.css`) |
 | `rave.html` | Katzen-Demo „Miau-Rave“ (`js/rave.js`, `js/rave-musik.js`, `css/rave.css`) |

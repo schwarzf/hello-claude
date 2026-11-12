@@ -58,7 +58,8 @@ function wav(buf) {
 
 /** Video-Filter: auf 1280×800 bringen, bei „tail“ am Ende ausblenden */
 function filters(C, dur) {
-  let vf = "scale=" + W + ":" + H + ":flags=" + (C.pixel ? "neighbor" : "lanczos"), af = "anull";
+  const sz = C.size || [W, H];
+  let vf = "scale=" + sz[0] + ":" + sz[1] + ":flags=" + (C.pixel ? "neighbor" : "lanczos"), af = "anull";
   if (C.tail) { vf += ",tpad=stop_mode=clone:stop_duration=" + C.tail + ",fade=t=out:st=" + dur + ":d=" + C.tail; af = "afade=t=out:st=" + dur + ":d=" + C.tail; }
   return { vf: vf + ",format=yuv420p", af };
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morgenlicht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/morgenlicht.css?v=202611122321">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Morgenlicht</h1>
+      <p>Ein kurzer Zeichentrickfilm im Stil des animierten Dokumentarfilms: eine schlaflose Nacht, die leere Stadt, das Meer, eine Erinnerung – und ein Morgen, der immer kommt. Gut 2 Minuten. · <a href="https://github.com/schwarzf/hello-claude/releases/download/videos/morgenlicht.mp4">🎬 Als Video ansehen</a> · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+    <div class="screen" id="screen">
+      <canvas id="demo" width="640" height="360"></canvas>
+      <div class="start" id="start">
+        <p class="title">MORGENLICHT</p>
+        <button type="button" id="play">▶ Film starten</button>
+        <button type="button" id="play-silent" class="secondary">Ohne Ton</button>
+        <p class="hint">Am besten mit Kopfhörern und im Vollbild.</p>
+      </div>
+    </div>
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">🔊 Ton</button>
+      <button type="button" id="btn-full">⛶ Vollbild</button>
+      <span id="part" aria-live="polite"></span>
+    </div>
+  </main>
+  <script src="js/musik.js?v=202611122321"></script>
+  <script src="js/toon/toon.js?v=202611122321"></script>
+  <script src="js/morgenlicht-musik.js?v=202611122321"></script>
+  <script src="js/morgenlicht.js?v=202611122321"></script>
+</body>
+</html>

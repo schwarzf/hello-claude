@@ -763,6 +763,65 @@
         });
       });
     }],
+    ["Toon: Zeitleiste, IK und Gelenk-Gerüst rechnen richtig", function () {
+      var tr = Toon.track([[0, 0], [2, 10, "linear"], [4, [0, 0], "linear"]]);
+      assertEqual(tr(-1), 0); assertEqual(tr(1), 5); assertEqual(tr(2), 10);
+      // IK: Hand landet genau auf dem Ziel
+      var a = Toon.ik(10, 10, 6, 12, false), ex = Math.sin(a[0]) * 10 + Math.sin(a[0] + a[1]) * 10, ey = Math.cos(a[0]) * 10 + Math.cos(a[0] + a[1]) * 10;
+      assert(Math.abs(ex - 6) < 1e-6 && Math.abs(ey - 12) < 1e-6, "IK trifft das Ziel: " + ex.toFixed(3) + "/" + ey.toFixed(3));
+      // ein ausgestreckter Arm nach vorn (90°) zeigt nach rechts
+      var man = Toon.human({}), p = Toon.stand({ upperF: Math.PI / 2, lowerF: 0 }), sh = man.point("upperF", 0, 0, 1, p, 1, 0), hand = man.point("lowerF", 0, 0, 1, p, 1);
+      assert(hand[0] > sh[0] + 30 && Math.abs(hand[1] - sh[1]) < 1, "Arm waagerecht nach vorn");
+      var walkA = Toon.walk(0.3), walkB = Toon.walk(0.3 + Math.PI);
+      assert(Math.abs(walkA.thighF - walkB.thighB) < 1e-9, "Lauf-Zyklus: Beine gegengleich");
+    }],
+    ["Toon: Comic-Filter kennt nur Papier, Tusche und die Akzentfarbe", function () {
+      var c = document.createElement("canvas"); c.width = 120; c.height = 40;
+      var g = c.getContext("2d"), grad = g.createLinearGradient(0, 0, 120, 0);
+      grad.addColorStop(0, "#000"); grad.addColorStop(1, "#fff"); g.fillStyle = grad; g.fillRect(0, 0, 120, 40); g.fillStyle = "#e02020"; g.fillRect(50, 10, 20, 20);
+      Toon.filters.comic(g, { accent: [208, 32, 32], accentHue: 0 });
+      var d = g.getImageData(0, 0, 120, 40).data, seen = {};
+      for (var i = 0; i < d.length; i += 4) seen[d[i] + "," + d[i + 1] + "," + d[i + 2]] = true;
+      var keys = Object.keys(seen);
+      assert(keys.every(function (k) { return ["244,236,220", "16,12,12", "208,32,32", "146,22,22"].indexOf(k) >= 0; }), "Farben: " + keys.join(" | "));
+      assert(seen["208,32,32"], "Rot bleibt als Akzent stehen");
+      // Verlaufs-Palette: dunkel → erste Farbe, hell → letzte
+      var c2 = document.createElement("canvas"); c2.width = 2; c2.height = 1; var g2 = c2.getContext("2d");
+      g2.fillStyle = "#000"; g2.fillRect(0, 0, 1, 1); g2.fillStyle = "#fff"; g2.fillRect(1, 0, 1, 1);
+      Toon.filters.gradientMap(g2, ["#102030", "#f0e0d0"]);
+      var px = g2.getImageData(0, 0, 2, 1).data;
+      assertEqual([px[0], px[1], px[2], px[4], px[5], px[6]], [16, 32, 48, 240, 224, 208]);
+    }],
+    ["Morgenlicht: melancholischer Anfang, Morgen in Dur und lauter", function () {
+      var L = MorgenlichtMusik;
+      assertEqual(L.SECTIONS.map(function (s) { return s.name; }), ["erwachen", "stadt", "meer", "erinnerung", "morgen"]);
+      assert(L.DURATION > 110 && L.DURATION < 135, "gut zwei Minuten: " + L.DURATION.toFixed(1));
+      assertEqual(L.SAD.slice(0, 3).map(function (n) { return n[2]; }), [76, 72, 69], "Motiv beginnt in a-Moll (e – c – a)");
+      assert(L.HOPE[L.HOPE.length - 1][2] > L.SAD[L.SAD.length - 1][2], "das Dur-Motiv endet höher");
+      function startOf(n) { return L.SECTIONS.filter(function (x) { return x.name === n; })[0].start * L.BAR; }
+      var kicks = function (a, b) { return L.song.drums.filter(function (e) { return e.type === "k" && e.t >= a && e.t < b; }).length; };
+      assertEqual(kicks(startOf("meer"), startOf("morgen")), 0, "am Meer und in der Erinnerung kein Beat");
+      assert(kicks(startOf("morgen"), 999) > 20, "der Morgen hat einen sanften Beat");
+      return L.render(2.5, 22050, L.sectionStart("morgen") + 12).then(function (a) {
+        return L.render(2.5, 22050, L.sectionStart("meer") + 8).then(function (b) {
+          function rms(d) { var s = 0; for (var i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); }
+          var ra = rms(a.getChannelData(0)), rb = rms(b.getChannelData(0));
+          assert(ra > rb && rb > 0.02, "Morgen lauter als das Meer: " + ra.toFixed(3) + " / " + rb.toFixed(3));
+        });
+      });
+    }],
+    ["Die Katze im Regen: sechs Seiten, Swing, Verfolgung schneller, Epilog in Dur", function () {
+      var K = RegenkatzeMusik;
+      assertEqual(K.SECTIONS.length, 6);
+      function startOf(n) { return K.SECTIONS.filter(function (x) { return x.name === n; })[0].start * K.BAR; }
+      var rides = K.song.drums.filter(function (e) { return e.type === "ride" && e.t >= startOf("titel") && e.t < startOf("titel") + 4; }).map(function (e) { return +(e.t % 1).toFixed(2); });
+      assert(rides.indexOf(0.66) >= 0, "Swing-Achtel auf 2/3 des Schlags");
+      var bassIn = function (n) { return K.song.bass.filter(function (e) { return e.t >= startOf(n) && e.t < startOf(n) + 32; }).length; };
+      assert(bassIn("jagd") >= bassIn("fall") * 2, "bei der Verfolgung doppelt so viele Basstöne");
+      var epi = K.song.horn.filter(function (e) { return e.t >= startOf("epilog"); }).map(function (e) { return e.midi % 12; });
+      assert(epi.indexOf(6) >= 0 && epi.indexOf(5) < 0, "Epilog in D-Dur (fis statt f)");
+      assert(K.song.sfx.some(function (e) { return e.type === "miau" && e.t >= startOf("enthuellung"); }), "die Täterin miaut");
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -894,10 +953,12 @@
         assert(w.document.querySelector('a[href="rave.html"]'), "Link zum Miau-Rave fehlt");
         assert(w.document.querySelector('a[href="roadtrip.html"]'), "Link zum Regenbogen-Roadtrip fehlt");
         assert(w.document.querySelector('a[href="drachen.html"]'), "Link zu Drachenfeuer fehlt");
+        assert(w.document.querySelector('a[href="morgenlicht.html"]'), "Link zu Morgenlicht fehlt");
+        assert(w.document.querySelector('a[href="regenkatze.html"]'), "Link zu Die Katze im Regen fehlt");
       });
     }],
     ["Jede Demo mit festem Ablauf verlinkt ihr Video im Release", function () {
-      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave", "roadtrip", "drachen"];
+      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave", "roadtrip", "drachen", "morgenlicht", "regenkatze"];
       return Promise.all(pages.map(function (p) {
         return fetch(p + ".html").then(function (r) { return r.text(); }).then(function (html) {
           assert(html.indexOf('href="https://github.com/schwarzf/hello-claude/releases/download/videos/' + p + '.mp4"') >= 0, p + ".html verlinkt sein Video nicht");
@@ -1149,6 +1210,37 @@
         dr.renderAt(D.sectionStart("kampf") + 6 * D.BAR * D.BEAT + 0.5);
         assertEqual(dr.state.said, "THORGAR: „HAAAA!“");
         assertEqual(dr.renderAt(D.DURATION - 0.3), "ende");
+      });
+    }],
+    ["Morgenlicht: alle Szenen, Untertitel, Nacht kühl und Morgen warm", function () {
+      return loadApp("morgenlicht.html").then(function (w) {
+        var doc = w.document, ml = w.morgenlicht, L = w.MorgenlichtMusik, c = doc.getElementById("demo").getContext("2d");
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && ml.running, "Film läuft");
+        L.SECTIONS.forEach(function (s) { assertEqual(ml.renderAt(L.sectionStart(s.name) + 3), s.name, "Szene " + s.name); });
+        ml.renderAt(L.sectionStart("stadt") + 6); assertEqual(ml.state.said, "Ich lief durch die leere Stadt.");
+        function avg(y0, y1) { var d = c.getImageData(0, y0, 640, y1 - y0).data, s = [0, 0, 0]; for (var i = 0; i < d.length; i += 4) { s[0] += d[i]; s[1] += d[i + 1]; s[2] += d[i + 2]; } var n = d.length / 4; return s.map(function (v) { return v / n; }); }
+        ml.renderAt(L.sectionStart("meer") + 6); var night = avg(20, 160);
+        ml.renderAt(L.sectionStart("morgen") + 20); var morning = avg(20, 160);
+        assert(night[2] >= night[0], "Nachthimmel kühl: " + night.map(Math.round).join(","));
+        assert(morning[0] > morning[2] + 30 && morning[0] > night[0] + 60, "Morgenhimmel warm und hell: " + morning.map(Math.round).join(","));
+        assertEqual(ml.renderAt(L.DURATION - 0.5), "ende");
+      });
+    }],
+    ["Die Katze im Regen: Seiten bauen sich Panel für Panel auf, Comic-Tusche mit Rot", function () {
+      return loadApp("regenkatze.html").then(function (w) {
+        var doc = w.document, rk = w.regenkatze, K = w.RegenkatzeMusik, c = doc.getElementById("demo").getContext("2d");
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && rk.running, "Comic läuft");
+        var bar = K.BAR * K.BEAT;
+        rk.renderAt(K.sectionStart("jagd") + 0.5); assertEqual([rk.scene, rk.state.panels], ["jagd", 1]);
+        rk.renderAt(K.sectionStart("jagd") + 4.5 * bar); assertEqual(rk.state.panels, 3);
+        rk.renderAt(K.sectionStart("jagd") + 7 * bar); assertEqual(rk.state.panels, 4);
+        rk.renderAt(K.sectionStart("titel") + 5);
+        var d = c.getImageData(0, 0, 640, 400).data, red = 0;
+        for (var i = 0; i < d.length; i += 4) if (d[i] > 150 && d[i + 1] < 60 && d[i + 2] < 60) red++;
+        assert(red > 100, "die rote Neonschrift bleibt farbig: " + red);
+        assertEqual(rk.renderAt(K.DURATION - 0.5), "ende");
       });
     }],
     ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {

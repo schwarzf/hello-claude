@@ -4,7 +4,8 @@
  * audio: Ausdruck mit DUR, der ein Promise<AudioBuffer> liefert;
  * pixel: 320×200-Demo, wird ohne Weichzeichnen auf 1280×800 vergrößert;
  * gl: WebGL-Canvas, wird auf 1280×800 gesetzt; tail: Ausblenden am Ende (s);
- * teile: so viele Jobs rendern die Demo parallel (für lange Shader-Demos).
+ * teile: so viele Jobs rendern die Demo parallel (für lange Shader-Demos);
+ * size: Videogröße, falls nicht 1280×800 (z. B. 16:9).
  */
 "use strict";
 module.exports = {
@@ -13,6 +14,8 @@ module.exports = {
   katzenfrieden: { page: "katzenfrieden.html", canvas: "demo", pixel: true, dur: "frieden.duration()", frame: "frieden.renderAt(t, true)", audio: "FriedenMusik.render(DUR, 44100, true)" },
   zweikatzen:    { page: "zweikatzen.html", canvas: "demo", pixel: true, dur: "geschichte.duration()", frame: "geschichte.renderAt(t, true)", audio: "GeschichteMusik.render(DUR, 44100, true)" },
   andi:          { page: "andi.html", canvas: "demo", pixel: true, dur: "andi.duration()", frame: "andi.renderAt(t, true)", audio: "AndiMusik.render(DUR, 44100, true)" },
+  morgenlicht:   { page: "morgenlicht.html", canvas: "demo", size: [1280, 720], dur: "MorgenlichtMusik.DURATION", frame: "morgenlicht.renderAt(t)", audio: "MorgenlichtMusik.render(DUR, 44100, 0)" },
+  regenkatze:    { page: "regenkatze.html", canvas: "demo", dur: "RegenkatzeMusik.DURATION + 1", frame: "regenkatze.renderAt(t)", audio: "RegenkatzeMusik.render(DUR, 44100, 0)" },
   drachen:       { page: "drachen.html", canvas: "demo", pixel: true, dur: "DrachenMusik.DURATION + 1.5", frame: "drachen.renderAt(t)", audio: "DrachenMusik.render(DUR, 44100, 0)" },
   roadtrip:      { page: "roadtrip.html", canvas: "demo", pixel: true, dur: "RoadtripMusik.DURATION + 1.5", frame: "roadtrip.renderAt(t)", audio: "RoadtripMusik.render(DUR, 44100, 0)" },
   rave:          { page: "rave.html", canvas: "demo", pixel: true, dur: "RaveMusik.DURATION + 1.5", frame: "rave.renderAt(t)", audio: "RaveMusik.render(DUR, 44100, 0)" },

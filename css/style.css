@@ -219,6 +219,12 @@ a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
 a.promo-demo .promo-text strong { color: #ff9b3a; }
 a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
 a.promo-katzendemo { background: #0b0630; }
+a.promo-regen { background: #1a1614; }
+a.promo-regen .promo-text strong { color: #f4ecdc; text-shadow: 2px 2px 0 #d02020; }
+a.promo-regen .promo-text span { color: #f4ecdc; }
+a.promo-morgen { background: linear-gradient(100deg, #0e1a2c, #6a2a3a, #e0884a); }
+a.promo-morgen .promo-text strong { color: #ffd890; }
+a.promo-morgen .promo-text span { color: #fff2e0; }
 a.promo-drachen { background: linear-gradient(100deg, #1a0408, #8a1a0a, #e0701a); }
 a.promo-drachen .promo-text strong { color: #ffd27a; text-shadow: 2px 2px 0 #000; }
 a.promo-drachen .promo-text span { color: #fff2dc; text-shadow: 1px 1px 0 #000; }
