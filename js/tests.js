@@ -793,6 +793,14 @@
         assert(w.document.querySelector('a[href="habanera.html"]'), "Link zur Katzen-Habanera fehlt");
       });
     }],
+    ["Jede Demo mit festem Ablauf verlinkt ihr Video im Release", function () {
+      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera"];
+      return Promise.all(pages.map(function (p) {
+        return fetch(p + ".html").then(function (r) { return r.text(); }).then(function (html) {
+          assert(html.indexOf('href="https://github.com/schwarzf/hello-claude/releases/download/videos/' + p + '.mp4"') >= 0, p + ".html verlinkt sein Video nicht");
+        });
+      }));
+    }],
     ["Katzenseite: Beispielkatzen laden und mischen", function () {
       return loadApp("katzen.html").then(function (w) {
         var doc = w.document;

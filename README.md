@@ -92,7 +92,8 @@ jedes Level ohne Treffer schaffbar ist.
 
 `demo.html` (von der Taskliste verlinkt) ist eine kleine Demo im Stil der
 Amiga-Demoszene, gerechnet in echter Low-Res-Auflösung (320×200, pixelig
-hochskaliert, optional mit Röhren-Scanlines und im Vollbild):
+hochskaliert, optional mit Röhren-Scanlines und im Vollbild) – live oder als
+Video (Release „videos“: `demo.mp4`, mit Ton):
 
 - Szenen: Intro mit Sternenfeld und Copper-Bars, wellendes Chrom-Logo,
   Sinus-Scroller, Glenz-Vektor-Würfel, Boing-Ball auf lila Gitter, Plasma mit
@@ -107,7 +108,7 @@ hochskaliert, optional mit Röhren-Scanlines und im Vollbild):
 
 `katzendemo.html` (von der Taskliste verlinkt) ist eine zweite Demo im
 Amiga-Stil, diesmal mit Katzen – live im Browser oder als fertiges Video
-(`video/katzendemo.mp4`, 70 Sekunden, 1280×800, mit Ton):
+(Release „videos“: `katzendemo.mp4`, 70 Sekunden, 1280×800, mit Ton):
 
 1. **Regenbogen-Flug:** die rote Katze fliegt mit großem Regenbogen-Schweif
    durchs Sternenfeld, begleitet von kleinen Regenbogen-Katzen
@@ -130,7 +131,7 @@ dem offline erzeugten Ton per ffmpeg zusammengesetzt wird.
 ## Katzenfrieden 🌿💃
 
 `katzenfrieden.html` (von der Taskliste verlinkt) ist die dritte Demo –
-live oder als Video (`video/katzenfrieden.mp4`, 88 Sekunden, 1280×800, mit Ton):
+live oder als Video (Release „videos“: `katzenfrieden.mp4`, 88 Sekunden, 1280×800, mit Ton):
 
 1. **Streit:** fünf verfeindete Katzen im nächtlichen Hinterhof machen einen
    Buckel, sträuben das Fell und fauchen sich an („FAUCH!“, „GRRR!“ …); zwei
@@ -156,7 +157,7 @@ die Musik und Grafik gemeinsam nutzen.
 
 `zweikatzen.html` (von der Taskliste verlinkt) erzählt eine Geschichte in
 vier Szenen, gesehen aus dem Zimmer heraus (Fenster mit Fensterbank, daneben
-die Tür) – live oder als Video (`video/zweikatzen.mp4`, 105 Sekunden, mit Ton):
+die Tür) – live oder als Video (Release „videos“: `zweikatzen.mp4`, 105 Sekunden, mit Ton):
 
 1. Die **Glückskatze** (dreifarbig, mit Halsband und Glöckchen, winkt wie eine
    Winkekatze) sitzt drinnen am Fenster; die **Regenbogenkatze** spaziert
@@ -175,7 +176,8 @@ Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
 ## Katzen-Habanera 🎤
 
-`habanera.html` (von der Taskliste verlinkt) ist ein knapp einminütiger
+`habanera.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
+ist ein knapp einminütiger
 **gezeichneter Comic**: Eine Diva mit Schleife und ein Kater mit Kappe singen
 nachts auf dem Dach die Habanera aus Bizets „Carmen“ (1875, gemeinfrei) – als
 Pop-Rock-Rap. Ablauf: Vorspiel → Strophe (erst sie, dann er) → Katzen-Rap →
@@ -201,7 +203,8 @@ Spielern. Alles entsteht live im Browser, ohne Aufnahmen.
 
 ## SINGULARITY ⚫
 
-`singularity.html` (von der Taskliste verlinkt) ist eine gut zweiminütige
+`singularity.html` (von der Taskliste verlinkt, auch als Video
+im Release „videos“) ist eine gut zweiminütige
 Shader-Demo (WebGL2) als eine einzige Eskalation. Die ersten 80 Sekunden sind
 fast monochrom mit einer Akzentfarbe, die bei jedem harten Schnitt wechselt;
 danach bricht die Farbe herein. Der Lichtpunkt vom Anfang kehrt in der
@@ -245,7 +248,7 @@ Tönen bleibt, nur die Terz wechselt von Moll nach Dur.
 ## Happy Birthday Andi! 🎂🎸
 
 `andi.html` (von der Taskliste verlinkt) ist eine Geburtstags-Demo für Andi,
-aufgebaut auf der Katzen-Demo – live oder als Video (`video/andi.mp4`, mit Ton).
+aufgebaut auf der Katzen-Demo – live oder als Video (Release „videos“: `andi.mp4`, mit Ton).
 Die Andi-Katze ist schwarz mit verspiegelter Sonnenbrille, Partyhut und
 Regenbogen-Schimmer:
 
@@ -267,7 +270,8 @@ Glockentöne in einer pentatonischen Tonleiter (oben hoch, unten tief).
 
 ## HYPERFLUX ⚡
 
-`neon.html` (von der Taskliste verlinkt) ist eine moderne Echtzeit-Demo mit
+`neon.html` (von der Taskliste verlinkt, auch als Video im Release „videos“) ist
+eine moderne Echtzeit-Demo mit
 GPU-Shadern (WebGL2) statt Pixel-Art. Sechs Szenen folgen der Musik:
 
 1. **System Boot** – Flug durch einen Daten-Tunnel aus Leiterbahnen
@@ -287,6 +291,24 @@ Sound (`js/neon-musik.js`): eigener Track in e-Moll, 145 BPM – harter Kick,
 rollender Bass, verzerrte Acid-Linie, Supersaw-Lead und -Stabs, Riser und
 Einschläge; ein weicher Begrenzer am Ausgang hält die Spitzen unter 0,9.
 
+## Videos 🎬
+
+Die Videos liegen **nicht im Repo**, sondern im GitHub-Release
+[„videos“](https://github.com/schwarzf/hello-claude/releases/tag/videos); die
+Demo-Seiten verlinken direkt darauf. Erzeugt werden sie vom Workflow
+„Demo-Videos“ (`.github/workflows/videos.yml`), der nur von Hand läuft
+(Actions → Demo-Videos → Run workflow):
+
+- `fehlende` (Standard): nur Videos, die im Release noch fehlen
+- `alle`: alles neu
+- eine Liste wie `habanera,neon`: genau diese Demos neu, z. B. nach einer Änderung
+
+`tools/video/render.js` zeichnet jede Demo Bild für Bild (30 fps, PNG) in
+headless Chromium, berechnet den Ton offline und baut mit ffmpeg ein MP4
+(1280×800, H.264 CRF 18, visuell verlustfrei). Lokal:
+`node tools/video/render.js habanera habanera.mp4`. Eine neue Demo bekommt
+ein Video durch einen Eintrag in `tools/video/demos.js`.
+
 ## Starten
 
 `index.html` direkt im Browser öffnen – fertig.
@@ -302,6 +324,7 @@ python3 -m http.server 8000
 
 `test.html` öffnen (z. B. http://localhost:8000/test.html). Die Seite führt aus:
 
+- **Video-Test**: jede Demo mit festem Ablauf verlinkt ihr Video im Release „videos“
 - **Unit-Tests** für die Logik in `js/taskstore.js` (mit In-Memory-Speicher)
 - **Unit-Tests** für das Morphing in `js/morph.js` (Dreiecksnetz, Verzerrung, Überblendung)
 - **Unit-Tests** für die Gesichtspunkte in `js/face.js` (Auswahl, Zuschnitt, Vorlage)
@@ -341,16 +364,15 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `katzenspiel.html` | Katzen-Jump'n'Run |
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
-| `video/katzendemo.mp4` | Katzen-Demo als Video |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
-| `video/katzenfrieden.mp4` | Katzenfrieden als Video |
 | `habanera.html` | Comic „Katzen-Habanera“ (`js/habanera.js`, `js/habanera-musik.js`, `css/habanera.css`) |
 | `singularity.html` | Shader-Demo SINGULARITY (`js/singularity.js`, `js/singularity-musik.js`, `css/singularity.css`) |
 | `neon.html` | Shader-Demo HYPERFLUX |
-| `andi.html` | Geburtstags-Demo für Andi (`js/andi.js`, `js/andi-musik.js`, `video/andi.mp4`) |
+| `andi.html` | Geburtstags-Demo für Andi (`js/andi.js`, `js/andi-musik.js`) |
 | `gluehwuermchen.html` | Mini-Demo Glühwürmchen (`js/gluehwuermchen.js`) |
 | `zweikatzen.html` | Demo „Zwei Katzen“ |
-| `video/zweikatzen.mp4` | Zwei Katzen als Video |
+| `tools/video/` | Video-Rendering (`render.js`, Liste der Demos in `demos.js`) |
+| `.github/workflows/videos.yml` | Workflow „Demo-Videos“ → Release „videos“ |
 | `test.html` | Testseite |
 | `js/taskstore.js` | Datenlogik (Anlegen, Ändern, Filtern, Speichern) |
 | `js/app.js` | Verbindung von Oberfläche und Logik |
