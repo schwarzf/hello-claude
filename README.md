@@ -303,9 +303,11 @@ Demo-Seiten verlinken direkt darauf. Erzeugt werden sie vom Workflow
 - `alle`: alles neu
 - eine Liste wie `habanera,neon`: genau diese Demos neu, z. B. nach einer Änderung
 
-`tools/video/render.js` zeichnet jede Demo Bild für Bild (30 fps, PNG) in
-headless Chromium, berechnet den Ton offline und baut mit ffmpeg ein MP4
-(1280×800, H.264 CRF 18, visuell verlustfrei). Lokal:
+`tools/video/render.js` zeichnet jede Demo Bild für Bild (30 fps) in
+headless Chromium, schickt die Pixel roh (verlustfrei) an ffmpeg, berechnet den
+Ton offline und baut ein MP4 (1280×800, H.264 CRF 18, visuell verlustfrei).
+Die langen Shader-Demos (HYPERFLUX, SINGULARITY) werden in mehreren Jobs
+parallel gerendert (Feld `teile`) und dann ohne Neukodieren zusammengesetzt. Lokal:
 `node tools/video/render.js habanera habanera.mp4`. Eine neue Demo bekommt
 ein Video durch einen Eintrag in `tools/video/demos.js`.
 

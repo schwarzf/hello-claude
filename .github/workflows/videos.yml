@@ -1,6 +1,8 @@
 # Rendert die Demo-Videos und veröffentlicht sie im Release „videos“.
 # Läuft nur von Hand (Actions → „Demo-Videos“ → Run workflow), nie automatisch.
 # Standard: nur Videos, die im Release noch fehlen. Videos liegen nie im Repo.
+# Lange Shader-Demos (Feld „teile“ in tools/video/demos.js) werden in mehreren
+# Jobs parallel gerendert und am Ende verlustfrei zusammengesetzt.
 name: Demo-Videos
 
 on:
@@ -18,7 +20,7 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      list: ${{ steps.plan.outputs.list }}
+      jobs: ${{ steps.plan.outputs.jobs }}
     steps:
       - uses: actions/checkout@v4
       - id: plan
@@ -26,29 +28,30 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           WAHL: ${{ inputs.demos }}
         run: |
-          all=$(node -e "console.log(Object.keys(require('./tools/video/demos.js')).join(' '))")
-          have=$(gh release view videos --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' 2>/dev/null || true)
-          list=()
-          for d in $all; do
-            case "$WAHL" in
-              alle) list+=("$d") ;;
-              fehlende) grep -qx "$d.mp4" <<<"$have" || list+=("$d") ;;
-              *) [[ ",$WAHL," == *",$d,"* ]] && list+=("$d") ;;
-            esac
-          done
-          json=$(printf '%s\n' "${list[@]}" | node -e "const l=require('fs').readFileSync(0,'utf8').split('\n').filter(Boolean);console.log(JSON.stringify(l))")
-          echo "Zu rendern: $json"
-          echo "list=$json" >> "$GITHUB_OUTPUT"
+          export HAVE=$(gh release view videos --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' 2>/dev/null || true)
+          node -e '
+            const demos = require("./tools/video/demos.js"), wahl = process.env.WAHL.trim(), have = process.env.HAVE.split("\n");
+            const jobs = [];
+            for (const [d, c] of Object.entries(demos)) {
+              const want = wahl === "alle" || (wahl === "fehlende" ? !have.includes(d + ".mp4") : ("," + wahl.replace(/\s/g, "") + ",").includes("," + d + ","));
+              if (!want) continue;
+              if (!c.teile) { jobs.push({ demo: d, teil: "ganz" }); continue; }
+              jobs.push({ demo: d, teil: "ton" });
+              for (let i = 1; i <= c.teile; i++) jobs.push({ demo: d, teil: i + "/" + c.teile });
+            }
+            console.log("Jobs:", JSON.stringify(jobs));
+            require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "jobs=" + JSON.stringify(jobs) + "\n");'
 
   render:
     needs: plan
-    if: needs.plan.outputs.list != '[]'
+    if: needs.plan.outputs.jobs != '[]'
+    name: render (${{ matrix.demo }} ${{ matrix.teil }})
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        demo: ${{ fromJSON(needs.plan.outputs.list) }}
+        include: ${{ fromJSON(needs.plan.outputs.jobs) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,11 +63,23 @@ jobs:
           npm install --no-save --no-audit --no-fund playwright@1.63.0
           npx playwright install --with-deps chromium
       - name: Rendern
-        run: node tools/video/render.js ${{ matrix.demo }} ${{ matrix.demo }}.mp4
+        id: r
+        env:
+          DEMO: ${{ matrix.demo }}
+          TEIL: ${{ matrix.teil }}
+        run: |
+          mkdir out
+          case "$TEIL" in
+            ganz) node tools/video/render.js "$DEMO" "out/$DEMO.mp4"; name="video-$DEMO" ;;
+            ton)  node tools/video/render.js "$DEMO" "out/$DEMO.ton.wav" --ton; name="teil-$DEMO-ton" ;;
+            *)    i=$(printf '%02d' "${TEIL%/*}")
+                  node tools/video/render.js "$DEMO" "out/$DEMO.teil-$i.mp4" --teil "$TEIL"; name="teil-$DEMO-$i" ;;
+          esac
+          echo "name=$name" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.demo }}
-          path: ${{ matrix.demo }}.mp4
+          name: ${{ steps.r.outputs.name }}
+          path: out/
           retention-days: 3
 
   publish:
@@ -72,17 +87,30 @@ jobs:
     if: always() && needs.render.result != 'skipped'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: out
           merge-multiple: true
+      - name: Geteilte Videos zusammensetzen
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          ls -la out
+          for ton in out/*.ton.wav; do
+            [ -e "$ton" ] || continue
+            demo=$(basename "$ton" .ton.wav)
+            want=$(node -e "console.log(require('./tools/video/demos.js')['$demo'].teile)")
+            have=$(ls out/$demo.teil-*.mp4 2>/dev/null | wc -l)
+            if [ "$have" != "$want" ]; then echo "::error::$demo: nur $have von $want Teilen fertig"; continue; fi
+            node tools/video/render.js --zusammen "$demo" "out/$demo.mp4" "$ton" $(ls out/$demo.teil-*.mp4 | sort)
+          done
       - name: Ins Release laden
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ls -la out
-          ls out/*.mp4 >/dev/null 2>&1 || { echo "Keine Videos gerendert"; exit 1; }
+          ls out/*.mp4 | grep -v '\.teil-' > liste.txt || { echo "Keine Videos fertig"; exit 1; }
+          cat liste.txt
           gh release view videos --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
             gh release create videos --repo "$GITHUB_REPOSITORY" --target "$GITHUB_REF_NAME" --title "Demo-Videos" \
               --notes "Alle Demos als Video (1280×800, 30 fps, mit Ton). Erzeugt vom Workflow „Demo-Videos“."
-          gh release upload videos out/*.mp4 --repo "$GITHUB_REPOSITORY" --clobber
+          gh release upload videos $(cat liste.txt) --repo "$GITHUB_REPOSITORY" --clobber
