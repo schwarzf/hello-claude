@@ -697,6 +697,41 @@
         });
       });
     }],
+    ["Regenbogen-Roadtrip: Stationen, Farben kehren zurück, Instrumente kommen dazu", function () {
+      var R = RoadtripMusik, S = R.song;
+      assertEqual(R.SECTIONS.map(function (s) { return s.name; }), ["prolog", "aufbruch", "wueste", "blumen", "faehre", "sturm", "bruecke", "abspann"]);
+      assert(R.DURATION > 175 && R.DURATION < 200, "etwa drei Minuten: " + R.DURATION.toFixed(1));
+      function startOf(name) { return R.SECTIONS.filter(function (x) { return x.name === name; })[0].start * R.BAR; }
+      // Farben: erst alle, nach dem Raub keine, dann 2 → 4 → 5 → 6
+      assertEqual(R.colorsAt(0), 6);
+      assertEqual(R.colorsAt(startOf("aufbruch")), 0, "nach dem Farbraub grau");
+      assertEqual([R.colorsAt(startOf("blumen")), R.colorsAt(startOf("faehre")), R.colorsAt(startOf("sturm")), R.colorsAt(startOf("bruecke"))], [2, 4, 5, 6]);
+      // mit jeder Farbe ein Instrument: Bass ab Rot/Orange, Arpeggio ab Gelb/Grün, zweite Stimme ab Blau, Akkorde ab Violett
+      function first(list) { return list.filter(function (e) { return e.t >= startOf("aufbruch"); })[0].t; }
+      var back = {}; R.COLORS.forEach(function (c) { if (!c.drain) back[c.n] = c.t; });
+      assertEqual(first(S.bass), back[2], "Bass kommt mit Rot und Orange");
+      assertEqual(first(S.arp), back[4], "Arpeggio kommt mit Gelb und Grün");
+      assertEqual(S.lead2[0].t, back[5], "zweite Stimme kommt mit Blau");
+      assertEqual(S.chords[0].t, back[6], "Akkorde kommen mit Violett");
+      // nach dem Raub spielt das Motiv nur einen Ton
+      var lonely = S.lead.filter(function (e) { return e.t >= startOf("prolog") + 32 && e.t < startOf("aufbruch"); });
+      assert(lonely.length > 3 && lonely.every(function (e) { return e.midi === 64; }), "einsames Motiv auf einem Ton");
+      assert(S.vocals.some(function (e) { return e.cat === 3 && /grau/.test(e.word); }), "Nebelbart ist einsam");
+      assertEqual(R.at(R.DURATION - 0.5).section, "ende");
+    }],
+    ["Regenbogen-Roadtrip: Finale lauter als der Prolog und begrenzt", function () {
+      var R = RoadtripMusik;
+      function rms(d) { var s = 0; for (var i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); }
+      return R.render(2.5, 22050, R.sectionStart("bruecke") + 10).then(function (a) {
+        return R.render(2.5, 22050, R.sectionStart("prolog") + 17).then(function (b) {
+          var d = a.getChannelData(0), peak = 0, ra = rms(d), rb = rms(b.getChannelData(0));
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          assert(ra > 0.1, "Finale hörbar laut: " + ra.toFixed(3));
+          assert(rb < ra && rb > 0.01, "Prolog nach dem Raub leiser: " + rb.toFixed(3));
+          assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        });
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -826,10 +861,11 @@
         assert(w.document.querySelector('a[href="singularity.html"]'), "Link zu SINGULARITY fehlt");
         assert(w.document.querySelector('a[href="habanera.html"]'), "Link zur Katzen-Habanera fehlt");
         assert(w.document.querySelector('a[href="rave.html"]'), "Link zum Miau-Rave fehlt");
+        assert(w.document.querySelector('a[href="roadtrip.html"]'), "Link zum Regenbogen-Roadtrip fehlt");
       });
     }],
     ["Jede Demo mit festem Ablauf verlinkt ihr Video im Release", function () {
-      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave"];
+      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave", "roadtrip"];
       return Promise.all(pages.map(function (p) {
         return fetch(p + ".html").then(function (r) { return r.text(); }).then(function (html) {
           assert(html.indexOf('href="https://github.com/schwarzf/hello-claude/releases/download/videos/' + p + '.mp4"') >= 0, p + ".html verlinkt sein Video nicht");
@@ -1039,6 +1075,27 @@
         ra.renderAt(R.sectionStart("party") + 0.1);
         assertEqual(ra.state.bubble, "Pfoten hoch!");
         assertEqual(ra.renderAt(R.DURATION - 0.3), "ende");
+      });
+    }],
+    ["Regenbogen-Roadtrip: alle Kapitel, die Farbleiste füllt sich, Dialoge", function () {
+      return loadApp("roadtrip.html").then(function (w) {
+        var doc = w.document, rt = w.roadtrip, R = w.RoadtripMusik, cv = doc.getElementById("demo"), c = cv.getContext("2d");
+        assertEqual([cv.width, cv.height], [320, 200], "echte Amiga-Auflösung");
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && rt.running, "Demo läuft");
+        R.SECTIONS.forEach(function (s) { assertEqual(rt.renderAt(R.sectionStart(s.name) + 1), s.name, "Kapitel " + s.name); });
+        // Farbleiste unten rechts: sechs Felder, so viele bunt wie Farben zurück sind
+        function slots() { var n = 0; for (var i = 0; i < 6; i++) { var p = pixel(c, 320 - 61 + i * 10 + 4, 200 - 7); if (!(p[0] === 0x3a && p[1] === 0x3a && p[2] === 0x44)) n++; } return n; }
+        rt.renderAt(R.sectionStart("aufbruch") + 15); assertEqual(slots(), 0, "nach dem Farbraub leer");
+        rt.renderAt(R.sectionStart("faehre") + 2); assertEqual(slots(), 4, "vor der Fähre vier Farben");
+        rt.renderAt(R.sectionStart("bruecke") + 2); assertEqual(slots(), 6, "auf der Brücke alle sechs");
+        // die Stadt ist nach dem Raub grau und am Ende wieder bunt
+        function sat(x, y) { var p = pixel(c, x, y); return Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2]); }
+        rt.renderAt(R.sectionStart("prolog") + 9 * R.BAR * R.BEAT); assert(sat(20, 140) < 12, "graue Stadt");
+        rt.renderAt(R.sectionStart("bruecke") + 14 * R.BAR * R.BEAT); assert(sat(20, 140) > 60, "bunte Stadt");
+        rt.renderAt(R.sectionStart("sturm") + 8 * R.BAR * R.BEAT + 1);
+        assertEqual(rt.state.said, "Bei mir ist alles grau …");
+        assertEqual(rt.renderAt(R.DURATION - 0.3), "ende");
       });
     }],
     ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {

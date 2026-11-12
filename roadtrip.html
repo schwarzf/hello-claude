@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Regenbogen-Roadtrip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Patrick+Hand&display=swap">
+  <link rel="stylesheet" href="css/demo.css?v=202611122228">
+  <link rel="stylesheet" href="css/roadtrip.css?v=202611122228">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Regenbogen-Roadtrip</h1>
+      <p>Die Regenbogenkatze verliert ihre Farben an Nebelbart, den grauen Wolkenkater – und holt sie sich auf einem Roadtrip mit der Glückskatze und Käpt’n Schnurrbart zurück. Retro-Amiga-Stil, gut 3 Minuten. · <a href="https://github.com/schwarzf/hello-claude/releases/download/videos/roadtrip.mp4">🎬 Als Video ansehen</a> · <a href="index.html">Zu den Dino-Tasks</a></p>
+    </header>
+
+    <div class="screen" id="screen">
+      <canvas id="demo" width="320" height="200"></canvas>
+      <div class="crt" aria-hidden="true"></div>
+      <div class="start" id="start">
+        <p class="blink">REGENBOGEN-ROADTRIP</p>
+        <button type="button" id="play">▶ LOSFAHREN!</button>
+        <button type="button" id="play-silent" class="secondary">OHNE TON</button>
+        <p class="hint">Mit Ton am schönsten – gut 3 Minuten.</p>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" id="btn-sound" aria-pressed="true">🔊 TON</button>
+      <button type="button" id="btn-crt" aria-pressed="true">📺 RÖHRE</button>
+      <button type="button" id="btn-full">⛶ VOLLBILD</button>
+      <span id="part" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <script src="js/musik.js?v=202611122228"></script>
+  <script src="js/roadtrip-musik.js?v=202611122228"></script>
+  <script src="js/roadtrip.js?v=202611122228"></script>
+</body>
+</html>

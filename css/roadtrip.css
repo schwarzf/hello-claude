@@ -1,0 +1,5 @@
+/* Regenbogen-Roadtrip: Amiga-Layout aus demo.css, dazu Regenbogen-Akzente */
+:root { --accent: #ffe14d; }
+body { background: #050512 radial-gradient(ellipse at top, #1c2a5a 0%, #050512 65%) no-repeat; }
+header h1 { background: linear-gradient(90deg, #ff3b3b, #ff9f1c, #ffe14d, #4cd964, #3b9dff, #8e5bff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(3px 3px 0 #000); }
+.screen { border-color: #2a3c8c; box-shadow: 0 0 0 2px #000, 0 0 44px rgba(59, 157, 255, 0.35); }

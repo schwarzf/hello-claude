@@ -174,6 +174,30 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Regenbogen-Roadtrip 🌈
+
+`roadtrip.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
+ist eine gut dreiminütige Katzen-Demo im **Retro-Amiga-Stil** (320×200, große
+Pixel). Nebelbart, ein grauer Wolkenkater, saugt der Regenbogenstadt und der
+Regenbogenkatze alle Farben aus. Mit der Glückskatze und Käpt'n Schnurrbart
+im klapprigen Campingbus „Die Schnurre“ geht es auf einen Roadtrip:
+
+1. **Prolog** – bunte Stadt mit Copper-Bars, dann der Farbraub (alles wird grau)
+2. **Aufbruch** – Pixel-Landkarte mit gestrichelter Route, der Bus hustet und knallt los, Chrom-Logo
+3. **Wüstenstraße** – Rennspiel-Straße mit Synth-Sonne; die Rettung des Kaktus-Igels bringt Rot und Orange zurück
+4. **Sonnenblumenmeer** – Parallax-Scrolling und Sinus-Bienen; Panne, die Glücksmünze repariert den Bus: Gelb und Grün
+5. **Fähre** – Amiga-Wasser mit Spiegelung, ein springender Delfin-Fisch bringt Blau; am Horizont wächst die Wolke
+6. **Sturm** – Gewitter mit Blitzen und Bildwackeln; die Wendung: Nebelbart ist nur einsam. Die Regenbogenkatze teilt, ein Pfotenschlag, Violett erscheint als Polarlicht
+7. **Regenbogenbrücke** – der Bus fährt über den Regenbogen, die Stadt wird wieder bunt, Vektor-Bobs, Nebelbart mit buntem Hut
+8. **Abspann** – Sternenfeld, Copper-Bars, Grüße im Sinus-Scroller
+
+Dialoge erscheinen wie in alten Amiga-Adventures mit Porträt und
+Schreibmaschinen-Text; eine Farbleiste unten rechts zeigt, welche Farben
+schon zurück sind. Musik (`js/roadtrip-musik.js`): eigene Komposition wie ein
+Tracker-Modul mit vier „Paula“-Kanälen (hart links/rechts, leicht 8-bittig,
+Tracker-Arpeggios). Das Motiv der Regenbogenkatze klingt nach dem Farbraub nur
+noch auf einem Ton; mit jeder Farbe kommt ein Instrument dazu.
+
 ## Miau-Rave 🪩
 
 `rave.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
@@ -359,6 +383,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für den Regenbogen-Roadtrip (`js/roadtrip-musik.js`): Stationen, Rückkehr der Farben, ein Instrument pro Farbe, einsames Motiv, Pegel; der UI-Test prüft alle Kapitel, die Farbleiste, die graue und die wieder bunte Stadt und die Dialoge
 - **Unit-Tests** für den Miau-Rave (`js/rave-musik.js`): Ablauf, Länge, Drums nur auf der Party, Herzschlag beim Verlieren, Gruppen-Ruf, Rückung, Pegel; der UI-Test prüft alle Kapitel, die Amiga-Palette, wer wann zu sehen ist und die Sprechblasen
 - **Unit-Tests** für die Katzen-Habanera (`js/habanera-musik.js`): Bizets Melodie, Aufbau, wer wann singt oder rappt, Pegel; der UI-Test prüft alle Szenen, offene Münder, Sprechblasen und die wackelnde Tuschelinie
 - **Unit-Tests** für SINGULARITY (`js/singularity-musik.js`): Ablauf, Tempo-Rampe, Chaos-Regler, Motiv, Lautstärke im Tunnel und die Stille danach; der UI-Test prüft Shader, alle Szenen, Schwarz in der Stille und Weiß am Ende
@@ -392,6 +417,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
+| `roadtrip.html` | Katzen-Demo „Regenbogen-Roadtrip“ (`js/roadtrip.js`, `js/roadtrip-musik.js`, `css/roadtrip.css`) |
 | `rave.html` | Katzen-Demo „Miau-Rave“ (`js/rave.js`, `js/rave-musik.js`, `css/rave.css`) |
 | `habanera.html` | Comic „Katzen-Habanera“ (`js/habanera.js`, `js/habanera-musik.js`, `css/habanera.css`) |
 | `singularity.html` | Shader-Demo SINGULARITY (`js/singularity.js`, `js/singularity-musik.js`, `css/singularity.css`) |

@@ -219,6 +219,9 @@ a.promo-demo:hover, a.promo-demo:focus-visible { background: #262b5e; }
 a.promo-demo .promo-text strong { color: #ff9b3a; }
 a.promo-demo img { image-rendering: pixelated; border: 2px solid var(--ink); border-radius: 6px; }
 a.promo-katzendemo { background: #0b0630; }
+a.promo-roadtrip { background: linear-gradient(100deg, #b8322a, #c27a12, #a89a12, #2a8a3a, #2a5ab8, #6a3ab8); }
+a.promo-roadtrip .promo-text strong { color: #fff; text-shadow: 2px 2px 0 #000; }
+a.promo-roadtrip .promo-text span { color: #fff; text-shadow: 1px 1px 0 #000; }
 a.promo-rave { background: linear-gradient(100deg, #1a0b3a, #6a1a6a); }
 a.promo-rave .promo-text strong { color: #ffe36b; }
 a.promo-habanera { background: #2c3a78; }
