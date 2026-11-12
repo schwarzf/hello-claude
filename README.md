@@ -174,6 +174,33 @@ Musik (`js/geschichte-musik.js`): eigene Komposition mit eigenem Tempo und
 eigener Stimmung pro Szene – leicht (96 BPM), spannend (120 BPM), ruhig mit
 Spieluhr, zögerlich mit Tür-Knarren, romantisch mit Harfe und Streichern.
 
+## Drachenfeuer 🐉
+
+`drachen.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
+ist eine gut zweieinhalbminütige **Fantasy-Demo im Amiga-Stil** (320×200),
+inspiriert von der Fantasy-Malerei der 70er/80er: dramatisches Gegenlicht,
+dunkle Silhouetten vor glühenden Himmeln, heroische Posen, wehende Umhänge.
+Alle Figuren sind eigene Entwürfe und familientauglich gekleidet.
+
+Geschichte: Der Zauberer Merowin sieht in seiner Kristallkugel, wie ein
+verfluchter Drache auf seinem Goldschatz erwacht und feuerspeiend über das Tal
+fliegt. Thorgar der Barbar und Sira die Kriegerin stellen sich ihm, Merowin
+schließt sich an. Auf dem Gipfel des Drachenbergs: Feuer gegen Schild,
+Blitzzauber, Axtsprung, Sira springt auf den Rücken des Drachen – bis Merowin
+mit einem Bannkreis aus Runen den Fluch bricht. Die Augen des Drachen werden
+golden, er wird zum Freund, und alle fliegen auf ihm über den Mond in den
+Morgen. Ein Erzähler begleitet die Szenen wie in alten Fantasy-Spielen.
+
+Technik (`js/drachen.js`): Die Figuren haben ein Gelenk-Gerüst für Posen
+(stehen, marschieren, Waffe heben, springen, Schild hochreißen) und bekommen
+eine Gegenlicht-Kante; der Drache hat Fledermausflügel mit Fingerknochen,
+Hals, Kiefer und Augen, die von Rot zu Gold wechseln. Jedes Bild wird auf
+12-Bit-Amiga-Farben mit Bayer-Dithering reduziert.
+
+Musik (`js/drachen-musik.js`): eigene Komposition, episch wie alte
+Amiga-Spielmusik – Chor auf „Aah“ (Formant-Synthese), Blechbläser, Streicher,
+Pauken und Harfe; ein Heldenthema in d-Moll, das im Finale in D-Dur erklingt.
+
 ## Regenbogen-Roadtrip 🌈
 
 `roadtrip.html` (von der Taskliste verlinkt, auch als Video im Release „videos“)
@@ -383,6 +410,7 @@ python3 -m http.server 8000
 - **Unit-Tests** für den Demo-Sound in `js/demo-musik.js` (Tonart, Songaufbau, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzen-Demo-Sound in `js/katzendemo-musik.js` (Tonart, Band-Ereignisse, Bassanteil, Pegel)
 - **Unit-Tests** für den Katzenfrieden-Sound in `js/frieden-musik.js` (Ablauf, Tempo-Steigerung, Zeittabelle, Bassanteil, Pegel)
+- **Unit-Tests** für Drachenfeuer (`js/drachen-musik.js`): Ablauf, Heldenthema in Moll und Dur, Kampf-Effekte, ruhige Wende, Pegel; der UI-Test prüft alle Szenen, die 12-Bit-Farben, den warmen Himmel, Erzähler und Rufe
 - **Unit-Tests** für den Regenbogen-Roadtrip (`js/roadtrip-musik.js`): Stationen, Rückkehr der Farben, ein Instrument pro Farbe, einsames Motiv, Pegel; der UI-Test prüft alle Kapitel, die Farbleiste, die graue und die wieder bunte Stadt und die Dialoge
 - **Unit-Tests** für den Miau-Rave (`js/rave-musik.js`): Ablauf, Länge, Drums nur auf der Party, Herzschlag beim Verlieren, Gruppen-Ruf, Rückung, Pegel; der UI-Test prüft alle Kapitel, die Amiga-Palette, wer wann zu sehen ist und die Sprechblasen
 - **Unit-Tests** für die Katzen-Habanera (`js/habanera-musik.js`): Bizets Melodie, Aufbau, wer wann singt oder rappt, Pegel; der UI-Test prüft alle Szenen, offene Münder, Sprechblasen und die wackelnde Tuschelinie
@@ -417,6 +445,7 @@ CSS oder JS die Nummer in allen HTML-Dateien erhöhen.
 | `demo.html` | Amiga-Demo |
 | `katzendemo.html` | Katzen-Demo |
 | `katzenfrieden.html` | Demo „Katzenfrieden“ |
+| `drachen.html` | Fantasy-Demo „Drachenfeuer“ (`js/drachen.js`, `js/drachen-musik.js`, `css/drachen.css`) |
 | `roadtrip.html` | Katzen-Demo „Regenbogen-Roadtrip“ (`js/roadtrip.js`, `js/roadtrip-musik.js`, `css/roadtrip.css`) |
 | `rave.html` | Katzen-Demo „Miau-Rave“ (`js/rave.js`, `js/rave-musik.js`, `css/rave.css`) |
 | `habanera.html` | Comic „Katzen-Habanera“ (`js/habanera.js`, `js/habanera-musik.js`, `css/habanera.css`) |

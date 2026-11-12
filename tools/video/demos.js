@@ -13,6 +13,7 @@ module.exports = {
   katzenfrieden: { page: "katzenfrieden.html", canvas: "demo", pixel: true, dur: "frieden.duration()", frame: "frieden.renderAt(t, true)", audio: "FriedenMusik.render(DUR, 44100, true)" },
   zweikatzen:    { page: "zweikatzen.html", canvas: "demo", pixel: true, dur: "geschichte.duration()", frame: "geschichte.renderAt(t, true)", audio: "GeschichteMusik.render(DUR, 44100, true)" },
   andi:          { page: "andi.html", canvas: "demo", pixel: true, dur: "andi.duration()", frame: "andi.renderAt(t, true)", audio: "AndiMusik.render(DUR, 44100, true)" },
+  drachen:       { page: "drachen.html", canvas: "demo", pixel: true, dur: "DrachenMusik.DURATION + 1.5", frame: "drachen.renderAt(t)", audio: "DrachenMusik.render(DUR, 44100, 0)" },
   roadtrip:      { page: "roadtrip.html", canvas: "demo", pixel: true, dur: "RoadtripMusik.DURATION + 1.5", frame: "roadtrip.renderAt(t)", audio: "RoadtripMusik.render(DUR, 44100, 0)" },
   rave:          { page: "rave.html", canvas: "demo", pixel: true, dur: "RaveMusik.DURATION + 1.5", frame: "rave.renderAt(t)", audio: "RaveMusik.render(DUR, 44100, 0)" },
   habanera:      { page: "habanera.html", canvas: "demo", dur: "HabaneraMusik.DURATION + 1.5", frame: "habanera.renderAt(t)", audio: "HabaneraMusik.render(DUR, 44100, 0)" },

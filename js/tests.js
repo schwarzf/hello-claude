@@ -732,6 +732,37 @@
         });
       });
     }],
+    ["Drachenfeuer: Ablauf, Heldenthema in Moll und Dur, Kampf mit Feuer, Schild und Blitz", function () {
+      var D = DrachenMusik, S = D.song;
+      assertEqual(D.SECTIONS.map(function (s) { return s.name; }), ["titel", "zauberer", "drache", "helden", "kampf", "wende", "finale"]);
+      assert(D.DURATION > 150 && D.DURATION < 175, "gut zweieinhalb Minuten: " + D.DURATION.toFixed(1));
+      function startOf(n) { return D.SECTIONS.filter(function (x) { return x.name === n; })[0].start * D.BAR; }
+      function inSec(list, n) { var s = D.SECTIONS.filter(function (x) { return x.name === n; })[0]; return list.filter(function (e) { return e.t >= s.start * D.BAR && e.t < (s.start + s.bars) * D.BAR; }); }
+      // das Heldenthema: in den Helden-Takten in d-Moll (mit f), im Finale in D-Dur (mit fis)
+      var held = inSec(S.brass, "helden").map(function (e) { return e.midi % 12; }), fin = inSec(S.brass, "finale").map(function (e) { return e.midi % 12; });
+      assert(held.indexOf(5) >= 0 && held.indexOf(6) < 0, "Helden in Moll");
+      assert(fin.indexOf(6) >= 0 && fin.indexOf(5) < 0, "Finale in Dur");
+      assertEqual(D.THEME.map(function (bar) { return bar[0][2]; }), [62, 70, 65, 69]);
+      var fx = inSec(S.sfx, "kampf").map(function (e) { return e.type; });
+      ["feuer", "schild", "blitz", "klirr", "bann"].forEach(function (k) { assert(fx.indexOf(k) >= 0, "im Kampf: " + k); });
+      assert(fx.indexOf("schild") > fx.indexOf("feuer"), "der Schild hebt sich gegen das Feuer");
+      assert(inSec(S.drums, "kampf").length > inSec(S.drums, "helden").length, "der Kampf trommelt mehr als der Marsch");
+      assertEqual(inSec(S.drums, "wende").length, 0, "die Wende ist ruhig");
+      assertEqual(D.at(D.DURATION - 0.5).section, "ende");
+    }],
+    ["Drachenfeuer: Kampf laut und begrenzt, Wende leise", function () {
+      var D = DrachenMusik;
+      function rms(d) { var s = 0; for (var i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); }
+      return D.render(2.5, 22050, D.sectionStart("kampf") + 12).then(function (a) {
+        return D.render(2.5, 22050, D.sectionStart("wende") + 3).then(function (b) {
+          var d = a.getChannelData(0), peak = 0, ra = rms(d), rb = rms(b.getChannelData(0));
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          assert(ra > 0.12, "Kampf laut: " + ra.toFixed(3));
+          assert(rb < ra * 0.7 && rb > 0.02, "Wende leiser, aber hörbar: " + rb.toFixed(3));
+          assert(peak <= 0.92, "Begrenzer hält die Spitze: " + peak.toFixed(2));
+        });
+      });
+    }],
     ["Musik ist hörbar, aber nicht übersteuert", function () {
       return Musik.render(6, 22050).then(function (buf) {
         var d = buf.getChannelData(0), peak = 0, sum = 0;
@@ -862,10 +893,11 @@
         assert(w.document.querySelector('a[href="habanera.html"]'), "Link zur Katzen-Habanera fehlt");
         assert(w.document.querySelector('a[href="rave.html"]'), "Link zum Miau-Rave fehlt");
         assert(w.document.querySelector('a[href="roadtrip.html"]'), "Link zum Regenbogen-Roadtrip fehlt");
+        assert(w.document.querySelector('a[href="drachen.html"]'), "Link zu Drachenfeuer fehlt");
       });
     }],
     ["Jede Demo mit festem Ablauf verlinkt ihr Video im Release", function () {
-      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave", "roadtrip"];
+      var pages = ["demo", "katzendemo", "katzenfrieden", "zweikatzen", "andi", "neon", "singularity", "habanera", "rave", "roadtrip", "drachen"];
       return Promise.all(pages.map(function (p) {
         return fetch(p + ".html").then(function (r) { return r.text(); }).then(function (html) {
           assert(html.indexOf('href="https://github.com/schwarzf/hello-claude/releases/download/videos/' + p + '.mp4"') >= 0, p + ".html verlinkt sein Video nicht");
@@ -1096,6 +1128,27 @@
         rt.renderAt(R.sectionStart("sturm") + 8 * R.BAR * R.BEAT + 1);
         assertEqual(rt.state.said, "Bei mir ist alles grau …");
         assertEqual(rt.renderAt(R.DURATION - 0.3), "ende");
+      });
+    }],
+    ["Drachenfeuer: alle Szenen, Amiga-Farben, Erzähler und Rufe", function () {
+      return loadApp("drachen.html").then(function (w) {
+        var doc = w.document, dr = w.drachen, D = w.DrachenMusik, cv = doc.getElementById("demo"), c = cv.getContext("2d");
+        assertEqual([cv.width, cv.height], [320, 200]);
+        doc.getElementById("play-silent").click();
+        assert(doc.getElementById("start").hidden && dr.running, "Demo läuft");
+        D.SECTIONS.forEach(function (s) { assertEqual(dr.renderAt(D.sectionStart(s.name) + 1.5), s.name, "Szene " + s.name); });
+        // 12-Bit-Amiga-Farben: jeder Kanal ist ein Vielfaches von 17
+        dr.renderAt(D.sectionStart("helden") + 3);
+        var d = c.getImageData(0, 0, 320, 200).data, ok = true;
+        for (var i = 0; i < d.length; i += 4 * 53) if (d[i] % 17 || d[i + 1] % 17 || d[i + 2] % 17) ok = false;
+        assert(ok, "nur 12-Bit-Farben");
+        // der Himmel hinter den Helden glüht warm
+        var p = pixel(c, 160, 20); assert(p[0] > p[2], "warmer Himmel: " + p.join(","));
+        dr.renderAt(D.sectionStart("zauberer") + 2 * D.BEAT);
+        assert(/Merowin/.test(dr.state.said), "der Erzähler: " + dr.state.said);
+        dr.renderAt(D.sectionStart("kampf") + 6 * D.BAR * D.BEAT + 0.5);
+        assertEqual(dr.state.said, "THORGAR: „HAAAA!“");
+        assertEqual(dr.renderAt(D.DURATION - 0.3), "ende");
       });
     }],
     ["SINGULARITY: Shader laufen, alle Szenen zeichnen, am Ende ist es weiß", function () {
