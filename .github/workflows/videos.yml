@@ -22,7 +22,7 @@ jobs:
     outputs:
       jobs: ${{ steps.plan.outputs.jobs }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: plan
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,14 +53,14 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.plan.outputs.jobs) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 26
       - name: Werkzeuge
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-          npm install --no-save --no-audit --no-fund playwright@1.63.0
+          npm install --no-save --no-audit --no-fund playwright@1.65.0
           npx playwright install --with-deps chromium
       - name: Rendern
         id: r
@@ -76,7 +76,7 @@ jobs:
                   node tools/video/render.js "$DEMO" "out/$DEMO.teil-$i.mp4" --teil "$TEIL"; name="teil-$DEMO-$i" ;;
           esac
           echo "name=$name" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.r.outputs.name }}
           path: out/
@@ -87,8 +87,8 @@ jobs:
     if: always() && needs.render.result != 'skipped'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           path: out
           merge-multiple: true
